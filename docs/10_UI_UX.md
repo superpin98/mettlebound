@@ -226,12 +226,14 @@ export const RARITY_COLORS = {
 | Familia | Fuente | Uso |
 |---|---|---|
 | **Display / Títulos** | Cinzel Decorative | Nombres de pantalla, títulos de modal, nombre del juego, nombres de habilidades |
-| **UI / HUD numérico** | Pixelify Sans | Etiquetas HUD, valores de stats, contadores, números de daño flotantes |
+| **UI / HUD numérico** | VT323 | Etiquetas HUD, valores de stats, contadores, números de daño flotantes |
 | **Body / Descripciones** | Spectral | Lore de clase, flavor text de items, descripción de mejoras, texto narrativo de eventos |
+
+> **Nota — cambio de fuente UI (Sprint 2):** Se descartó **Pixelify Sans** por legibilidad deficiente en contexto numérico: los dígitos 0/8 y 6/9 son difícilmente distinguibles a tamaños pequeños de HUD, y la confusión B/8 fue recurrente en pruebas visuales. Se adoptó **VT323**, una fuente pixel art monoespaciada de un solo peso que mantiene el estilo retro-dungeon y ofrece dígitos inequívocos incluso a 12–14px. VT323 es variable en tamaño (sin subpixel blur en pantallas de alta densidad) y se carga con un único peso desde Google Fonts.
 
 Las tres fuentes están en **Google Fonts** (import único en `style.css`):
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Pixelify+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=VT323&family=Spectral:wght@400;600&display=swap');
 ```
 
 ### Decisión razonada sobre títulos
@@ -276,12 +278,12 @@ El kit Grimspire usa **Jacquard 24**, una fuente pixel blackletter. En una panta
 }
 ```
 
-#### Pixelify Sans — HUD y etiquetas
+#### VT323 — HUD y etiquetas
 
 ```css
 /* Etiquetas de stat (STR, DEX, INT, LCK) y valores numéricos */
 .ui-stat-label {
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
   font-weight: 500;
   font-size: 0.75rem;
   color: var(--text-muted);
@@ -291,7 +293,7 @@ El kit Grimspire usa **Jacquard 24**, una fuente pixel blackletter. En una panta
 }
 
 .ui-stat-value {
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
   font-weight: 700;
   font-size: 0.9rem;
   color: var(--text-primary);
@@ -300,7 +302,7 @@ El kit Grimspire usa **Jacquard 24**, una fuente pixel blackletter. En una panta
 
 /* Números de daño flotantes */
 .ui-damage-number {
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
   font-weight: 700;
   font-size: 1.1rem;
   line-height: 1;
@@ -311,7 +313,7 @@ El kit Grimspire usa **Jacquard 24**, una fuente pixel blackletter. En una panta
 
 /* Contadores y valores en botones */
 .ui-button-label {
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
   font-weight: 600;
   font-size: 0.8rem;
   letter-spacing: 0.12em;
@@ -411,7 +413,7 @@ Inspirada directamente en `04_upgrade_selection_three_boons.png`. Tres tarjetas 
   transform: translateX(-50%);
   background-color: var(--rarity-color);
   color: var(--bg-void);
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.15em;
@@ -446,7 +448,7 @@ Inspirada directamente en `04_upgrade_selection_three_boons.png`. Tres tarjetas 
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
   font-size: 0.75rem;
 }
 
@@ -480,7 +482,7 @@ Cuatro variantes, inspiradas en las capturas de Grimspire:
 ```css
 /* Base compartida */
 .ui-btn {
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
   font-weight: 600;
   font-size: 0.8rem;
   letter-spacing: 0.12em;
@@ -578,7 +580,7 @@ El tooltip aparece junto al cursor, nunca se sale de pantalla, borde del color d
 }
 
 .ui-tooltip__type {
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
   font-size: 0.7rem;
   color: var(--text-muted);
   letter-spacing: 0.1em;
@@ -594,7 +596,7 @@ El tooltip aparece junto al cursor, nunca se sale de pantalla, borde del color d
 .ui-tooltip__stat {
   display: flex;
   justify-content: space-between;
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
   font-size: 0.78rem;
   color: var(--text-secondary);
   line-height: 1.6;
@@ -605,7 +607,7 @@ El tooltip aparece junto al cursor, nunca se sale de pantalla, borde del color d
 }
 
 .ui-tooltip__affix {
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
   font-size: 0.78rem;
   color: var(--mp-light);   /* azul claro para afijos mágicos */
   line-height: 1.6;
@@ -616,7 +618,7 @@ El tooltip aparece junto al cursor, nunca se sale de pantalla, borde del color d
 /* Efecto único destacado */
 .ui-tooltip__unique-effect {
   color: var(--rarity-legendary-light);
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
   font-size: 0.78rem;
   line-height: 1.6;
 }
@@ -632,7 +634,7 @@ El tooltip aparece junto al cursor, nunca se sale de pantalla, borde del color d
 }
 
 .ui-tooltip__set {
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
   font-size: 0.7rem;
   color: var(--rarity-uncommon-mid);
   letter-spacing: 0.05em;
@@ -669,7 +671,7 @@ Para cada icono existe una variante pre-coloreada por rareza en `icons-rarity/<n
 
 ### Fuente de iconos para stats
 
-Para los 4 stats principales (sin icono específico en el kit), usar caracteres Unicode en Pixelify Sans o crear SVGs simples de 24×24:
+Para los 4 stats principales (sin icono específico en el kit), usar caracteres Unicode en VT323 o crear SVGs simples de 24×24:
 
 - STR 💪 → icono de espada del kit (`icons/weapons/sword_4x.png`)
 - DEX 🏹 → icono de arco del kit (`icons/weapons/bow_4x.png`)
@@ -713,7 +715,7 @@ Basado en `references/visual-style-refs/03_hud_combat_overlay.png`, adaptado a M
 
 **Esquina superior izquierda** — Info del personaje:
 - Retrato de clase (48×48px, del kit si disponible o placeholder de color)
-- Nombre + nivel en Pixelify Sans
+- Nombre + nivel en VT323
 - 3 barras apiladas: HP (roja), MP (azul), XP (dorada-ámbar) con valores numéricos dentro
 - Fila de badges de estado (`status/badge_*.png` del kit)
 
@@ -727,11 +729,11 @@ Basado en `references/visual-style-refs/03_hud_combat_overlay.png`, adaptado a M
 **Centro** — Canvas Babylon.js (limpio, sin UI sobre la escena salvo damage numbers)
 
 **Damage numbers** — Flotan en la escena 3D usando CSS position:absolute anclado al projected world position:
-- Pixelify Sans, peso bold, outline negro, animación: sube 40px y desvanece en 800ms
+- VT323, peso bold, outline negro, animación: sube 40px y desvanece en 800ms
 
 **Franja inferior** — Acciones y economía:
 - Izquierda: slots de habilidad activa + consumibles
-- Derecha: monedas (💰), gemas (💎), almas (💀) con Pixelify Sans
+- Derecha: monedas (💰), gemas (💎), almas (💀) con VT323
 
 ### CSS del HUD container
 
@@ -741,7 +743,7 @@ Basado en `references/visual-style-refs/03_hud_combat_overlay.png`, adaptado a M
   inset: 0;
   pointer-events: none;      /* el canvas sigue recibiendo clicks del jugador */
   z-index: 100;
-  font-family: 'Pixelify Sans', monospace;
+  font-family: 'VT323', monospace;
 }
 
 #ui-hud > * {

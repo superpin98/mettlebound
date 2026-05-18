@@ -1,0 +1,16 @@
+import { defineConfig } from 'vitest/config';
+import { resolve } from 'path';
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
+  test: {
+    // Entorno de Node (sin DOM) para tests de lógica pura.
+    // La UI (HUD, LevelUpModal) no se testea en esta fase.
+    environment: 'node',
+    include: ['tests/**/*.test.ts'],
+  },
+});

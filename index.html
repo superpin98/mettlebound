@@ -8,6 +8,11 @@
   </head>
   <body>
     <canvas id="renderCanvas"></canvas>
+    <!-- Contenedores raíz de la UI superpuesta al canvas.
+         Todo lo que no es canvas va aquí; el transform del contenedor
+         aplica --ui-scale a todos sus hijos de una sola vez. -->
+    <div id="ui-corner"></div>
+    <div id="ui-center"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

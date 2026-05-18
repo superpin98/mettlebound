@@ -1,4 +1,11 @@
-/* Reset mínimo — el juego ocupa toda la ventana */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=VT323&family=Spectral:wght@400;600&display=swap');
+
+/* ============================================================
+   style.css — estilos globales de Mettlebound
+   Paleta completa en custom properties (fuente de verdad: docs/10_UI_UX.md)
+   ============================================================ */
+
+/* ─── Reset mínimo ─────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -15,11 +22,619 @@ body {
   background: #0d0d14;
 }
 
-/* El canvas de Babylon ocupa toda la pantalla */
+/* ─── Custom properties (paleta) ───────────────────────────── */
+:root {
+  /* Fondos */
+  --bg-void:        #080612;
+  --bg-panel:       #1a1228;
+  --bg-panel-mid:   #2a1845;
+  --bg-panel-light: #3e2a60;
+
+  /* Bordes dorados */
+  --border-gold-dim:    #a87a30;
+  --border-gold:        #d4a04a;
+  --border-gold-bright: #f4dc92;
+
+  /* Texto */
+  --text-primary:   #f4e2a6;
+  --text-secondary: #d4bc7e;
+  --text-muted:     #a89058;
+
+  /* Rarezas */
+  --rarity-common-mid:    #8c92a8;
+  --rarity-uncommon-mid:  #6a9a4a;
+  --rarity-rare-mid:      #5a8acb;
+  --rarity-epic-mid:      #a052d8;
+  --rarity-legendary-mid: #d4a04a;
+  --rarity-cursed-mid:    #c43a3a;
+
+  /* Stats primarios */
+  --stat-str: #c43a3a;
+  --stat-dex: #6a9a4a;
+  --stat-int: #5a8acb;
+  --stat-lck: #d4a04a;
+
+  /* Barras de recursos */
+  --hp-dark: #7a1a1a;  --hp-mid: #c43a3a;  --hp-bright: #f06060;
+  --mp-dark: #1a2a7a;  --mp-mid: #5a8acb;  --mp-bright: #80b0f0;
+  --xp-dark: #7a3a10;  --xp-mid: #e8743a;  --xp-bright: #f4a060;
+
+  /* Tipografía */
+  --font-display: 'Cinzel Decorative', serif;
+  --font-ui:      'VT323', monospace;
+  --font-body:    'Spectral', serif;
+}
+
+/* ─── Canvas de Babylon ────────────────────────────────────── */
 #renderCanvas {
   width: 100%;
   height: 100%;
   display: block;
-  /* Evita el scroll táctil accidental en móviles */
   touch-action: none;
+}
+
+/* ============================================================
+   Contenedores raíz de la UI
+   #ui-corner — HUD y elementos anclados a la esquina superior izquierda
+   #ui-center — modales a pantalla completa (ClassSelectionModal, LevelUpModal…)
+   El transform de cada contenedor aplica --ui-scale a TODOS sus hijos.
+   Para añadir un nuevo modal: apéndalo a #ui-center → escala automáticamente.
+   ============================================================ */
+
+#ui-corner {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  transform: scale(var(--ui-scale, 1));
+  transform-origin: top left;
+}
+
+#ui-center {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10000;
+  transform: scale(var(--ui-scale, 1));
+  transform-origin: center center;
+}
+
+/* ============================================================
+   HUD — overlay en juego (esquina superior izquierda)
+   ============================================================ */
+
+#hud {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  width: 220px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-gold-dim);
+  border-radius: 4px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 100;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--text-secondary);
+  pointer-events: none; /* no interfiere con el canvas */
+}
+
+/* Fila superior: clase + nivel */
+.hud-class-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-class-name {
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--text-primary);
+  flex: 1;
+  letter-spacing: 0.04em;
+}
+
+.hud-level {
+  font-size: 11px;
+  color: var(--border-gold);
+}
+
+.hud-pending-badge {
+  background: var(--xp-mid);
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  animation: pulse-badge 1s ease-in-out infinite;
+}
+
+.hud-pending-badge.hidden { display: none; }
+
+@keyframes pulse-badge {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* Barras de recurso */
+.hud-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-bar-label {
+  width: 22px;
+  font-size: 10px;
+  text-align: right;
+  color: var(--text-muted);
+}
+
+.hud-bar {
+  flex: 1;
+  height: 8px;
+  background: #0d0d14;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.hud-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.25s ease;
+}
+
+.hud-hp-fill  { background: linear-gradient(90deg, var(--hp-dark), var(--hp-mid)); }
+.hud-mp-fill  { background: linear-gradient(90deg, var(--mp-dark), var(--mp-mid)); }
+.hud-xp-fill  { background: linear-gradient(90deg, var(--xp-dark), var(--xp-mid)); }
+
+.hud-bar-text {
+  width: 42px;
+  font-size: 10px;
+  text-align: right;
+  color: var(--text-muted);
+}
+
+/* Grid de stats */
+.hud-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.hud-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0,0,0,0.3);
+  border-radius: 3px;
+  padding: 4px 2px;
+}
+
+.hud-stat-label  { font-size: 9px; color: var(--text-muted); letter-spacing: 0.05em; }
+.hud-stat-value  { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+
+.hud-stat-str .hud-stat-value { color: var(--stat-str); }
+.hud-stat-dex .hud-stat-value { color: var(--stat-dex); }
+.hud-stat-int .hud-stat-value { color: var(--stat-int); }
+.hud-stat-lck .hud-stat-value { color: var(--stat-lck); }
+
+.hud-stat-derived .hud-stat-value { color: var(--text-secondary); font-size: 11px; }
+
+/* ============================================================
+   LevelUpModal — overlay de subida de nivel
+   ============================================================ */
+
+#levelup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 6, 18, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(3px);
+  pointer-events: auto; /* reactivar dentro del padre #ui-center que tiene none */
+}
+
+#levelup-overlay.hidden { display: none; }
+
+#levelup-modal {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-gold);
+  border-radius: 6px;
+  padding: 28px 32px;
+  width: min(480px, 92vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 0 40px rgba(212, 160, 74, 0.15);
+}
+
+/* Cabecera del modal */
+.levelup-header {
+  text-align: center;
+}
+
+.levelup-header-errante .levelup-title {
+  color: var(--xp-mid);
+}
+
+.levelup-title-ornament {
+  color: var(--border-gold);
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.levelup-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--border-gold-bright);
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.levelup-subtitle {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Etiquetas de sección */
+.levelup-section-label {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+/* Botones de stat */
+.levelup-stat-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.levelup-stat-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-panel-mid);
+  border: 1px solid var(--border-gold-dim);
+  border-radius: 4px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: var(--font-ui);
+  color: var(--text-primary);
+}
+
+.levelup-stat-btn:hover:not(:disabled) {
+  background: var(--bg-panel-light);
+  border-color: var(--border-gold);
+}
+
+.levelup-stat-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.levelup-stat-btn.stat-str { border-left: 3px solid var(--stat-str); }
+.levelup-stat-btn.stat-dex { border-left: 3px solid var(--stat-dex); }
+.levelup-stat-btn.stat-int { border-left: 3px solid var(--stat-int); }
+.levelup-stat-btn.stat-lck { border-left: 3px solid var(--stat-lck); }
+
+.stat-btn-label { flex: 1; font-size: 13px; text-align: left; }
+.stat-btn-value { font-size: 15px; font-weight: 700; min-width: 24px; text-align: center; }
+.stat-btn-plus  { font-size: 11px; color: var(--border-gold); }
+
+/* Grid de mejoras */
+.levelup-upgrades-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.levelup-upgrade-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: var(--bg-panel-mid);
+  border: 1px solid var(--border-gold-dim);
+  border-radius: 4px;
+  padding: 12px 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: var(--font-ui);
+}
+
+.levelup-upgrade-card:hover:not(:disabled) {
+  background: var(--bg-panel-light);
+  border-color: var(--border-gold);
+}
+
+.levelup-upgrade-card.selected {
+  border-color: var(--border-gold-bright);
+  box-shadow: 0 0 8px rgba(244, 220, 146, 0.25);
+}
+
+.levelup-upgrade-card:disabled { opacity: 0.35; cursor: default; }
+
+/* Colores por rareza */
+.levelup-upgrade-card.rarity-common    { border-left: 3px solid var(--rarity-common-mid); }
+.levelup-upgrade-card.rarity-uncommon  { border-left: 3px solid var(--rarity-uncommon-mid); }
+.levelup-upgrade-card.rarity-rare      { border-left: 3px solid var(--rarity-rare-mid); }
+.levelup-upgrade-card.rarity-epic      { border-left: 3px solid var(--rarity-epic-mid); }
+.levelup-upgrade-card.rarity-legendary { border-left: 3px solid var(--rarity-legendary-mid); }
+
+.upgrade-rarity-badge {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.levelup-upgrade-card.rarity-common    .upgrade-rarity-badge { color: var(--rarity-common-mid); }
+.levelup-upgrade-card.rarity-uncommon  .upgrade-rarity-badge { color: var(--rarity-uncommon-mid); }
+.levelup-upgrade-card.rarity-rare      .upgrade-rarity-badge { color: var(--rarity-rare-mid); }
+.levelup-upgrade-card.rarity-epic      .upgrade-rarity-badge { color: var(--rarity-epic-mid); }
+.levelup-upgrade-card.rarity-legendary .upgrade-rarity-badge { color: var(--rarity-legendary-mid); }
+
+.upgrade-name {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.upgrade-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+}
+
+/* Botón de confirmación */
+.levelup-confirm-btn {
+  background: var(--border-gold-dim);
+  color: var(--bg-void);
+  border: none;
+  border-radius: 4px;
+  padding: 12px 24px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.15s;
+  width: 100%;
+}
+
+.levelup-confirm-btn:hover:not(:disabled) {
+  background: var(--border-gold);
+}
+
+.levelup-confirm-btn:disabled {
+  background: var(--bg-panel-light);
+  color: var(--text-muted);
+  cursor: default;
+}
+
+/* Clase de utilidad */
+.hidden { display: none !important; }
+
+/* ============================================================
+   UIScale — selector de escala de interfaz
+   ============================================================ */
+
+#ui-scale-root {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  transform: scale(var(--ui-scale, 1));
+  transform-origin: bottom left;
+}
+
+#ui-scale-btn {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-gold-dim);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+#ui-scale-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-gold);
+}
+
+#ui-scale-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-gold-dim);
+  border-radius: 4px;
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 72px;
+}
+
+#ui-scale-label {
+  font-size: 9px;
+  font-family: var(--font-ui);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.ui-scale-option {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  padding: 3px 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+}
+
+.ui-scale-option:hover {
+  background: var(--bg-panel-mid);
+  color: var(--text-primary);
+}
+
+.ui-scale-option.active {
+  border-color: var(--border-gold-dim);
+  color: var(--border-gold-bright);
+}
+
+/* ============================================================
+   ClassSelectionModal — pantalla de elección de clase
+   ============================================================ */
+
+#class-select-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 6, 18, 0.97);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 24px;
+  overflow-y: auto;
+  pointer-events: auto; /* reactivar dentro del padre #ui-center que tiene none */
+}
+
+#class-select-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  max-width: 960px;
+  width: 100%;
+}
+
+.class-select-header { text-align: center; }
+
+.class-select-ornament {
+  font-size: 18px;
+  color: var(--border-gold);
+  margin-bottom: 8px;
+}
+
+.class-select-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--border-gold-bright);
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.class-select-subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.class-select-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.class-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-gold-dim);
+  border-radius: 6px;
+  padding: 20px 16px;
+  width: 168px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.18s, background 0.18s, transform 0.12s;
+}
+
+.class-card:hover {
+  border-color: var(--border-gold);
+  background: var(--bg-panel-mid);
+  transform: translateY(-2px);
+}
+
+.class-card:active { transform: translateY(0); }
+
+.class-card-icon { font-size: 28px; line-height: 1; }
+
+.class-card-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--border-gold-bright);
+  letter-spacing: 0.04em;
+}
+
+.class-card-desc {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  font-style: italic;
+}
+
+.class-card-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 10px;
+  margin-top: 4px;
+  width: 100%;
+}
+
+.cs-stat {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.cs-str strong { color: var(--stat-str); }
+.cs-dex strong { color: var(--stat-dex); }
+.cs-int strong { color: var(--stat-int); }
+.cs-lck strong { color: var(--stat-lck); }
+
+.class-card-free {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--border-gold);
+  background: rgba(212, 160, 74, 0.12);
+  border: 1px solid var(--border-gold-dim);
+  border-radius: 3px;
+  padding: 2px 8px;
+  margin-top: 2px;
 }
