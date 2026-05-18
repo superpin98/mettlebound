@@ -72,6 +72,36 @@ Dev:
 - GitHub: https://github.com/superpin98/mettlebound (privado)
 - Branch principal: `main`
 
+## 🔀 Workflow de ramas y sincronización entre máquinas
+
+Cada sprint vive en su propia rama (`sprint-2`, `sprint-3`, etc.), creada a 
+partir de `main`. **`main` solo recibe sprints completos y verificados.**
+
+### Al iniciar trabajo en una máquina
+```powershell
+git checkout main && git pull
+git checkout sprint-N          # o -b sprint-N si es nueva
+git pull origin sprint-N       # solo si la rama ya existe en el servidor
+```
+
+### Al final de CADA sesión (aunque el sprint no esté terminado)
+1. Cowork actualiza este archivo (`CURRENT_STATE.md`) indicando:
+   - Progreso exacto del sprint
+   - Qué archivos están a medio implementar y qué falta
+   - Cualquier decisión tomada en la sesión
+2. Commit con prefijo según estado:
+   - `wip(sprint-N):` si está a medias
+   - `feat(sprint-N):` si el sprint está completo
+3. Push a la rama del sprint.
+
+### Al cerrar un sprint completo
+```powershell
+git checkout main
+git merge sprint-N
+git push
+# Opcional: git branch -d sprint-N (si no se necesita para histórico)
+```
+
 ## 📋 Cómo actualizar este archivo
 
 Al final de cada sprint:
