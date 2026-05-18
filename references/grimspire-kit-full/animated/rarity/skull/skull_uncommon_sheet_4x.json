@@ -1,0 +1,58 @@
+{
+  "name": "skull_uncommon_sheet",
+  "icon": "skull",
+  "rarity": "uncommon",
+  "pixel_scale": 4,
+  "frame_count": 2,
+  "frame_width_px": 128,
+  "frame_height_px": 128,
+  "total_width_px": 256,
+  "total_height_px": 128,
+  "layout": "horizontal_strip",
+  "frame_positions": [
+    {
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "width": 128,
+      "height": 128
+    },
+    {
+      "index": 1,
+      "x": 128,
+      "y": 0,
+      "width": 128,
+      "height": 128
+    }
+  ],
+  "suggested_fps": 4,
+  "loop": true,
+  "pivot": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "unity_import": {
+    "texture_type": "Sprite (2D and UI)",
+    "sprite_mode": "Multiple",
+    "pixels_per_unit": 32,
+    "filter_mode": "Point",
+    "compression": "None",
+    "slice": {
+      "type": "Grid By Cell Count",
+      "columns": 2,
+      "rows": 1,
+      "cell_size": {
+        "width": 128,
+        "height": 128
+      },
+      "pivot": "Center"
+    },
+    "animation": {
+      "clip_name": "skull_uncommon_glow",
+      "samples": 4,
+      "loop_time": true,
+      "loop_pose": true
+    }
+  },
+  "claude_code_instructions": "In Unity:\n1. Import \"skull_uncommon_sheet_4x.png\" with Texture Type = Sprite (2D and UI),\n   Sprite Mode = Multiple, Filter Mode = Point, Compression = None, PPU = 32.\n2. Open Sprite Editor → Slice → Type = Grid By Cell Count → C: 2, R: 1 → Apply.\n3. Create an Animator Controller \"skull_uncommon_glow.controller\".\n4. Drag the 2 sliced sprites onto a Scene to auto-create an Animation Clip;\n   move it to /Animations/, set Samples = 4, tick Loop Time.\n5. Bind the clip as the controller's default state.\n6. On the prefab, use Animator (not SpriteRenderer.sprite) so the loop plays automatically."
+}

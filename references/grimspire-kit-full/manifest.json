@@ -1,0 +1,5158 @@
+{
+  "name": "Grimspire Asset Pack",
+  "version": "1.0",
+  "generated": "2026-05-16",
+  "pixel_scale": 4,
+  "pixel_grid": "32×32 native; multiplied by pixel_scale on export.",
+  "total_assets": 183,
+  "unity_global_defaults": {
+    "texture_type": "Sprite (2D and UI)",
+    "filter_mode": "Point",
+    "compression": "None",
+    "pixels_per_unit": 32,
+    "ppu_panels_buttons": 32,
+    "ppu_portraits": 48
+  },
+  "design_tokens": {
+    "universal_outline": "#0a0510",
+    "materials": {
+      "steel": {
+        "dark": "#2a2c3a",
+        "base": "#5a5e72",
+        "mid": "#8c92a8",
+        "light": "#d0d6e4"
+      },
+      "iron": {
+        "dark": "#1c1d28",
+        "base": "#3a3d4c",
+        "mid": "#5e6378",
+        "light": "#8e94aa"
+      },
+      "wood": {
+        "dark": "#3a200f",
+        "base": "#6a3e1c",
+        "mid": "#9e6532",
+        "light": "#c8884c"
+      },
+      "woodDark": {
+        "dark": "#1c0e07",
+        "base": "#3a1e0e",
+        "mid": "#5a3a1e",
+        "light": "#7a4e2a"
+      },
+      "leather": {
+        "dark": "#2a1408",
+        "base": "#5a3a1e",
+        "mid": "#8a6038",
+        "light": "#b08858"
+      },
+      "gold": {
+        "dark": "#6a4818",
+        "base": "#a87a30",
+        "mid": "#d4a04a",
+        "light": "#f4dc92"
+      },
+      "bronze": {
+        "dark": "#5a3818",
+        "base": "#8a5e28",
+        "mid": "#b88c4a",
+        "light": "#dcbc6c"
+      },
+      "red": {
+        "dark": "#3a0a16",
+        "base": "#7a1a2a",
+        "mid": "#c43a3a",
+        "light": "#ec8a7a"
+      },
+      "blood": {
+        "dark": "#1c0408",
+        "base": "#3e0810",
+        "mid": "#6a1420",
+        "light": "#962030"
+      },
+      "blue": {
+        "dark": "#1a2c4a",
+        "base": "#3a5e8a",
+        "mid": "#5a8acb",
+        "light": "#a8c6ec"
+      },
+      "cyan": {
+        "dark": "#0e2c3a",
+        "base": "#1e5670",
+        "mid": "#3a96b8",
+        "light": "#7ed0e8"
+      },
+      "green": {
+        "dark": "#1a3a0e",
+        "base": "#3a6a1e",
+        "mid": "#6a9a3a",
+        "light": "#a6cc5e"
+      },
+      "moss": {
+        "dark": "#283a1a",
+        "base": "#48662a",
+        "mid": "#6b8a4a",
+        "light": "#a4c468"
+      },
+      "bone": {
+        "dark": "#5e4a36",
+        "base": "#9a8266",
+        "mid": "#cabd9a",
+        "light": "#f0e6c8"
+      },
+      "cloth": {
+        "dark": "#1a0a28",
+        "base": "#321a4a",
+        "mid": "#5a2e88",
+        "light": "#8a52c8"
+      },
+      "purple": {
+        "dark": "#3a1850",
+        "base": "#6a2eaa",
+        "mid": "#9a52d8",
+        "light": "#caa0f0"
+      },
+      "ember": {
+        "dark": "#5a1c0a",
+        "base": "#a83c14",
+        "mid": "#e8743a",
+        "light": "#ffb478"
+      },
+      "parchment": {
+        "dark": "#6a5a36",
+        "base": "#a89058",
+        "mid": "#d4bc7e",
+        "light": "#f4e2a6"
+      },
+      "shadow": {
+        "dark": "#080612",
+        "base": "#1a1228",
+        "mid": "#2a1845",
+        "light": "#3e2a60"
+      },
+      "flesh": {
+        "dark": "#3a1e1a",
+        "base": "#6a3a30",
+        "mid": "#a06850",
+        "light": "#c89878"
+      }
+    },
+    "rarity": {
+      "common": {
+        "dark": "#2a2c3a",
+        "base": "#5a5e72",
+        "mid": "#8c92a8",
+        "light": "#d0d6e4"
+      },
+      "uncommon": {
+        "dark": "#1e3a1a",
+        "base": "#3a6a2e",
+        "mid": "#6a9a4a",
+        "light": "#a8cc6c"
+      },
+      "rare": {
+        "dark": "#1a2c4a",
+        "base": "#3a5e9a",
+        "mid": "#5a8acb",
+        "light": "#9cc0ec"
+      },
+      "mythic": {
+        "dark": "#3a1850",
+        "base": "#6a2eaa",
+        "mid": "#a052d8",
+        "light": "#d2a0f0"
+      },
+      "cursed": {
+        "dark": "#3a0a16",
+        "base": "#6a1422",
+        "mid": "#c43a3a",
+        "light": "#ec7878"
+      },
+      "relic": {
+        "dark": "#6a4818",
+        "base": "#a87a30",
+        "mid": "#d4a04a",
+        "light": "#f4dc92"
+      }
+    }
+  },
+  "screens": {
+    "title_screen": {
+      "description": "Main menu / title with cathedral backdrop, sigil rings, ember particles.",
+      "anchors": {
+        "background": [
+          "props/prop_pillar",
+          "props/prop_arch",
+          "particles/particle_ember"
+        ],
+        "logo_decor": [
+          "ornaments/divider_*",
+          "decor/sigil_ring_*"
+        ],
+        "buttons": [
+          "buttons/btn_primary_*",
+          "buttons/btn_ghost_*"
+        ]
+      }
+    },
+    "class_select": {
+      "description": "Vessel/class picker. Portrait cards + stat pips + signature ability.",
+      "anchors": {
+        "portraits": [
+          "portraits/portrait_knight",
+          "portraits/portrait_witch",
+          "portraits/portrait_monk",
+          "portraits/portrait_rogue"
+        ],
+        "card_frames": [
+          "panels/panel_bronze_*",
+          "slots/slot_mythic_*"
+        ],
+        "weapon_glyphs": [
+          "icons/weapons/sword",
+          "icons/weapons/staff",
+          "icons/armor/shield",
+          "icons/weapons/dagger"
+        ],
+        "confirm_buttons": [
+          "buttons/btn_primary_280x56",
+          "buttons/btn_ghost_*"
+        ]
+      }
+    },
+    "hud": {
+      "description": "In-game heads-up display. Persistent during exploration + combat.",
+      "anchors": {
+        "top_left_portrait": [
+          "portraits/portrait_*",
+          "ornaments/level_badge_*"
+        ],
+        "top_left_bars": [
+          "bars/bar_frame_256x24",
+          "bars/bar_hp_fill_*",
+          "bars/bar_stamina_fill_*",
+          "bars/bar_mana_fill_*"
+        ],
+        "top_left_status": [
+          "status/badge_*"
+        ],
+        "top_center": [
+          "ornaments/divider_*"
+        ],
+        "top_right_minimap": [
+          "panels/panel_bronze_192",
+          "map-tokens/*"
+        ],
+        "bottom_left_abilities": [
+          "slots/slot_*_64",
+          "icons/weapons/sword",
+          "icons/armor/shield",
+          "icons/ui/star",
+          "icons/ui/heart"
+        ],
+        "bottom_right_consumables": [
+          "slots/slot_*_48",
+          "icons/consum/potion",
+          "icons/consum/flask",
+          "icons/consum/scroll"
+        ],
+        "bottom_center_currency": [
+          "icons/treasure/coin",
+          "icons/treasure/gem",
+          "icons/bestiary/skull"
+        ],
+        "bottom_center_prompt": [
+          "buttons/btn_primary_*"
+        ],
+        "boss_fight": [
+          "bars/boss_bar_480x32"
+        ],
+        "damage_numbers": [
+          "damage/*"
+        ]
+      }
+    },
+    "inventory": {
+      "description": "Pack & vestments grid. Paperdoll on left, item grid center, detail right.",
+      "anchors": {
+        "panel": [
+          "panels/panel_bronze_*"
+        ],
+        "slot_grid": [
+          "slots/slot_*_64",
+          "slots/slot_*_48"
+        ],
+        "items": [
+          "icons/*"
+        ],
+        "equipped_marker": [
+          "icons/ui/star"
+        ],
+        "action_buttons": [
+          "buttons/btn_*"
+        ]
+      }
+    },
+    "skill_tree": {
+      "description": "Sworn oaths talent tree. Diamond nodes connected by paths.",
+      "anchors": {
+        "nodes": [
+          "skill-nodes/*"
+        ],
+        "branch_separators": [
+          "ornaments/divider_*"
+        ],
+        "cost_indicator": [
+          "icons/ui/star",
+          "icons/bestiary/skull"
+        ],
+        "confirm": [
+          "buttons/btn_primary_*"
+        ]
+      }
+    },
+    "map": {
+      "description": "Branching dungeon map. Floors arranged left → right with node icons.",
+      "anchors": {
+        "nodes": [
+          "map-tokens/*"
+        ],
+        "boss_marker": [
+          "map-tokens/boss_*"
+        ],
+        "rewards": [
+          "icons/treasure/*"
+        ],
+        "legend": [
+          "icons/*"
+        ]
+      }
+    },
+    "loot": {
+      "description": "Three-card boon pick. Mythic / rare / cursed card with rarity ribbon.",
+      "anchors": {
+        "cards": [
+          "panels/panel_bronze_256x128",
+          "panels/panel_blood_256"
+        ],
+        "item_icons": [
+          "icons/*"
+        ],
+        "rarity_rings": [
+          "decor/sigil_ring_*"
+        ],
+        "actions": [
+          "buttons/btn_primary_*"
+        ]
+      }
+    },
+    "pause": {
+      "description": "Pause overlay with cathedral gate bars.",
+      "anchors": {
+        "panel": [
+          "panels/panel_bronze_*"
+        ],
+        "gate_bars": [
+          "props/prop_pillar"
+        ],
+        "buttons": [
+          "buttons/btn_*"
+        ]
+      }
+    },
+    "game_over": {
+      "description": "\"YOU DIED\" run summary. Blood drips, tally panels, rewards earned.",
+      "anchors": {
+        "tally_panels": [
+          "panels/panel_blood_256"
+        ],
+        "notable_items": [
+          "slots/slot_*",
+          "icons/*"
+        ],
+        "rewards": [
+          "icons/treasure/coin",
+          "icons/bestiary/skull",
+          "icons/treasure/gem"
+        ],
+        "retry_buttons": [
+          "buttons/btn_primary_*",
+          "buttons/btn_ghost_*"
+        ]
+      }
+    },
+    "hub_sanctuary": {
+      "description": "Meta-progression between runs. Forge / Altar / Crypt / Merchant / Codex wings.",
+      "anchors": {
+        "wing_icons": [
+          "icons/weapons/sword",
+          "icons/ui/star",
+          "icons/armor/shield",
+          "icons/treasure/coin",
+          "icons/consum/scroll"
+        ],
+        "upgrade_cards": [
+          "panels/panel_bronze_*"
+        ],
+        "currency": [
+          "icons/treasure/coin",
+          "icons/bestiary/skull",
+          "icons/treasure/gem"
+        ],
+        "props": [
+          "props/prop_cauldron",
+          "props/prop_tome",
+          "props/prop_lantern",
+          "props/prop_banner"
+        ]
+      }
+    },
+    "settings": {
+      "description": "Display / Audio / Controls / Accessibility / About tabs.",
+      "anchors": {
+        "panel": [
+          "panels/panel_bronze_*"
+        ],
+        "tabs": [
+          "ornaments/divider_*"
+        ],
+        "toggles_sliders": [
+          "(programmatic in Unity UI)"
+        ],
+        "back_apply": [
+          "buttons/btn_*"
+        ]
+      }
+    },
+    "cursors": {
+      "description": "Mouse cursors swapped per context.",
+      "anchors": {
+        "default": [
+          "cursors/cursor_default"
+        ],
+        "interactable": [
+          "cursors/cursor_click"
+        ],
+        "combat_target": [
+          "cursors/cursor_target"
+        ]
+      }
+    }
+  },
+  "assets": [
+    {
+      "id": "icon_sword",
+      "path": "icons/weapons/sword_4x.png",
+      "category": "icon",
+      "subcategory": "weapons",
+      "name": "Sword",
+      "intended_use": "One-handed melee weapon icon.",
+      "placement": [
+        "inventory.weapon_slot",
+        "hud.ability_bar",
+        "loot.weapon_card"
+      ],
+      "rarity_variants": "icons-rarity/sword/sword_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "weapons",
+        "sword"
+      ]
+    },
+    {
+      "id": "icon_greatsword",
+      "path": "icons/weapons/greatsword_4x.png",
+      "category": "icon",
+      "subcategory": "weapons",
+      "name": "Greatsword",
+      "intended_use": "Two-handed heavy weapon icon.",
+      "placement": [
+        "inventory.weapon_slot",
+        "loot.weapon_card"
+      ],
+      "rarity_variants": "icons-rarity/greatsword/greatsword_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "weapons",
+        "greatsword"
+      ]
+    },
+    {
+      "id": "icon_dagger",
+      "path": "icons/weapons/dagger_4x.png",
+      "category": "icon",
+      "subcategory": "weapons",
+      "name": "Dagger",
+      "intended_use": "Off-hand / rogue weapon icon.",
+      "placement": [
+        "inventory.weapon_slot",
+        "class_select.rogue"
+      ],
+      "rarity_variants": "icons-rarity/dagger/dagger_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "weapons",
+        "dagger"
+      ]
+    },
+    {
+      "id": "icon_staff",
+      "path": "icons/weapons/staff_4x.png",
+      "category": "icon",
+      "subcategory": "weapons",
+      "name": "Staff",
+      "intended_use": "Mage/witch weapon icon.",
+      "placement": [
+        "inventory.weapon_slot",
+        "class_select.witch"
+      ],
+      "rarity_variants": "icons-rarity/staff/staff_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "weapons",
+        "staff"
+      ]
+    },
+    {
+      "id": "icon_axe",
+      "path": "icons/weapons/axe_4x.png",
+      "category": "icon",
+      "subcategory": "weapons",
+      "name": "Axe",
+      "intended_use": "Heavy chopping weapon icon.",
+      "placement": [
+        "inventory.weapon_slot"
+      ],
+      "rarity_variants": "icons-rarity/axe/axe_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "weapons",
+        "axe"
+      ]
+    },
+    {
+      "id": "icon_bow",
+      "path": "icons/weapons/bow_4x.png",
+      "category": "icon",
+      "subcategory": "weapons",
+      "name": "Bow",
+      "intended_use": "Ranged weapon icon.",
+      "placement": [
+        "inventory.weapon_slot"
+      ],
+      "rarity_variants": "icons-rarity/bow/bow_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "weapons",
+        "bow"
+      ]
+    },
+    {
+      "id": "icon_shield",
+      "path": "icons/armor/shield_4x.png",
+      "category": "icon",
+      "subcategory": "armor",
+      "name": "Shield",
+      "intended_use": "Block/defense icon.",
+      "placement": [
+        "inventory.shield_slot",
+        "class_select.knight",
+        "hud.ability_bar"
+      ],
+      "rarity_variants": "icons-rarity/shield/shield_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "armor",
+        "shield"
+      ]
+    },
+    {
+      "id": "icon_helm",
+      "path": "icons/armor/helm_4x.png",
+      "category": "icon",
+      "subcategory": "armor",
+      "name": "Helm",
+      "intended_use": "Head armor icon.",
+      "placement": [
+        "inventory.helm_slot"
+      ],
+      "rarity_variants": "icons-rarity/helm/helm_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "armor",
+        "helm"
+      ]
+    },
+    {
+      "id": "icon_boot",
+      "path": "icons/armor/boot_4x.png",
+      "category": "icon",
+      "subcategory": "armor",
+      "name": "Boots",
+      "intended_use": "Foot armor icon.",
+      "placement": [
+        "inventory.boot_slot"
+      ],
+      "rarity_variants": "icons-rarity/boot/boot_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "armor",
+        "boot"
+      ]
+    },
+    {
+      "id": "icon_ring",
+      "path": "icons/armor/ring_4x.png",
+      "category": "icon",
+      "subcategory": "armor",
+      "name": "Ring",
+      "intended_use": "Trinket icon.",
+      "placement": [
+        "inventory.ring_slot"
+      ],
+      "rarity_variants": "icons-rarity/ring/ring_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "armor",
+        "ring"
+      ]
+    },
+    {
+      "id": "icon_amulet",
+      "path": "icons/armor/amulet_4x.png",
+      "category": "icon",
+      "subcategory": "armor",
+      "name": "Amulet",
+      "intended_use": "Neck/trinket icon.",
+      "placement": [
+        "inventory.amulet_slot"
+      ],
+      "rarity_variants": "icons-rarity/amulet/amulet_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "armor",
+        "amulet"
+      ]
+    },
+    {
+      "id": "icon_cape",
+      "path": "icons/armor/cape_4x.png",
+      "category": "icon",
+      "subcategory": "armor",
+      "name": "Cape",
+      "intended_use": "Back/cloak icon.",
+      "placement": [
+        "inventory.cape_slot"
+      ],
+      "rarity_variants": "icons-rarity/cape/cape_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "armor",
+        "cape"
+      ]
+    },
+    {
+      "id": "icon_potion",
+      "path": "icons/consum/potion_4x.png",
+      "category": "icon",
+      "subcategory": "consum",
+      "name": "Health Potion",
+      "intended_use": "Healing consumable icon.",
+      "placement": [
+        "hud.consumable_slot",
+        "inventory.consumable"
+      ],
+      "rarity_variants": null,
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": true
+      },
+      "tags": [
+        "consum",
+        "potion"
+      ]
+    },
+    {
+      "id": "icon_flask",
+      "path": "icons/consum/flask_4x.png",
+      "category": "icon",
+      "subcategory": "consum",
+      "name": "Mana Flask",
+      "intended_use": "Mana consumable icon.",
+      "placement": [
+        "hud.consumable_slot",
+        "inventory.consumable"
+      ],
+      "rarity_variants": null,
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": true
+      },
+      "tags": [
+        "consum",
+        "flask"
+      ]
+    },
+    {
+      "id": "icon_scroll",
+      "path": "icons/consum/scroll_4x.png",
+      "category": "icon",
+      "subcategory": "consum",
+      "name": "Scroll",
+      "intended_use": "Single-use spell scroll icon.",
+      "placement": [
+        "hud.consumable_slot",
+        "inventory.consumable"
+      ],
+      "rarity_variants": null,
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": true
+      },
+      "tags": [
+        "consum",
+        "scroll"
+      ]
+    },
+    {
+      "id": "icon_coin",
+      "path": "icons/treasure/coin_4x.png",
+      "category": "icon",
+      "subcategory": "treasure",
+      "name": "Gold Coin",
+      "intended_use": "Soft currency icon.",
+      "placement": [
+        "hud.currency",
+        "hub.merchant"
+      ],
+      "rarity_variants": "icons-rarity/coin/coin_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "treasure",
+        "coin"
+      ]
+    },
+    {
+      "id": "icon_gem",
+      "path": "icons/treasure/gem_4x.png",
+      "category": "icon",
+      "subcategory": "treasure",
+      "name": "Gem",
+      "intended_use": "Rare material icon.",
+      "placement": [
+        "inventory.material",
+        "loot.rare_drop"
+      ],
+      "rarity_variants": "icons-rarity/gem/gem_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "treasure",
+        "gem"
+      ]
+    },
+    {
+      "id": "icon_largegem",
+      "path": "icons/treasure/largegem_4x.png",
+      "category": "icon",
+      "subcategory": "treasure",
+      "name": "Large Gem",
+      "intended_use": "Premium currency / pale ash.",
+      "placement": [
+        "hud.currency",
+        "hub.altar"
+      ],
+      "rarity_variants": "icons-rarity/largegem/largegem_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "treasure",
+        "largegem"
+      ]
+    },
+    {
+      "id": "icon_chest",
+      "path": "icons/treasure/chest_4x.png",
+      "category": "icon",
+      "subcategory": "treasure",
+      "name": "Treasure Chest",
+      "intended_use": "Interactable loot container.",
+      "placement": [
+        "hud.world_prompt",
+        "map.chest_node"
+      ],
+      "rarity_variants": null,
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": true
+      },
+      "tags": [
+        "treasure",
+        "chest"
+      ]
+    },
+    {
+      "id": "icon_key",
+      "path": "icons/treasure/key_4x.png",
+      "category": "icon",
+      "subcategory": "treasure",
+      "name": "Key",
+      "intended_use": "Quest / lock-opener icon.",
+      "placement": [
+        "inventory.quest"
+      ],
+      "rarity_variants": "icons-rarity/key/key_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "treasure",
+        "key"
+      ]
+    },
+    {
+      "id": "icon_skull",
+      "path": "icons/bestiary/skull_4x.png",
+      "category": "icon",
+      "subcategory": "bestiary",
+      "name": "Skull",
+      "intended_use": "Souls currency / kill counter.",
+      "placement": [
+        "hud.currency",
+        "hud.kill_count"
+      ],
+      "rarity_variants": "icons-rarity/skull/skull_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "bestiary",
+        "skull"
+      ]
+    },
+    {
+      "id": "icon_bones",
+      "path": "icons/bestiary/bones_4x.png",
+      "category": "icon",
+      "subcategory": "bestiary",
+      "name": "Crossed Bones",
+      "intended_use": "Death/cursed marker.",
+      "placement": [
+        "codex.death_tally"
+      ],
+      "rarity_variants": null,
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": true
+      },
+      "tags": [
+        "bestiary",
+        "bones"
+      ]
+    },
+    {
+      "id": "icon_eye",
+      "path": "icons/bestiary/eye_4x.png",
+      "category": "icon",
+      "subcategory": "bestiary",
+      "name": "Eye",
+      "intended_use": "Reveal / vision symbol.",
+      "placement": [
+        "skill_tree.smoke_branch"
+      ],
+      "rarity_variants": "icons-rarity/eye/eye_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "bestiary",
+        "eye"
+      ]
+    },
+    {
+      "id": "icon_flame",
+      "path": "icons/bestiary/flame_4x.png",
+      "category": "icon",
+      "subcategory": "bestiary",
+      "name": "Flame",
+      "intended_use": "Fire / burning effect symbol.",
+      "placement": [
+        "hud.status_burning",
+        "skill_tree.penance"
+      ],
+      "rarity_variants": "icons-rarity/flame/flame_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "bestiary",
+        "flame"
+      ]
+    },
+    {
+      "id": "icon_heart",
+      "path": "icons/ui/heart_4x.png",
+      "category": "icon",
+      "subcategory": "ui",
+      "name": "Heart",
+      "intended_use": "Health / life symbol.",
+      "placement": [
+        "hud.health_indicator",
+        "inventory.relic"
+      ],
+      "rarity_variants": "icons-rarity/heart/heart_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "ui",
+        "heart"
+      ]
+    },
+    {
+      "id": "icon_star",
+      "path": "icons/ui/star_4x.png",
+      "category": "icon",
+      "subcategory": "ui",
+      "name": "Star",
+      "intended_use": "Oath / talent / favor symbol.",
+      "placement": [
+        "skill_tree.cost",
+        "hub.unlock_marker"
+      ],
+      "rarity_variants": "icons-rarity/star/star_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "ui",
+        "star"
+      ]
+    },
+    {
+      "id": "icon_cross",
+      "path": "icons/ui/cross_4x.png",
+      "category": "icon",
+      "subcategory": "ui",
+      "name": "Cross",
+      "intended_use": "Holy / shrine symbol.",
+      "placement": [
+        "map.shrine_node",
+        "hud.status_blessed"
+      ],
+      "rarity_variants": "icons-rarity/cross/cross_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "ui",
+        "cross"
+      ]
+    },
+    {
+      "id": "icon_ankh",
+      "path": "icons/ui/ankh_4x.png",
+      "category": "icon",
+      "subcategory": "ui",
+      "name": "Ankh",
+      "intended_use": "Revive / immortality symbol.",
+      "placement": [
+        "skill_tree.keystone_revive"
+      ],
+      "rarity_variants": "icons-rarity/ankh/ankh_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "ui",
+        "ankh"
+      ]
+    },
+    {
+      "id": "icon_arrow",
+      "path": "icons/ui/arrow_4x.png",
+      "category": "icon",
+      "subcategory": "ui",
+      "name": "Arrow",
+      "intended_use": "Direction / haste indicator.",
+      "placement": [
+        "hud.status_haste",
+        "map.path_arrow"
+      ],
+      "rarity_variants": "icons-rarity/arrow/arrow_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "ui",
+        "arrow"
+      ]
+    },
+    {
+      "id": "icon_lock",
+      "path": "icons/ui/lock_4x.png",
+      "category": "icon",
+      "subcategory": "ui",
+      "name": "Lock",
+      "intended_use": "Locked content marker.",
+      "placement": [
+        "hub.locked_wing",
+        "skill_tree.locked_node"
+      ],
+      "rarity_variants": "icons-rarity/lock/lock_<rarity>_4x.png  (rarity: common|uncommon|rare|mythic|cursed|relic)",
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "tint_via_unity_color": false
+      },
+      "tags": [
+        "ui",
+        "lock"
+      ]
+    },
+    {
+      "id": "slot_common_48",
+      "path": "slots/slot_common_48.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Common slot (48px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "common"
+      ]
+    },
+    {
+      "id": "slot_common_64",
+      "path": "slots/slot_common_64.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Common slot (64px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "common"
+      ]
+    },
+    {
+      "id": "slot_common_96",
+      "path": "slots/slot_common_96.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Common slot (96px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "common"
+      ]
+    },
+    {
+      "id": "slot_uncommon_48",
+      "path": "slots/slot_uncommon_48.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Uncommon slot (48px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "slot_uncommon_64",
+      "path": "slots/slot_uncommon_64.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Uncommon slot (64px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "slot_uncommon_96",
+      "path": "slots/slot_uncommon_96.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Uncommon slot (96px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "uncommon"
+      ]
+    },
+    {
+      "id": "slot_rare_48",
+      "path": "slots/slot_rare_48.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Rare slot (48px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "rare"
+      ]
+    },
+    {
+      "id": "slot_rare_64",
+      "path": "slots/slot_rare_64.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Rare slot (64px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "rare"
+      ]
+    },
+    {
+      "id": "slot_rare_96",
+      "path": "slots/slot_rare_96.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Rare slot (96px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "rare"
+      ]
+    },
+    {
+      "id": "slot_mythic_48",
+      "path": "slots/slot_mythic_48.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Mythic slot (48px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "mythic"
+      ]
+    },
+    {
+      "id": "slot_mythic_64",
+      "path": "slots/slot_mythic_64.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Mythic slot (64px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "mythic"
+      ]
+    },
+    {
+      "id": "slot_mythic_96",
+      "path": "slots/slot_mythic_96.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Mythic slot (96px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "mythic"
+      ]
+    },
+    {
+      "id": "slot_cursed_48",
+      "path": "slots/slot_cursed_48.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Cursed slot (48px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "cursed"
+      ]
+    },
+    {
+      "id": "slot_cursed_64",
+      "path": "slots/slot_cursed_64.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Cursed slot (64px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "cursed"
+      ]
+    },
+    {
+      "id": "slot_cursed_96",
+      "path": "slots/slot_cursed_96.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Cursed slot (96px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "cursed"
+      ]
+    },
+    {
+      "id": "slot_relic_48",
+      "path": "slots/slot_relic_48.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Relic slot (48px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "relic"
+      ]
+    },
+    {
+      "id": "slot_relic_64",
+      "path": "slots/slot_relic_64.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Relic slot (64px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "relic"
+      ]
+    },
+    {
+      "id": "slot_relic_96",
+      "path": "slots/slot_relic_96.png",
+      "category": "ui",
+      "subcategory": "slot",
+      "name": "Relic slot (96px)",
+      "intended_use": "Inventory/hotbar/ability slot frame. Item icon goes on top.",
+      "placement": [
+        "inventory.grid",
+        "hud.ability_bar",
+        "hud.consumable_bar",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "slot",
+        "frame",
+        "relic"
+      ]
+    },
+    {
+      "id": "panel_bronze_128",
+      "path": "panels/panel_bronze_128.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Bronze panel (128²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "bronze"
+      ]
+    },
+    {
+      "id": "panel_bronze_192",
+      "path": "panels/panel_bronze_192.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Bronze panel (192²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "bronze"
+      ]
+    },
+    {
+      "id": "panel_bronze_256",
+      "path": "panels/panel_bronze_256.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Bronze panel (256²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "bronze"
+      ]
+    },
+    {
+      "id": "panel_bronze_384",
+      "path": "panels/panel_bronze_384.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Bronze panel (384²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "bronze"
+      ]
+    },
+    {
+      "id": "panel_bronze_wide",
+      "path": "panels/panel_bronze_512x192.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Bronze panel (wide)",
+      "intended_use": "9-slice wide banner/tooltip frame.",
+      "placement": [
+        "menu.banner",
+        "tooltip.wide"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "bronze",
+        "wide"
+      ]
+    },
+    {
+      "id": "panel_iron_128",
+      "path": "panels/panel_iron_128.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Iron panel (128²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "iron"
+      ]
+    },
+    {
+      "id": "panel_iron_192",
+      "path": "panels/panel_iron_192.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Iron panel (192²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "iron"
+      ]
+    },
+    {
+      "id": "panel_iron_256",
+      "path": "panels/panel_iron_256.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Iron panel (256²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "iron"
+      ]
+    },
+    {
+      "id": "panel_iron_384",
+      "path": "panels/panel_iron_384.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Iron panel (384²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "iron"
+      ]
+    },
+    {
+      "id": "panel_iron_wide",
+      "path": "panels/panel_iron_512x192.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Iron panel (wide)",
+      "intended_use": "9-slice wide banner/tooltip frame.",
+      "placement": [
+        "menu.banner",
+        "tooltip.wide"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "iron",
+        "wide"
+      ]
+    },
+    {
+      "id": "panel_blood_128",
+      "path": "panels/panel_blood_128.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Blood panel (128²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "blood"
+      ]
+    },
+    {
+      "id": "panel_blood_192",
+      "path": "panels/panel_blood_192.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Blood panel (192²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "blood"
+      ]
+    },
+    {
+      "id": "panel_blood_256",
+      "path": "panels/panel_blood_256.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Blood panel (256²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "blood"
+      ]
+    },
+    {
+      "id": "panel_blood_384",
+      "path": "panels/panel_blood_384.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Blood panel (384²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "blood"
+      ]
+    },
+    {
+      "id": "panel_blood_wide",
+      "path": "panels/panel_blood_512x192.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Blood panel (wide)",
+      "intended_use": "9-slice wide banner/tooltip frame.",
+      "placement": [
+        "menu.banner",
+        "tooltip.wide"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "blood",
+        "wide"
+      ]
+    },
+    {
+      "id": "panel_bone_128",
+      "path": "panels/panel_bone_128.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Bone panel (128²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "bone"
+      ]
+    },
+    {
+      "id": "panel_bone_192",
+      "path": "panels/panel_bone_192.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Bone panel (192²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "bone"
+      ]
+    },
+    {
+      "id": "panel_bone_256",
+      "path": "panels/panel_bone_256.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Bone panel (256²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "bone"
+      ]
+    },
+    {
+      "id": "panel_bone_384",
+      "path": "panels/panel_bone_384.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Bone panel (384²)",
+      "intended_use": "9-slice background frame for menus, cards, tooltips. Stretches to any size.",
+      "placement": [
+        "inventory.background",
+        "menu.window",
+        "tooltip",
+        "loot.card"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "bone"
+      ]
+    },
+    {
+      "id": "panel_bone_wide",
+      "path": "panels/panel_bone_512x192.png",
+      "category": "ui",
+      "subcategory": "panel",
+      "name": "Bone panel (wide)",
+      "intended_use": "9-slice wide banner/tooltip frame.",
+      "placement": [
+        "menu.banner",
+        "tooltip.wide"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          24,
+          24,
+          24,
+          24
+        ]
+      },
+      "tags": [
+        "panel",
+        "frame",
+        "9-slice",
+        "bone",
+        "wide"
+      ]
+    },
+    {
+      "id": "btn_default_160x40",
+      "path": "buttons/btn_default_160x40.png",
+      "category": "ui",
+      "subcategory": "button",
+      "name": "Default button (160×40)",
+      "intended_use": "Click target. Primary = call-to-action, Default = neutral, Danger = destructive (Forsake Run, Discard), Ghost = secondary nav.",
+      "placement": [
+        "menu.actions",
+        "tooltip.confirm",
+        "hud.world_prompt"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "recommended_size_units": [
+          5,
+          1.25
+        ]
+      },
+      "tags": [
+        "button",
+        "default"
+      ]
+    },
+    {
+      "id": "btn_default_220x48",
+      "path": "buttons/btn_default_220x48.png",
+      "category": "ui",
+      "subcategory": "button",
+      "name": "Default button (220×48)",
+      "intended_use": "Click target. Primary = call-to-action, Default = neutral, Danger = destructive (Forsake Run, Discard), Ghost = secondary nav.",
+      "placement": [
+        "menu.actions",
+        "tooltip.confirm",
+        "hud.world_prompt"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "recommended_size_units": [
+          6.875,
+          1.5
+        ]
+      },
+      "tags": [
+        "button",
+        "default"
+      ]
+    },
+    {
+      "id": "btn_default_280x56",
+      "path": "buttons/btn_default_280x56.png",
+      "category": "ui",
+      "subcategory": "button",
+      "name": "Default button (280×56)",
+      "intended_use": "Click target. Primary = call-to-action, Default = neutral, Danger = destructive (Forsake Run, Discard), Ghost = secondary nav.",
+      "placement": [
+        "menu.actions",
+        "tooltip.confirm",
+        "hud.world_prompt"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "recommended_size_units": [
+          8.75,
+          1.75
+        ]
+      },
+      "tags": [
+        "button",
+        "default"
+      ]
+    },
+    {
+      "id": "btn_primary_160x40",
+      "path": "buttons/btn_primary_160x40.png",
+      "category": "ui",
+      "subcategory": "button",
+      "name": "Primary button (160×40)",
+      "intended_use": "Click target. Primary = call-to-action, Default = neutral, Danger = destructive (Forsake Run, Discard), Ghost = secondary nav.",
+      "placement": [
+        "menu.actions",
+        "tooltip.confirm",
+        "hud.world_prompt"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "recommended_size_units": [
+          5,
+          1.25
+        ]
+      },
+      "tags": [
+        "button",
+        "primary"
+      ]
+    },
+    {
+      "id": "btn_primary_220x48",
+      "path": "buttons/btn_primary_220x48.png",
+      "category": "ui",
+      "subcategory": "button",
+      "name": "Primary button (220×48)",
+      "intended_use": "Click target. Primary = call-to-action, Default = neutral, Danger = destructive (Forsake Run, Discard), Ghost = secondary nav.",
+      "placement": [
+        "menu.actions",
+        "tooltip.confirm",
+        "hud.world_prompt"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "recommended_size_units": [
+          6.875,
+          1.5
+        ]
+      },
+      "tags": [
+        "button",
+        "primary"
+      ]
+    },
+    {
+      "id": "btn_primary_280x56",
+      "path": "buttons/btn_primary_280x56.png",
+      "category": "ui",
+      "subcategory": "button",
+      "name": "Primary button (280×56)",
+      "intended_use": "Click target. Primary = call-to-action, Default = neutral, Danger = destructive (Forsake Run, Discard), Ghost = secondary nav.",
+      "placement": [
+        "menu.actions",
+        "tooltip.confirm",
+        "hud.world_prompt"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "recommended_size_units": [
+          8.75,
+          1.75
+        ]
+      },
+      "tags": [
+        "button",
+        "primary"
+      ]
+    },
+    {
+      "id": "btn_danger_160x40",
+      "path": "buttons/btn_danger_160x40.png",
+      "category": "ui",
+      "subcategory": "button",
+      "name": "Danger button (160×40)",
+      "intended_use": "Click target. Primary = call-to-action, Default = neutral, Danger = destructive (Forsake Run, Discard), Ghost = secondary nav.",
+      "placement": [
+        "menu.actions",
+        "tooltip.confirm",
+        "hud.world_prompt"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "recommended_size_units": [
+          5,
+          1.25
+        ]
+      },
+      "tags": [
+        "button",
+        "danger"
+      ]
+    },
+    {
+      "id": "btn_danger_220x48",
+      "path": "buttons/btn_danger_220x48.png",
+      "category": "ui",
+      "subcategory": "button",
+      "name": "Danger button (220×48)",
+      "intended_use": "Click target. Primary = call-to-action, Default = neutral, Danger = destructive (Forsake Run, Discard), Ghost = secondary nav.",
+      "placement": [
+        "menu.actions",
+        "tooltip.confirm",
+        "hud.world_prompt"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "recommended_size_units": [
+          6.875,
+          1.5
+        ]
+      },
+      "tags": [
+        "button",
+        "danger"
+      ]
+    },
+    {
+      "id": "btn_danger_280x56",
+      "path": "buttons/btn_danger_280x56.png",
+      "category": "ui",
+      "subcategory": "button",
+      "name": "Danger button (280×56)",
+      "intended_use": "Click target. Primary = call-to-action, Default = neutral, Danger = destructive (Forsake Run, Discard), Ghost = secondary nav.",
+      "placement": [
+        "menu.actions",
+        "tooltip.confirm",
+        "hud.world_prompt"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "recommended_size_units": [
+          8.75,
+          1.75
+        ]
+      },
+      "tags": [
+        "button",
+        "danger"
+      ]
+    },
+    {
+      "id": "btn_ghost_160x40",
+      "path": "buttons/btn_ghost_160x40.png",
+      "category": "ui",
+      "subcategory": "button",
+      "name": "Ghost button (160×40)",
+      "intended_use": "Click target. Primary = call-to-action, Default = neutral, Danger = destructive (Forsake Run, Discard), Ghost = secondary nav.",
+      "placement": [
+        "menu.actions",
+        "tooltip.confirm",
+        "hud.world_prompt"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "recommended_size_units": [
+          5,
+          1.25
+        ]
+      },
+      "tags": [
+        "button",
+        "ghost"
+      ]
+    },
+    {
+      "id": "btn_ghost_220x48",
+      "path": "buttons/btn_ghost_220x48.png",
+      "category": "ui",
+      "subcategory": "button",
+      "name": "Ghost button (220×48)",
+      "intended_use": "Click target. Primary = call-to-action, Default = neutral, Danger = destructive (Forsake Run, Discard), Ghost = secondary nav.",
+      "placement": [
+        "menu.actions",
+        "tooltip.confirm",
+        "hud.world_prompt"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "recommended_size_units": [
+          6.875,
+          1.5
+        ]
+      },
+      "tags": [
+        "button",
+        "ghost"
+      ]
+    },
+    {
+      "id": "btn_ghost_280x56",
+      "path": "buttons/btn_ghost_280x56.png",
+      "category": "ui",
+      "subcategory": "button",
+      "name": "Ghost button (280×56)",
+      "intended_use": "Click target. Primary = call-to-action, Default = neutral, Danger = destructive (Forsake Run, Discard), Ghost = secondary nav.",
+      "placement": [
+        "menu.actions",
+        "tooltip.confirm",
+        "hud.world_prompt"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "recommended_size_units": [
+          8.75,
+          1.75
+        ]
+      },
+      "tags": [
+        "button",
+        "ghost"
+      ]
+    },
+    {
+      "id": "bar_hp_256x16",
+      "path": "bars/bar_hp_fill_256x16.png",
+      "category": "ui",
+      "subcategory": "bar_fill",
+      "name": "HP bar fill (256×16)",
+      "intended_use": "Resource bar gradient fill. Use Unity Image Type=Filled, FillMethod=Horizontal, then drive Fill Amount from your stat 0..1.",
+      "placement": [
+        "hud.top_left_bars"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Filled",
+        "fill_method": "Horizontal",
+        "drive": "fillAmount"
+      },
+      "tags": [
+        "bar",
+        "hp",
+        "fill"
+      ]
+    },
+    {
+      "id": "bar_hp_128x12",
+      "path": "bars/bar_hp_fill_128x12.png",
+      "category": "ui",
+      "subcategory": "bar_fill",
+      "name": "HP bar fill (128×12)",
+      "intended_use": "Resource bar gradient fill. Use Unity Image Type=Filled, FillMethod=Horizontal, then drive Fill Amount from your stat 0..1.",
+      "placement": [
+        "hud.top_left_bars"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Filled",
+        "fill_method": "Horizontal",
+        "drive": "fillAmount"
+      },
+      "tags": [
+        "bar",
+        "hp",
+        "fill"
+      ]
+    },
+    {
+      "id": "bar_stamina_256x16",
+      "path": "bars/bar_stamina_fill_256x16.png",
+      "category": "ui",
+      "subcategory": "bar_fill",
+      "name": "STAMINA bar fill (256×16)",
+      "intended_use": "Resource bar gradient fill. Use Unity Image Type=Filled, FillMethod=Horizontal, then drive Fill Amount from your stat 0..1.",
+      "placement": [
+        "hud.top_left_bars"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Filled",
+        "fill_method": "Horizontal",
+        "drive": "fillAmount"
+      },
+      "tags": [
+        "bar",
+        "stamina",
+        "fill"
+      ]
+    },
+    {
+      "id": "bar_stamina_128x12",
+      "path": "bars/bar_stamina_fill_128x12.png",
+      "category": "ui",
+      "subcategory": "bar_fill",
+      "name": "STAMINA bar fill (128×12)",
+      "intended_use": "Resource bar gradient fill. Use Unity Image Type=Filled, FillMethod=Horizontal, then drive Fill Amount from your stat 0..1.",
+      "placement": [
+        "hud.top_left_bars"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Filled",
+        "fill_method": "Horizontal",
+        "drive": "fillAmount"
+      },
+      "tags": [
+        "bar",
+        "stamina",
+        "fill"
+      ]
+    },
+    {
+      "id": "bar_mana_256x16",
+      "path": "bars/bar_mana_fill_256x16.png",
+      "category": "ui",
+      "subcategory": "bar_fill",
+      "name": "MANA bar fill (256×16)",
+      "intended_use": "Resource bar gradient fill. Use Unity Image Type=Filled, FillMethod=Horizontal, then drive Fill Amount from your stat 0..1.",
+      "placement": [
+        "hud.top_left_bars"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Filled",
+        "fill_method": "Horizontal",
+        "drive": "fillAmount"
+      },
+      "tags": [
+        "bar",
+        "mana",
+        "fill"
+      ]
+    },
+    {
+      "id": "bar_mana_128x12",
+      "path": "bars/bar_mana_fill_128x12.png",
+      "category": "ui",
+      "subcategory": "bar_fill",
+      "name": "MANA bar fill (128×12)",
+      "intended_use": "Resource bar gradient fill. Use Unity Image Type=Filled, FillMethod=Horizontal, then drive Fill Amount from your stat 0..1.",
+      "placement": [
+        "hud.top_left_bars"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Filled",
+        "fill_method": "Horizontal",
+        "drive": "fillAmount"
+      },
+      "tags": [
+        "bar",
+        "mana",
+        "fill"
+      ]
+    },
+    {
+      "id": "bar_xp_256x16",
+      "path": "bars/bar_xp_fill_256x16.png",
+      "category": "ui",
+      "subcategory": "bar_fill",
+      "name": "XP bar fill (256×16)",
+      "intended_use": "Resource bar gradient fill. Use Unity Image Type=Filled, FillMethod=Horizontal, then drive Fill Amount from your stat 0..1.",
+      "placement": [
+        "hud.top_left_bars"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Filled",
+        "fill_method": "Horizontal",
+        "drive": "fillAmount"
+      },
+      "tags": [
+        "bar",
+        "xp",
+        "fill"
+      ]
+    },
+    {
+      "id": "bar_xp_128x12",
+      "path": "bars/bar_xp_fill_128x12.png",
+      "category": "ui",
+      "subcategory": "bar_fill",
+      "name": "XP bar fill (128×12)",
+      "intended_use": "Resource bar gradient fill. Use Unity Image Type=Filled, FillMethod=Horizontal, then drive Fill Amount from your stat 0..1.",
+      "placement": [
+        "hud.top_left_bars"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Filled",
+        "fill_method": "Horizontal",
+        "drive": "fillAmount"
+      },
+      "tags": [
+        "bar",
+        "xp",
+        "fill"
+      ]
+    },
+    {
+      "id": "bar_shield_256x16",
+      "path": "bars/bar_shield_fill_256x16.png",
+      "category": "ui",
+      "subcategory": "bar_fill",
+      "name": "SHIELD bar fill (256×16)",
+      "intended_use": "Resource bar gradient fill. Use Unity Image Type=Filled, FillMethod=Horizontal, then drive Fill Amount from your stat 0..1.",
+      "placement": [
+        "hud.top_left_bars"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Filled",
+        "fill_method": "Horizontal",
+        "drive": "fillAmount"
+      },
+      "tags": [
+        "bar",
+        "shield",
+        "fill"
+      ]
+    },
+    {
+      "id": "bar_shield_128x12",
+      "path": "bars/bar_shield_fill_128x12.png",
+      "category": "ui",
+      "subcategory": "bar_fill",
+      "name": "SHIELD bar fill (128×12)",
+      "intended_use": "Resource bar gradient fill. Use Unity Image Type=Filled, FillMethod=Horizontal, then drive Fill Amount from your stat 0..1.",
+      "placement": [
+        "hud.top_left_bars"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Filled",
+        "fill_method": "Horizontal",
+        "drive": "fillAmount"
+      },
+      "tags": [
+        "bar",
+        "shield",
+        "fill"
+      ]
+    },
+    {
+      "id": "bar_frame_256x24",
+      "path": "bars/bar_frame_256x24.png",
+      "category": "ui",
+      "subcategory": "bar_frame",
+      "name": "Bar frame 256x24",
+      "intended_use": "Frame around a resource bar. Place behind the fill.",
+      "placement": [
+        "hud.top_left_bars"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "bar",
+        "frame"
+      ]
+    },
+    {
+      "id": "bar_frame_128x16",
+      "path": "bars/bar_frame_128x16.png",
+      "category": "ui",
+      "subcategory": "bar_frame",
+      "name": "Bar frame 128x16",
+      "intended_use": "Frame around a resource bar. Place behind the fill.",
+      "placement": [
+        "hud.top_left_bars"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "bar",
+        "frame"
+      ]
+    },
+    {
+      "id": "boss_bar",
+      "path": "bars/boss_bar_480x32.png",
+      "category": "ui",
+      "subcategory": "bar_frame",
+      "name": "Boss healthbar (480×32)",
+      "intended_use": "Ornate boss-fight healthbar frame. Use with bar_hp_fill_* on top.",
+      "placement": [
+        "hud.boss_fight"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "bar",
+        "boss",
+        "frame"
+      ]
+    },
+    {
+      "id": "status_fury",
+      "path": "status/badge_fury_4x.png",
+      "category": "ui",
+      "subcategory": "status_badge",
+      "name": "Fury status badge",
+      "intended_use": "Damage-boost buff. Stack horizontally under the HP bar. Optionally overlay a remaining-duration text.",
+      "placement": [
+        "hud.top_left_status"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "status",
+        "badge",
+        "fury"
+      ]
+    },
+    {
+      "id": "status_blessed",
+      "path": "status/badge_blessed_4x.png",
+      "category": "ui",
+      "subcategory": "status_badge",
+      "name": "Blessed status badge",
+      "intended_use": "Holy / damage-reduction buff. Stack horizontally under the HP bar. Optionally overlay a remaining-duration text.",
+      "placement": [
+        "hud.top_left_status"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "status",
+        "badge",
+        "blessed"
+      ]
+    },
+    {
+      "id": "status_bleed",
+      "path": "status/badge_bleed_4x.png",
+      "category": "ui",
+      "subcategory": "status_badge",
+      "name": "Bleed status badge",
+      "intended_use": "DoT bleed debuff. Stack horizontally under the HP bar. Optionally overlay a remaining-duration text.",
+      "placement": [
+        "hud.top_left_status"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "status",
+        "badge",
+        "bleed"
+      ]
+    },
+    {
+      "id": "status_shielded",
+      "path": "status/badge_shielded_4x.png",
+      "category": "ui",
+      "subcategory": "status_badge",
+      "name": "Shielded status badge",
+      "intended_use": "Damage-absorb shield buff. Stack horizontally under the HP bar. Optionally overlay a remaining-duration text.",
+      "placement": [
+        "hud.top_left_status"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "status",
+        "badge",
+        "shielded"
+      ]
+    },
+    {
+      "id": "status_poison",
+      "path": "status/badge_poison_4x.png",
+      "category": "ui",
+      "subcategory": "status_badge",
+      "name": "Poison status badge",
+      "intended_use": "Poison DoT debuff. Stack horizontally under the HP bar. Optionally overlay a remaining-duration text.",
+      "placement": [
+        "hud.top_left_status"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "status",
+        "badge",
+        "poison"
+      ]
+    },
+    {
+      "id": "status_burning",
+      "path": "status/badge_burning_4x.png",
+      "category": "ui",
+      "subcategory": "status_badge",
+      "name": "Burning status badge",
+      "intended_use": "Fire DoT debuff. Stack horizontally under the HP bar. Optionally overlay a remaining-duration text.",
+      "placement": [
+        "hud.top_left_status"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "status",
+        "badge",
+        "burning"
+      ]
+    },
+    {
+      "id": "status_haste",
+      "path": "status/badge_haste_4x.png",
+      "category": "ui",
+      "subcategory": "status_badge",
+      "name": "Haste status badge",
+      "intended_use": "Move/attack-speed buff. Stack horizontally under the HP bar. Optionally overlay a remaining-duration text.",
+      "placement": [
+        "hud.top_left_status"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "status",
+        "badge",
+        "haste"
+      ]
+    },
+    {
+      "id": "status_chilled",
+      "path": "status/badge_chilled_4x.png",
+      "category": "ui",
+      "subcategory": "status_badge",
+      "name": "Chilled status badge",
+      "intended_use": "Slow debuff. Stack horizontally under the HP bar. Optionally overlay a remaining-duration text.",
+      "placement": [
+        "hud.top_left_status"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "status",
+        "badge",
+        "chilled"
+      ]
+    },
+    {
+      "id": "status_cursed",
+      "path": "status/badge_cursed_4x.png",
+      "category": "ui",
+      "subcategory": "status_badge",
+      "name": "Cursed status badge",
+      "intended_use": "Status curse / unholy debuff. Stack horizontally under the HP bar. Optionally overlay a remaining-duration text.",
+      "placement": [
+        "hud.top_left_status"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "status",
+        "badge",
+        "cursed"
+      ]
+    },
+    {
+      "id": "map_start_normal",
+      "path": "map-tokens/start_normal_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · start (normal)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "start",
+        "normal"
+      ]
+    },
+    {
+      "id": "map_start_current",
+      "path": "map-tokens/start_current_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · start (current)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "start",
+        "current"
+      ]
+    },
+    {
+      "id": "map_start_cleared",
+      "path": "map-tokens/start_cleared_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · start (cleared)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "start",
+        "cleared"
+      ]
+    },
+    {
+      "id": "map_combat_normal",
+      "path": "map-tokens/combat_normal_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · combat (normal)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "combat",
+        "normal"
+      ]
+    },
+    {
+      "id": "map_combat_current",
+      "path": "map-tokens/combat_current_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · combat (current)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "combat",
+        "current"
+      ]
+    },
+    {
+      "id": "map_combat_cleared",
+      "path": "map-tokens/combat_cleared_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · combat (cleared)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "combat",
+        "cleared"
+      ]
+    },
+    {
+      "id": "map_elite_normal",
+      "path": "map-tokens/elite_normal_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · elite (normal)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "elite",
+        "normal"
+      ]
+    },
+    {
+      "id": "map_elite_current",
+      "path": "map-tokens/elite_current_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · elite (current)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "elite",
+        "current"
+      ]
+    },
+    {
+      "id": "map_elite_cleared",
+      "path": "map-tokens/elite_cleared_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · elite (cleared)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "elite",
+        "cleared"
+      ]
+    },
+    {
+      "id": "map_event_normal",
+      "path": "map-tokens/event_normal_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · event (normal)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "event",
+        "normal"
+      ]
+    },
+    {
+      "id": "map_event_current",
+      "path": "map-tokens/event_current_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · event (current)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "event",
+        "current"
+      ]
+    },
+    {
+      "id": "map_event_cleared",
+      "path": "map-tokens/event_cleared_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · event (cleared)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "event",
+        "cleared"
+      ]
+    },
+    {
+      "id": "map_shrine_normal",
+      "path": "map-tokens/shrine_normal_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · shrine (normal)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "shrine",
+        "normal"
+      ]
+    },
+    {
+      "id": "map_shrine_current",
+      "path": "map-tokens/shrine_current_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · shrine (current)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "shrine",
+        "current"
+      ]
+    },
+    {
+      "id": "map_shrine_cleared",
+      "path": "map-tokens/shrine_cleared_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · shrine (cleared)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "shrine",
+        "cleared"
+      ]
+    },
+    {
+      "id": "map_shop_normal",
+      "path": "map-tokens/shop_normal_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · shop (normal)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "shop",
+        "normal"
+      ]
+    },
+    {
+      "id": "map_shop_current",
+      "path": "map-tokens/shop_current_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · shop (current)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "shop",
+        "current"
+      ]
+    },
+    {
+      "id": "map_shop_cleared",
+      "path": "map-tokens/shop_cleared_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · shop (cleared)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "shop",
+        "cleared"
+      ]
+    },
+    {
+      "id": "map_cursed_normal",
+      "path": "map-tokens/cursed_normal_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · cursed (normal)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "cursed",
+        "normal"
+      ]
+    },
+    {
+      "id": "map_cursed_current",
+      "path": "map-tokens/cursed_current_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · cursed (current)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "cursed",
+        "current"
+      ]
+    },
+    {
+      "id": "map_cursed_cleared",
+      "path": "map-tokens/cursed_cleared_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · cursed (cleared)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "cursed",
+        "cleared"
+      ]
+    },
+    {
+      "id": "map_boss_normal",
+      "path": "map-tokens/boss_normal_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · boss (normal)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "boss",
+        "normal"
+      ]
+    },
+    {
+      "id": "map_boss_current",
+      "path": "map-tokens/boss_current_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · boss (current)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "boss",
+        "current"
+      ]
+    },
+    {
+      "id": "map_boss_cleared",
+      "path": "map-tokens/boss_cleared_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · boss (cleared)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "boss",
+        "cleared"
+      ]
+    },
+    {
+      "id": "map_rest_normal",
+      "path": "map-tokens/rest_normal_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · rest (normal)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "rest",
+        "normal"
+      ]
+    },
+    {
+      "id": "map_rest_current",
+      "path": "map-tokens/rest_current_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · rest (current)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "rest",
+        "current"
+      ]
+    },
+    {
+      "id": "map_rest_cleared",
+      "path": "map-tokens/rest_cleared_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · rest (cleared)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "rest",
+        "cleared"
+      ]
+    },
+    {
+      "id": "map_chest_normal",
+      "path": "map-tokens/chest_normal_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · chest (normal)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "chest",
+        "normal"
+      ]
+    },
+    {
+      "id": "map_chest_current",
+      "path": "map-tokens/chest_current_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · chest (current)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "chest",
+        "current"
+      ]
+    },
+    {
+      "id": "map_chest_cleared",
+      "path": "map-tokens/chest_cleared_4x.png",
+      "category": "ui",
+      "subcategory": "map_token",
+      "name": "Map · chest (cleared)",
+      "intended_use": "Branching-map room token. Use the right state based on player progress.",
+      "placement": [
+        "map.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "map",
+        "node",
+        "chest",
+        "cleared"
+      ]
+    },
+    {
+      "id": "skill_core_locked",
+      "path": "skill-nodes/core_locked_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · core (locked)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "core",
+        "locked"
+      ]
+    },
+    {
+      "id": "skill_core_available",
+      "path": "skill-nodes/core_available_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · core (available)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "core",
+        "available"
+      ]
+    },
+    {
+      "id": "skill_core_unlocked",
+      "path": "skill-nodes/core_unlocked_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · core (unlocked)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "core",
+        "unlocked"
+      ]
+    },
+    {
+      "id": "skill_core_keystone",
+      "path": "skill-nodes/core_keystone_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · core (keystone)",
+      "intended_use": "Build-defining keystone node. Marks the end of a branch.",
+      "placement": [
+        "skill_tree.keystone"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "keystone",
+        "core"
+      ]
+    },
+    {
+      "id": "skill_steel_locked",
+      "path": "skill-nodes/steel_locked_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · steel (locked)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "steel",
+        "locked"
+      ]
+    },
+    {
+      "id": "skill_steel_available",
+      "path": "skill-nodes/steel_available_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · steel (available)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "steel",
+        "available"
+      ]
+    },
+    {
+      "id": "skill_steel_unlocked",
+      "path": "skill-nodes/steel_unlocked_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · steel (unlocked)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "steel",
+        "unlocked"
+      ]
+    },
+    {
+      "id": "skill_steel_keystone",
+      "path": "skill-nodes/steel_keystone_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · steel (keystone)",
+      "intended_use": "Build-defining keystone node. Marks the end of a branch.",
+      "placement": [
+        "skill_tree.keystone"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "keystone",
+        "steel"
+      ]
+    },
+    {
+      "id": "skill_penance_locked",
+      "path": "skill-nodes/penance_locked_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · penance (locked)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "penance",
+        "locked"
+      ]
+    },
+    {
+      "id": "skill_penance_available",
+      "path": "skill-nodes/penance_available_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · penance (available)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "penance",
+        "available"
+      ]
+    },
+    {
+      "id": "skill_penance_unlocked",
+      "path": "skill-nodes/penance_unlocked_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · penance (unlocked)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "penance",
+        "unlocked"
+      ]
+    },
+    {
+      "id": "skill_penance_keystone",
+      "path": "skill-nodes/penance_keystone_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · penance (keystone)",
+      "intended_use": "Build-defining keystone node. Marks the end of a branch.",
+      "placement": [
+        "skill_tree.keystone"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "keystone",
+        "penance"
+      ]
+    },
+    {
+      "id": "skill_smoke_locked",
+      "path": "skill-nodes/smoke_locked_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · smoke (locked)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "smoke",
+        "locked"
+      ]
+    },
+    {
+      "id": "skill_smoke_available",
+      "path": "skill-nodes/smoke_available_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · smoke (available)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "smoke",
+        "available"
+      ]
+    },
+    {
+      "id": "skill_smoke_unlocked",
+      "path": "skill-nodes/smoke_unlocked_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · smoke (unlocked)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "smoke",
+        "unlocked"
+      ]
+    },
+    {
+      "id": "skill_smoke_keystone",
+      "path": "skill-nodes/smoke_keystone_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · smoke (keystone)",
+      "intended_use": "Build-defining keystone node. Marks the end of a branch.",
+      "placement": [
+        "skill_tree.keystone"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "keystone",
+        "smoke"
+      ]
+    },
+    {
+      "id": "skill_cursed_locked",
+      "path": "skill-nodes/cursed_locked_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · cursed (locked)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "cursed",
+        "locked"
+      ]
+    },
+    {
+      "id": "skill_cursed_available",
+      "path": "skill-nodes/cursed_available_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · cursed (available)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "cursed",
+        "available"
+      ]
+    },
+    {
+      "id": "skill_cursed_unlocked",
+      "path": "skill-nodes/cursed_unlocked_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · cursed (unlocked)",
+      "intended_use": "Talent-tree diamond node. Branch color encodes path; state encodes progress.",
+      "placement": [
+        "skill_tree.node"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "cursed",
+        "unlocked"
+      ]
+    },
+    {
+      "id": "skill_cursed_keystone",
+      "path": "skill-nodes/cursed_keystone_4x.png",
+      "category": "ui",
+      "subcategory": "skill_node",
+      "name": "Skill · cursed (keystone)",
+      "intended_use": "Build-defining keystone node. Marks the end of a branch.",
+      "placement": [
+        "skill_tree.keystone"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "skill",
+        "talent",
+        "keystone",
+        "cursed"
+      ]
+    },
+    {
+      "id": "portrait_knight",
+      "path": "portraits/portrait_knight_4x.png",
+      "category": "character",
+      "subcategory": "portrait",
+      "name": "Portrait · Vow Knight",
+      "intended_use": "Character bust for class-select screen, HUD portrait corner, and dialog avatar.",
+      "placement": [
+        "class_select.card",
+        "hud.top_left_portrait",
+        "dialog.speaker"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 48,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "portrait",
+        "character",
+        "class",
+        "knight"
+      ]
+    },
+    {
+      "id": "portrait_witch",
+      "path": "portraits/portrait_witch_4x.png",
+      "category": "character",
+      "subcategory": "portrait",
+      "name": "Portrait · Ashen Witch",
+      "intended_use": "Character bust for class-select screen, HUD portrait corner, and dialog avatar.",
+      "placement": [
+        "class_select.card",
+        "hud.top_left_portrait",
+        "dialog.speaker"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 48,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "portrait",
+        "character",
+        "class",
+        "witch"
+      ]
+    },
+    {
+      "id": "portrait_monk",
+      "path": "portraits/portrait_monk_4x.png",
+      "category": "character",
+      "subcategory": "portrait",
+      "name": "Portrait · Reliquary Monk",
+      "intended_use": "Character bust for class-select screen, HUD portrait corner, and dialog avatar.",
+      "placement": [
+        "class_select.card",
+        "hud.top_left_portrait",
+        "dialog.speaker"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 48,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "portrait",
+        "character",
+        "class",
+        "monk"
+      ]
+    },
+    {
+      "id": "portrait_rogue",
+      "path": "portraits/portrait_rogue_4x.png",
+      "category": "character",
+      "subcategory": "portrait",
+      "name": "Portrait · Cinder Rogue",
+      "intended_use": "Character bust for class-select screen, HUD portrait corner, and dialog avatar.",
+      "placement": [
+        "class_select.card",
+        "hud.top_left_portrait",
+        "dialog.speaker"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 48,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "portrait",
+        "character",
+        "class",
+        "rogue"
+      ]
+    },
+    {
+      "id": "cursor_default",
+      "path": "cursors/cursor_default_4x.png",
+      "category": "ui",
+      "subcategory": "cursor",
+      "name": "Default arrow",
+      "intended_use": "Mouse cursor. Swap based on hover context. Hotspot at top-left for 'default', center for 'target'.",
+      "placement": [
+        "cursor"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "hotspot_px": [
+          0,
+          0
+        ]
+      },
+      "tags": [
+        "cursor",
+        "default"
+      ]
+    },
+    {
+      "id": "cursor_click",
+      "path": "cursors/cursor_click_4x.png",
+      "category": "ui",
+      "subcategory": "cursor",
+      "name": "Pointing hand (interactable)",
+      "intended_use": "Mouse cursor. Swap based on hover context. Hotspot at top-left for 'default', center for 'target'.",
+      "placement": [
+        "cursor"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "hotspot_px": [
+          0,
+          0
+        ]
+      },
+      "tags": [
+        "cursor",
+        "click"
+      ]
+    },
+    {
+      "id": "cursor_target",
+      "path": "cursors/cursor_target_4x.png",
+      "category": "ui",
+      "subcategory": "cursor",
+      "name": "Red crosshair (combat)",
+      "intended_use": "Mouse cursor. Swap based on hover context. Hotspot at top-left for 'default', center for 'target'.",
+      "placement": [
+        "cursor"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "hotspot_px": [
+          12,
+          12
+        ]
+      },
+      "tags": [
+        "cursor",
+        "target"
+      ]
+    },
+    {
+      "id": "particle_ember",
+      "path": "particles/particle_ember_4x.png",
+      "category": "effect",
+      "subcategory": "particle",
+      "name": "Ember particle",
+      "intended_use": "Floating cinder particle (drift up). Use in title screen, hub, fire effects.",
+      "placement": [
+        "fx.world",
+        "fx.ui"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "suggested": "Use as ParticleSystem Renderer texture, or animate via DOTween/Coroutine"
+      },
+      "tags": [
+        "particle",
+        "effect",
+        "ember"
+      ]
+    },
+    {
+      "id": "particle_sparkle",
+      "path": "particles/particle_sparkle_4x.png",
+      "category": "effect",
+      "subcategory": "particle",
+      "name": "Sparkle particle",
+      "intended_use": "4-point twinkle for legendary loot, crit hits, sigil glow.",
+      "placement": [
+        "fx.world",
+        "fx.ui"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "suggested": "Use as ParticleSystem Renderer texture, or animate via DOTween/Coroutine"
+      },
+      "tags": [
+        "particle",
+        "effect",
+        "sparkle"
+      ]
+    },
+    {
+      "id": "particle_blood",
+      "path": "particles/particle_blood_4x.png",
+      "category": "effect",
+      "subcategory": "particle",
+      "name": "Blood particle",
+      "intended_use": "Blood splat for hit feedback, kill effects.",
+      "placement": [
+        "fx.world",
+        "fx.ui"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "suggested": "Use as ParticleSystem Renderer texture, or animate via DOTween/Coroutine"
+      },
+      "tags": [
+        "particle",
+        "effect",
+        "blood"
+      ]
+    },
+    {
+      "id": "particle_smoke",
+      "path": "particles/particle_smoke_4x.png",
+      "category": "effect",
+      "subcategory": "particle",
+      "name": "Smoke particle",
+      "intended_use": "Soft puff for cursed altars, rogue smokebomb, fog reveal.",
+      "placement": [
+        "fx.world",
+        "fx.ui"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "suggested": "Use as ParticleSystem Renderer texture, or animate via DOTween/Coroutine"
+      },
+      "tags": [
+        "particle",
+        "effect",
+        "smoke"
+      ]
+    },
+    {
+      "id": "particle_mana",
+      "path": "particles/particle_mana_4x.png",
+      "category": "effect",
+      "subcategory": "particle",
+      "name": "Mana particle",
+      "intended_use": "Blue wisp for mana spend, witch casting.",
+      "placement": [
+        "fx.world",
+        "fx.ui"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "suggested": "Use as ParticleSystem Renderer texture, or animate via DOTween/Coroutine"
+      },
+      "tags": [
+        "particle",
+        "effect",
+        "mana"
+      ]
+    },
+    {
+      "id": "particle_soul",
+      "path": "particles/particle_soul_4x.png",
+      "category": "effect",
+      "subcategory": "particle",
+      "name": "Soul particle",
+      "intended_use": "Purple soul orb for enemy death drop, banked souls.",
+      "placement": [
+        "fx.world",
+        "fx.ui"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "suggested": "Use as ParticleSystem Renderer texture, or animate via DOTween/Coroutine"
+      },
+      "tags": [
+        "particle",
+        "effect",
+        "soul"
+      ]
+    },
+    {
+      "id": "prop_pillar",
+      "path": "props/prop_pillar_4x.png",
+      "category": "world",
+      "subcategory": "prop",
+      "name": "Pillar",
+      "intended_use": "Cathedral pillar with lit window. Background prop for title screen and hub.",
+      "placement": [
+        "world.decor",
+        "menu.background"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "prop",
+        "world",
+        "pillar"
+      ]
+    },
+    {
+      "id": "prop_arch",
+      "path": "props/prop_arch_4x.png",
+      "category": "world",
+      "subcategory": "prop",
+      "name": "Arch",
+      "intended_use": "Stone archway. Use as doorway between rooms or pause-menu backdrop.",
+      "placement": [
+        "world.decor",
+        "menu.background"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "prop",
+        "world",
+        "arch"
+      ]
+    },
+    {
+      "id": "prop_tombstone",
+      "path": "props/prop_tombstone_4x.png",
+      "category": "world",
+      "subcategory": "prop",
+      "name": "Tombstone",
+      "intended_use": "Tombstone with cross. Use in cursed altars, codex of the fallen, run-summary screen.",
+      "placement": [
+        "world.decor",
+        "menu.background"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "prop",
+        "world",
+        "tombstone"
+      ]
+    },
+    {
+      "id": "prop_banner",
+      "path": "props/prop_banner_4x.png",
+      "category": "world",
+      "subcategory": "prop",
+      "name": "Banner",
+      "intended_use": "Hanging crest banner. Decorate menus, faction halls.",
+      "placement": [
+        "world.decor",
+        "menu.background"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "prop",
+        "world",
+        "banner"
+      ]
+    },
+    {
+      "id": "prop_lantern",
+      "path": "props/prop_lantern_4x.png",
+      "category": "world",
+      "subcategory": "prop",
+      "name": "Lantern",
+      "intended_use": "Wall lantern with flame. Place along corridors, hub.",
+      "placement": [
+        "world.decor",
+        "menu.background"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "prop",
+        "world",
+        "lantern"
+      ]
+    },
+    {
+      "id": "prop_tome",
+      "path": "props/prop_tome_4x.png",
+      "category": "world",
+      "subcategory": "prop",
+      "name": "Tome",
+      "intended_use": "Spellbook with sigil. Use in skill tree, codex screen, witch class.",
+      "placement": [
+        "world.decor",
+        "menu.background"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "prop",
+        "world",
+        "tome"
+      ]
+    },
+    {
+      "id": "prop_cauldron",
+      "path": "props/prop_cauldron_4x.png",
+      "category": "world",
+      "subcategory": "prop",
+      "name": "Cauldron",
+      "intended_use": "Bubbling green cauldron. Hub kitchen / brewing UI.",
+      "placement": [
+        "world.decor",
+        "menu.background"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "prop",
+        "world",
+        "cauldron"
+      ]
+    },
+    {
+      "id": "prop_crown",
+      "path": "props/prop_crown_4x.png",
+      "category": "world",
+      "subcategory": "prop",
+      "name": "Crown",
+      "intended_use": "Royal crown with ruby. Use for high-tier rewards, leaderboard.",
+      "placement": [
+        "world.decor",
+        "menu.background"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "prop",
+        "world",
+        "crown"
+      ]
+    },
+    {
+      "id": "iso_tile_shadow",
+      "path": "decor/iso_tile_shadow_64.png",
+      "category": "world",
+      "subcategory": "tile",
+      "name": "Iso floor tile · shadow",
+      "intended_use": "Isometric floor tile. Tile diagonally in 32×16-pixel grid.",
+      "placement": [
+        "world.floor"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "pivot": [
+          0.5,
+          0
+        ]
+      },
+      "tags": [
+        "tile",
+        "floor",
+        "isometric",
+        "shadow"
+      ]
+    },
+    {
+      "id": "iso_tile_wood",
+      "path": "decor/iso_tile_wood_64.png",
+      "category": "world",
+      "subcategory": "tile",
+      "name": "Iso floor tile · wood",
+      "intended_use": "Isometric floor tile. Tile diagonally in 32×16-pixel grid.",
+      "placement": [
+        "world.floor"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "pivot": [
+          0.5,
+          0
+        ]
+      },
+      "tags": [
+        "tile",
+        "floor",
+        "isometric",
+        "wood"
+      ]
+    },
+    {
+      "id": "iso_tile_leather",
+      "path": "decor/iso_tile_leather_64.png",
+      "category": "world",
+      "subcategory": "tile",
+      "name": "Iso floor tile · leather",
+      "intended_use": "Isometric floor tile. Tile diagonally in 32×16-pixel grid.",
+      "placement": [
+        "world.floor"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "pivot": [
+          0.5,
+          0
+        ]
+      },
+      "tags": [
+        "tile",
+        "floor",
+        "isometric",
+        "leather"
+      ]
+    },
+    {
+      "id": "iso_tile_moss",
+      "path": "decor/iso_tile_moss_64.png",
+      "category": "world",
+      "subcategory": "tile",
+      "name": "Iso floor tile · moss",
+      "intended_use": "Isometric floor tile. Tile diagonally in 32×16-pixel grid.",
+      "placement": [
+        "world.floor"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "pivot": [
+          0.5,
+          0
+        ]
+      },
+      "tags": [
+        "tile",
+        "floor",
+        "isometric",
+        "moss"
+      ]
+    },
+    {
+      "id": "iso_tile_iron",
+      "path": "decor/iso_tile_iron_64.png",
+      "category": "world",
+      "subcategory": "tile",
+      "name": "Iso floor tile · iron",
+      "intended_use": "Isometric floor tile. Tile diagonally in 32×16-pixel grid.",
+      "placement": [
+        "world.floor"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple",
+        "pivot": [
+          0.5,
+          0
+        ]
+      },
+      "tags": [
+        "tile",
+        "floor",
+        "isometric",
+        "iron"
+      ]
+    },
+    {
+      "id": "divider_256",
+      "path": "ornaments/divider_256.png",
+      "category": "ui",
+      "subcategory": "ornament",
+      "name": "Divider 256px",
+      "intended_use": "Horizontal bronze divider with center dot. Between menu sections.",
+      "placement": [
+        "menu.section_divider"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          16,
+          4,
+          16,
+          4
+        ]
+      },
+      "tags": [
+        "ornament",
+        "divider"
+      ]
+    },
+    {
+      "id": "divider_384",
+      "path": "ornaments/divider_384.png",
+      "category": "ui",
+      "subcategory": "ornament",
+      "name": "Divider 384px",
+      "intended_use": "Horizontal bronze divider with center dot. Between menu sections.",
+      "placement": [
+        "menu.section_divider"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Sliced",
+        "nine_slice_border_px": [
+          16,
+          4,
+          16,
+          4
+        ]
+      },
+      "tags": [
+        "ornament",
+        "divider"
+      ]
+    },
+    {
+      "id": "level_badge_1",
+      "path": "ornaments/level_badge_1.png",
+      "category": "ui",
+      "subcategory": "ornament",
+      "name": "Level badge · 1",
+      "intended_use": "Pre-baked level number sample. In production, draw the number with TextMeshPro on top of a blank badge bg.",
+      "placement": [
+        "hud.top_left_portrait"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "level",
+        "badge",
+        "ornament"
+      ]
+    },
+    {
+      "id": "level_badge_14",
+      "path": "ornaments/level_badge_14.png",
+      "category": "ui",
+      "subcategory": "ornament",
+      "name": "Level badge · 14",
+      "intended_use": "Pre-baked level number sample. In production, draw the number with TextMeshPro on top of a blank badge bg.",
+      "placement": [
+        "hud.top_left_portrait"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "level",
+        "badge",
+        "ornament"
+      ]
+    },
+    {
+      "id": "level_badge_99",
+      "path": "ornaments/level_badge_99.png",
+      "category": "ui",
+      "subcategory": "ornament",
+      "name": "Level badge · 99",
+      "intended_use": "Pre-baked level number sample. In production, draw the number with TextMeshPro on top of a blank badge bg.",
+      "placement": [
+        "hud.top_left_portrait"
+      ],
+      "unity": {
+        "texture_type": "Sprite (2D and UI)",
+        "pixels_per_unit": 32,
+        "filter_mode": "Point",
+        "compression": "None",
+        "image_type": "Simple"
+      },
+      "tags": [
+        "level",
+        "badge",
+        "ornament"
+      ]
+    }
+  ]
+}

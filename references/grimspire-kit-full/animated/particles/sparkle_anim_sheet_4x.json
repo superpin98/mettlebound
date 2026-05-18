@@ -1,0 +1,85 @@
+{
+  "name": "particle_sparkle_sheet",
+  "asset": "particle_sparkle",
+  "animation_concept": "Sparkle expands then contracts.",
+  "frame_count": 6,
+  "frame_width_px": 64,
+  "frame_height_px": 64,
+  "total_width_px": 384,
+  "total_height_px": 64,
+  "layout": "horizontal_strip",
+  "frame_positions": [
+    {
+      "index": 0,
+      "x": 0,
+      "y": 0,
+      "width": 64,
+      "height": 64
+    },
+    {
+      "index": 1,
+      "x": 64,
+      "y": 0,
+      "width": 64,
+      "height": 64
+    },
+    {
+      "index": 2,
+      "x": 128,
+      "y": 0,
+      "width": 64,
+      "height": 64
+    },
+    {
+      "index": 3,
+      "x": 192,
+      "y": 0,
+      "width": 64,
+      "height": 64
+    },
+    {
+      "index": 4,
+      "x": 256,
+      "y": 0,
+      "width": 64,
+      "height": 64
+    },
+    {
+      "index": 5,
+      "x": 320,
+      "y": 0,
+      "width": 64,
+      "height": 64
+    }
+  ],
+  "suggested_fps": 12,
+  "loop": true,
+  "pivot": {
+    "x": 0.5,
+    "y": 0.5
+  },
+  "unity_import": {
+    "texture_type": "Sprite (2D and UI)",
+    "sprite_mode": "Multiple",
+    "pixels_per_unit": 32,
+    "filter_mode": "Point",
+    "compression": "None",
+    "slice": {
+      "type": "Grid By Cell Count",
+      "columns": 6,
+      "rows": 1,
+      "cell_size": {
+        "width": 64,
+        "height": 64
+      },
+      "pivot": "Center"
+    },
+    "animation": {
+      "clip_name": "particle_sparkle_anim",
+      "samples": 12,
+      "loop_time": true,
+      "loop_pose": true
+    }
+  },
+  "claude_code_instructions": "In Unity for \"particle_sparkle\" — Sparkle expands then contracts.\n1. Import \"particle_sparkle_sheet.png\" — Texture Type: Sprite (2D and UI),\n   Sprite Mode: Multiple, Filter Mode: Point, Compression: None, PPU: 32.\n2. Sprite Editor → Slice → Grid By Cell Count → C: 6, R: 1 → Apply.\n3. Create Animator Controller \"particle_sparkle_anim.controller\".\n4. Drag all 6 sliced sprites onto Scene → auto Animation Clip;\n   Samples: 12, Loop Time: ON."
+}

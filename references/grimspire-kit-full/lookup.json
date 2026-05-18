@@ -1,0 +1,284 @@
+{
+  "version": "1.0",
+  "scale": 4,
+  "path_templates": {
+    "icon_static": "icons/<category>/<name>_4x.png",
+    "icon_rarity_static": "icons-rarity/<name>/<name>_<rarity>_4x.png",
+    "icon_animated": "animated/icons/<name>_anim_sheet_4x.png",
+    "icon_rarity_animated": "animated/rarity/<name>/<name>_<rarity>_sheet_4x.png",
+    "legendary_animated": "animated/legendary/<name>_sheet_4x.png",
+    "status_animated": "animated/status/<effect>_anim_sheet_4x.png",
+    "map_token_animated": "animated/map-tokens/<type>_current_anim_sheet_4x.png",
+    "map_token_static": "map-tokens/<type>_<state>_4x.png",
+    "skill_node_animated": "animated/skill-nodes/<branch>_<state>_anim_sheet_4x.png",
+    "skill_node_static": "skill-nodes/<branch>_<state>_4x.png",
+    "cursor_animated": "animated/cursors/<kind>_anim_sheet_4x.png",
+    "cursor_static": "cursors/cursor_<kind>_4x.png",
+    "particle_animated": "animated/particles/<kind>_anim_sheet_4x.png",
+    "panel": "panels/panel_<chrome>_<size>.png",
+    "slot": "slots/slot_<rarity>_<size>.png",
+    "bar_fill": "bars/bar_<kind>_fill_<WxH>.png",
+    "bar_frame": "bars/bar_frame_<WxH>.png",
+    "button": "buttons/btn_<kind>_<WxH>.png",
+    "portrait": "portraits/portrait_<class>_4x.png",
+    "prop": "props/prop_<name>_4x.png",
+    "tile": "decor/iso_tile_<material>_64.png"
+  },
+  "vocab": {
+    "rarity": [
+      "common",
+      "uncommon",
+      "rare",
+      "mythic",
+      "cursed",
+      "relic"
+    ],
+    "animated_rarity": [
+      "uncommon",
+      "rare",
+      "mythic",
+      "cursed",
+      "relic"
+    ],
+    "chrome": [
+      "bronze",
+      "iron",
+      "blood",
+      "bone"
+    ],
+    "panel_size": [
+      128,
+      192,
+      256,
+      384,
+      "512x192"
+    ],
+    "slot_size": [
+      48,
+      64,
+      96
+    ],
+    "bar_kind": [
+      "hp",
+      "stamina",
+      "mana",
+      "xp",
+      "shield"
+    ],
+    "button_kind": [
+      "default",
+      "primary",
+      "danger",
+      "ghost"
+    ],
+    "button_size": [
+      [
+        "160",
+        "40"
+      ],
+      [
+        "220",
+        "48"
+      ],
+      [
+        "280",
+        "56"
+      ]
+    ],
+    "char_class": [
+      "knight",
+      "witch",
+      "monk",
+      "rogue"
+    ],
+    "tile_material": [
+      "shadow",
+      "wood",
+      "leather",
+      "moss",
+      "iron"
+    ],
+    "status_effect": [
+      "fury",
+      "blessed",
+      "bleed",
+      "shielded",
+      "poison",
+      "burning",
+      "haste",
+      "chilled",
+      "cursed"
+    ],
+    "map_type": [
+      "start",
+      "combat",
+      "elite",
+      "event",
+      "shrine",
+      "shop",
+      "cursed",
+      "boss",
+      "rest",
+      "chest"
+    ],
+    "map_state": [
+      "normal",
+      "current",
+      "cleared"
+    ],
+    "skill_branch": [
+      "core",
+      "steel",
+      "penance",
+      "smoke",
+      "cursed"
+    ],
+    "skill_state": [
+      "locked",
+      "available",
+      "unlocked"
+    ],
+    "cursor_kind": [
+      "default",
+      "click",
+      "target"
+    ],
+    "particle_kind": [
+      "ember",
+      "sparkle",
+      "blood",
+      "smoke",
+      "mana",
+      "soul"
+    ],
+    "legendary_name": [
+      "dreadblade",
+      "reaperScythe",
+      "archonWand"
+    ],
+    "icon_name": [
+      "sword",
+      "greatsword",
+      "dagger",
+      "staff",
+      "axe",
+      "bow",
+      "shield",
+      "helm",
+      "boot",
+      "ring",
+      "amulet",
+      "cape",
+      "potion",
+      "flask",
+      "scroll",
+      "coin",
+      "gem",
+      "largegem",
+      "chest",
+      "key",
+      "skull",
+      "bones",
+      "eye",
+      "flame",
+      "heart",
+      "star",
+      "cross",
+      "ankh",
+      "arrow",
+      "lock"
+    ]
+  },
+  "unity_defaults": {
+    "texture_type": "Sprite (2D and UI)",
+    "pixels_per_unit": 32,
+    "pixels_per_unit_portraits_and_legendary": 48,
+    "filter_mode": "Point",
+    "compression": "None",
+    "panel_nine_slice_border_px": 24,
+    "animation_loop": true
+  },
+  "common_queries": [
+    {
+      "intent": "animated rare sword",
+      "path": "animated/rarity/sword/sword_rare_sheet_4x.png"
+    },
+    {
+      "intent": "animated mythic sword",
+      "path": "animated/rarity/sword/sword_mythic_sheet_4x.png"
+    },
+    {
+      "intent": "animated relic sword",
+      "path": "animated/rarity/sword/sword_relic_sheet_4x.png"
+    },
+    {
+      "intent": "animated cursed sword",
+      "path": "animated/rarity/sword/sword_cursed_sheet_4x.png"
+    },
+    {
+      "intent": "legendary greatsword",
+      "path": "animated/legendary/dreadblade_sheet_4x.png"
+    },
+    {
+      "intent": "legendary scythe",
+      "path": "animated/legendary/reaperScythe_sheet_4x.png"
+    },
+    {
+      "intent": "legendary wand",
+      "path": "animated/legendary/archonWand_sheet_4x.png"
+    },
+    {
+      "intent": "HP bar fill (HUD)",
+      "path": "bars/bar_hp_fill_256x16.png"
+    },
+    {
+      "intent": "boss bar",
+      "path": "bars/boss_bar_480x32.png"
+    },
+    {
+      "intent": "inventory panel",
+      "path": "panels/panel_bronze_256.png"
+    },
+    {
+      "intent": "mythic slot frame",
+      "path": "slots/slot_mythic_64.png"
+    },
+    {
+      "intent": "primary button",
+      "path": "buttons/btn_primary_220x48.png"
+    },
+    {
+      "intent": "fury buff badge",
+      "path": "animated/status/fury_anim_sheet_4x.png"
+    },
+    {
+      "intent": "bleed DoT badge",
+      "path": "animated/status/bleed_anim_sheet_4x.png"
+    },
+    {
+      "intent": "combat map node",
+      "path": "animated/map-tokens/combat_current_anim_sheet_4x.png"
+    },
+    {
+      "intent": "boss map node",
+      "path": "animated/map-tokens/boss_current_anim_sheet_4x.png"
+    },
+    {
+      "intent": "ember particle",
+      "path": "animated/particles/ember_anim_sheet_4x.png"
+    },
+    {
+      "intent": "soul orb particle",
+      "path": "animated/particles/soul_anim_sheet_4x.png"
+    },
+    {
+      "intent": "knight portrait",
+      "path": "portraits/portrait_knight_4x.png"
+    },
+    {
+      "intent": "target crosshair cursor",
+      "path": "animated/cursors/target_anim_sheet_4x.png"
+    }
+  ],
+  "note_for_ai": "To resolve a user query to a path, follow these steps:\n1. Identify whether the asset is ANIMATED (motion, glow, pulse, sparkle) or STATIC.\n2. Identify the category (icon / status / map / skill / cursor / particle / chrome).\n3. Identify the rarity if mentioned (default: common = no rarity suffix).\n4. Build the path from path_templates above, substituting vocab values.\n5. Confirm by listing files in that directory if uncertain.\nEach animated PNG has a sibling .json sidecar with frame_count, fps, pivot,\nand detailed Unity slice + Animator instructions."
+}

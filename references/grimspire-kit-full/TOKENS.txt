@@ -1,0 +1,47 @@
+# GRIMSPIRE — Design Tokens
+# Copy these into Unity (ScriptableObject, TextMeshPro style sheet, etc.)
+
+## Outline
+universal_outline    #0a0510
+
+## Materials (dark / base / mid / light)
+steel      #2a2c3a  #5a5e72  #8c92a8  #d0d6e4
+iron       #1c1d28  #3a3d4c  #5e6378  #8e94aa
+wood       #3a200f  #6a3e1c  #9e6532  #c8884c
+woodDark   #1c0e07  #3a1e0e  #5a3a1e  #7a4e2a
+leather    #2a1408  #5a3a1e  #8a6038  #b08858
+gold       #6a4818  #a87a30  #d4a04a  #f4dc92
+bronze     #5a3818  #8a5e28  #b88c4a  #dcbc6c
+red        #3a0a16  #7a1a2a  #c43a3a  #ec8a7a
+blood      #1c0408  #3e0810  #6a1420  #962030
+blue       #1a2c4a  #3a5e8a  #5a8acb  #a8c6ec
+cyan       #0e2c3a  #1e5670  #3a96b8  #7ed0e8
+green      #1a3a0e  #3a6a1e  #6a9a3a  #a6cc5e
+moss       #283a1a  #48662a  #6b8a4a  #a4c468
+bone       #5e4a36  #9a8266  #cabd9a  #f0e6c8
+cloth      #1a0a28  #321a4a  #5a2e88  #8a52c8
+purple     #3a1850  #6a2eaa  #9a52d8  #caa0f0
+ember      #5a1c0a  #a83c14  #e8743a  #ffb478
+parchment  #6a5a36  #a89058  #d4bc7e  #f4e2a6
+shadow     #080612  #1a1228  #2a1845  #3e2a60
+flesh      #3a1e1a  #6a3a30  #a06850  #c89878
+
+## Rarity (dark / base / mid / light)
+common     #2a2c3a  #5a5e72  #8c92a8  #d0d6e4
+uncommon   #1e3a1a  #3a6a2e  #6a9a4a  #a8cc6c
+rare       #1a2c4a  #3a5e9a  #5a8acb  #9cc0ec
+mythic     #3a1850  #6a2eaa  #a052d8  #d2a0f0
+cursed     #3a0a16  #6a1422  #c43a3a  #ec7878
+relic      #6a4818  #a87a30  #d4a04a  #f4dc92
+
+## Type
+display    Jacquard 24       (Google Fonts)
+pixel UI   Pixelify Sans     (Google Fonts)
+body       Spectral          (Google Fonts)
+mono       JetBrains Mono
+
+## Recommended Unity import
+Pixels Per Unit:  32
+Filter Mode:      Point
+Compression:      None
+9-slice border:   24px on all sides (panels)
