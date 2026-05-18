@@ -58,6 +58,9 @@ Dev:
 - **UI mínima** = HTML overlay simple. Babylon GUI compleja se pospone al Sprint 8.
 - **EventBus** (mitt) para desacoplar `game/` de `ui/`. El game core nunca 
   llama directamente a la UI.
+- **Dirección visual**: 3D low poly + UI 2D estilizada (estilo Hades/Slay the 
+  Spire). Referencias en `references/visual-style-refs/`. Documentación 
+  completa en `docs/10_UI_UX.md`.
 
 ## 🐛 Bugs/cuidados conocidos
 
