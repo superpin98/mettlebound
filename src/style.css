@@ -1,0 +1,25 @@
+/* Reset mínimo — el juego ocupa toda la ventana */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0d0d14;
+}
+
+/* El canvas de Babylon ocupa toda la pantalla */
+#renderCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* Evita el scroll táctil accidental en móviles */
+  touch-action: none;
+}
