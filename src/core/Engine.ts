@@ -2,13 +2,11 @@
 import {
   Engine as BabylonEngine,
   Scene,
-  ArcRotateCamera,
   HemisphericLight,
-  MeshBuilder,
+  DirectionalLight,
   Vector3,
   Color4,
   Color3,
-  StandardMaterial,
 } from '@babylonjs/core';
 
 // Imports internos
@@ -17,9 +15,9 @@ import { logger } from '@/core/Logger';
 // ============================================================
 // Engine — wrapper de BABYLON.Engine y BABYLON.Scene.
 //
-// Responsabilidad única: inicializar el motor de renderizado
-// y exponer la escena para que otros sistemas la usen.
-// Durante el Sprint 0 también crea el cubo de prueba.
+// Responsabilidad única: inicializar el motor de renderizado,
+// la escena base y la iluminación global. Los sistemas de
+// cámara, personaje e input viven en sus propias clases.
 // ============================================================
 
 export class Engine {
@@ -32,12 +30,9 @@ export class Engine {
     this._engine = new BabylonEngine(canvas, /* antialias */ true);
     this._scene = this._createScene();
 
-    this._setupCamera(canvas);
     this._setupLight();
-    this._setupSpinningCube();
     this._startRenderLoop();
 
-    // Redimensionar el canvas cuando cambie el tamaño de la ventana
     window.addEventListener('resize', () => {
       this._engine.resize();
     });
@@ -45,67 +40,50 @@ export class Engine {
     logger.info('Engine: listo');
   }
 
-  // Devuelve la escena activa (otros sistemas la usarán en sprints futuros)
+  // Expone la escena para que otros sistemas añadan meshes y callbacks
   get scene(): Scene {
     return this._scene;
   }
 
+  // Expone el motor de Babylon (útil para getDeltaTime en los controllers)
+  get babylonEngine(): BabylonEngine {
+    return this._engine;
+  }
+
   // ——————————————————————————————————————————
-  // Métodos privados de configuración
+  // Métodos privados
   // ——————————————————————————————————————————
 
   private _createScene(): Scene {
     const scene = new Scene(this._engine);
-    // Fondo oscuro azulado — coherente con la estética de mazmorra
+    // Fondo oscuro azulado — estética de mazmorra
     scene.clearColor = new Color4(0.05, 0.05, 0.1, 1.0);
     return scene;
   }
 
-  private _setupCamera(canvas: HTMLCanvasElement): void {
-    // ArcRotateCamera: cámara orbital que rodea un punto central.
-    // Ángulos en radianes: alpha = rotación horizontal, beta = ángulo vertical.
-    const camera = new ArcRotateCamera(
-      'mainCamera',
-      -Math.PI / 2,  // alpha: mirando desde delante
-      Math.PI / 3,   // beta: ligeramente desde arriba
-      5,             // radio: distancia al objetivo
-      Vector3.Zero(),
-      this._scene
-    );
-    // Permite arrastrar con el ratón para orbitar la cámara
-    camera.attachControl(canvas, /* preventDefault */ true);
-  }
-
   private _setupLight(): void {
-    // HemisphericLight: luz ambiente que ilumina desde arriba.
-    // Suficiente para ver el cubo sin sombras complejas.
-    const light = new HemisphericLight(
+    // — Luz hemisférica: luz ambiente omnidireccional —
+    // Ilumina todo uniformemente según la normal de cada superficie.
+    // Se mantiene aquí hasta que tengamos iluminación por sala en sprints futuros.
+    const hemi = new HemisphericLight(
       'ambientLight',
       new Vector3(0, 1, 0),
       this._scene
     );
-    light.intensity = 0.9;
-    light.diffuse = new Color3(0.9, 0.85, 1.0);   // tono frío ligeramente violáceo
-    light.groundColor = new Color3(0.2, 0.1, 0.3); // reflejo desde abajo oscuro
-  }
+    hemi.intensity = 0.85;
+    hemi.diffuse = new Color3(0.9, 0.85, 1.0);       // tono frío violáceo
+    hemi.groundColor = new Color3(0.165, 0.145, 0.19); // #2a2530 — cálido oscuro desde abajo
 
-  private _setupSpinningCube(): void {
-    // Cubo de prueba — se eliminará en Sprint 1 al sustituirlo por el personaje
-    const cube = MeshBuilder.CreateBox('testCube', { size: 1.2 }, this._scene);
-
-    // Material de color sólido para que se vea el shading de la luz
-    const material = new StandardMaterial('cubeMaterial', this._scene);
-    material.diffuseColor = new Color3(0.5, 0.2, 0.8);  // morado Mettlebound
-    material.specularColor = new Color3(0.3, 0.1, 0.5);
-    cube.material = material;
-
-    // Rotación en el render loop: 0.01 rad/frame ≈ 0.6°/frame ≈ 36°/s a 60fps
-    this._scene.registerBeforeRender(() => {
-      cube.rotation.y += 0.01;
-      cube.rotation.x += 0.005;
-    });
-
-    logger.debug('Engine: cubo de prueba creado', { mesh: cube.name });
+    // — Luz direccional: da sombreado volumétrico a la cápsula —
+    // Llega desde arriba-frente para que se note la rotación del personaje.
+    // Dirección normalizada: (-0.5, -1, -0.5) → Vector3 normalizado.
+    const dir = new DirectionalLight(
+      'sunLight',
+      new Vector3(-0.5, -1, -0.5).normalize(),
+      this._scene
+    );
+    dir.intensity = 0.5;
+    dir.diffuse = new Color3(0.95, 0.9, 1.0); // blanco ligeramente frío
   }
 
   private _startRenderLoop(): void {
