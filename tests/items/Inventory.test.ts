@@ -46,7 +46,7 @@ describe('Inventory -- items de inicio por clase', () => {
     expect(inv.getSnapshot().equipped.weapon?.baseId).toBe('sword_long_notched');
   });
 
-  it('Cazador empieza con bow_short_forest equipado en slot weapon', () => {
+  it('Cazadora empieza con bow_short_forest equipado en slot weapon', () => {
     const inv = new Inventory('cazador');
     expect(inv.getSnapshot().equipped.weapon?.baseId).toBe('bow_short_forest');
   });

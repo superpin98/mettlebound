@@ -2,125 +2,248 @@
 import {
   Scene,
   MeshBuilder,
-  StandardMaterial,
-  Color3,
   Vector3,
   Quaternion,
 } from '@babylonjs/core';
-import type { Mesh, ArcRotateCamera } from '@babylonjs/core';
-import { GridMaterial } from '@babylonjs/materials/grid';
+import type { Mesh, ArcRotateCamera, AnimationGroup } from '@babylonjs/core';
 
 // Imports internos
 import type { InputManager } from '@/core/InputManager';
+import type { AssetManager, AssetInstance } from '@/core/AssetManager';
+import type { ClassId } from '@/types/game.types';
+import { getClassById, isBodyPart } from '@/config/classes.config';
 import { logger } from '@/core/Logger';
 
 // ============================================================
-// Constantes de configuración
+// Constantes de configuracion
 // ============================================================
 
 // Unidades Babylon por segundo
 const PLAYER_SPEED = 5;
 
-// Factor de interpolación para la rotación suave (0-1, más bajo = más suave)
+// Factor de interpolacion para la rotacion suave (0-1, mas bajo = mas suave)
 const ROTATION_LERP = 0.12;
 
-// Dimensiones de la cápsula placeholder
-const CAPSULE_HEIGHT = 2;
-const CAPSULE_RADIUS = 0.4;
+// Altura del pivot sobre el suelo.
+// y=1 ~= cintura del personaje (KayKit mide ~2 u de alto).
+// La camara orbita alrededor del pivot, asi se apunta a la cintura, no a los pies.
+const PIVOT_HEIGHT = 1;
 
-// Tamaño del suelo en unidades de juego
-const GROUND_SIZE = 50;
+// Offset del modelo respecto al pivot para que los pies toquen y=0.
+// pivot.y = 1, modelo.y_local = -1 -> modelo.y_world = 0 (suelo).
+const MODEL_Y_OFFSET = -1;
+
+// URL base de los modelos de personaje
+const CHAR_BASE_URL = '/assets/models/characters/';
 
 // ============================================================
-// PlayerController — mueve el personaje con WASD.
+// PlayerController -- controla el personaje con WASD.
 //
 // Responsabilidades:
-//   - Crear la cápsula placeholder y el suelo con grid
-//   - Calcular el movimiento relativo a la dirección de cámara
-//   - Rotar suavemente el personaje hacia donde camina
+//   - Mantener un pivot invisible que la camara sigue desde el arranque
+//   - Cargar el modelo 3D de la clase elegida como hijo del pivot
+//   - Calcular el movimiento relativo a la direccion de camara
+//   - Rotar el pivot (y el modelo hijo) hacia donde camina el jugador
+//   - Gestionar el swap de animaciones Idle <-> Walking_A
 //
-// La cámara se inyecta después de la construcción con setCamera()
-// porque CameraController necesita el mesh del personaje para
-// crearse, generando una dependencia circular de construcción.
+// Bootstrap: el constructor es SINCRONO (crea el pivot inmediatamente
+// para que CameraController tenga target). loadModel() es async y se
+// llama en main.ts despues de que el jugador elige su clase.
 // ============================================================
 
 export class PlayerController {
-  private readonly _mesh: Mesh;
+  private readonly _pivot: Mesh;
   private readonly _input: InputManager;
+  private readonly _assetManager: AssetManager;
   private _camera: ArcRotateCamera | null = null;
 
-  constructor(scene: Scene, input: InputManager) {
+  // Instancia 3D activa. Null hasta que loadModel() resuelva.
+  private _currentInstance: AssetInstance | null = null;
+
+  // Animation groups de la instancia activa
+  private _idleAnim: AnimationGroup | null = null;
+  private _walkAnim: AnimationGroup | null = null;
+
+  // Evita re-lanzar el swap de animacion en cada frame
+  private _isWalking = false;
+
+  constructor(scene: Scene, input: InputManager, assetManager: AssetManager) {
     this._input = input;
+    this._assetManager = assetManager;
 
-    this._mesh = this._createCapsule(scene);
-    this._createGround(scene);
+    this._pivot = this._createPivot(scene);
 
-    // Registrar la actualización en el render loop
     scene.registerBeforeRender(() => {
       const deltaTime = scene.getEngine().getDeltaTime() / 1000;
       this._update(deltaTime);
     });
 
-    logger.info('PlayerController: personaje creado en', { position: this._mesh.position });
+    logger.info('PlayerController: pivot creado', { position: this._pivot.position });
   }
 
+  // ——————————————————————————————————————————
+  // API publica
+  // ——————————————————————————————————————————
+
   /**
-   * Referencia al mesh del personaje. CameraController la usa como objetivo.
+   * Mesh que la camara sigue. Es el pivot invisible.
+   * El modelo 3D visible es hijo del pivot, no es este mesh.
+   * Se mantiene este getter para no romper CameraController ni main.ts.
    */
   get mesh(): Mesh {
-    return this._mesh;
+    return this._pivot;
   }
 
   /**
-   * Inyecta la cámara después de que CameraController la haya creado.
-   * Sin cámara, el personaje no se puede mover (el movimiento es relativo a ella).
+   * Inyecta la camara tras crear CameraController.
+   * Sin camara el personaje no puede moverse.
    */
   setCamera(camera: ArcRotateCamera): void {
     this._camera = camera;
-    logger.debug('PlayerController: cámara inyectada');
+    logger.debug('PlayerController: camara inyectada');
+  }
+
+  /**
+   * Carga el modelo 3D de la clase indicada y lo instancia en escena.
+   * Si ya habia un modelo, lo dispone antes de cargar el nuevo.
+   * Tras cargar, inicia la animacion Idle en loop automaticamente.
+   *
+   * La escena no se pasa como parametro porque AssetManager ya la
+   * tiene almacenada desde su constructor.
+   */
+  async loadModel(classId: ClassId): Promise<void> {
+    // Liberar el modelo anterior (cambio de clase en caliente)
+    if (this._currentInstance !== null) {
+      this._idleAnim = null;
+      this._walkAnim = null;
+      this._isWalking = false;
+      this._currentInstance.dispose();
+      this._currentInstance = null;
+      logger.debug('PlayerController: modelo anterior liberado');
+    }
+
+    const classDef = getClassById(classId);
+    const filename = classDef.modelAssetId;
+
+    if (!filename) {
+      logger.warn('PlayerController: clase sin modelAssetId', { classId });
+      return;
+    }
+
+    logger.info('PlayerController: cargando modelo', { classId, filename });
+
+    const container = await this._assetManager.loadAsset(CHAR_BASE_URL, filename);
+
+    // Neutralizar luces que el loader GLTF pudo haber extraido del GLB al container.
+    // Sin esto, cada loadModel() de un modelo nuevo acumula luces extra en la escena.
+    if (container.lights.length > 0) {
+      logger.debug('PlayerController: luces embebidas en GLB eliminadas', {
+        count: container.lights.length,
+        names: container.lights.map((l) => l.name),
+      });
+      container.lights.forEach((l) => l.dispose());
+    }
+
+    const instance = this._assetManager.instantiate(container);
+
+    // Anclar modelo al pivot: hereda posicion, rotacion y escala del pivot
+    instance.rootNode.parent = this._pivot;
+
+    // Bajar el modelo para que los pies queden a y=0 en world space
+    // (pivot esta a PIVOT_HEIGHT=1, asi que offset local = MODEL_Y_OFFSET=-1)
+    instance.rootNode.position = new Vector3(0, MODEL_Y_OFFSET, 0);
+
+    this._currentInstance = instance;
+
+    // Ocultar armas/accesorios que no corresponden a esta clase
+    this._applyAttachmentVisibility(instance, classId);
+
+    // Diagnostico: loguear grupos para confirmar sufijos de instancia
+    logger.debug('PlayerController: animationGroups detectados', {
+      count: instance.animationGroups.length,
+      names: instance.animationGroups.map((g) => g.name),
+    });
+
+    // instantiateModelsToScene aplica el nameFn tambien a los AnimationGroups,
+    // convirtiendo 'Idle' -> 'Idle_inst1', 'Walking_A' -> 'Walking_A_inst1', etc.
+    // Buscamos ignorando el sufijo _instN, igual que _applyAttachmentVisibility con meshes.
+    const findAnim = (baseName: string): AnimationGroup | null =>
+      instance.animationGroups.find(
+        (g) => g.name.replace(/_inst\d+$/, '') === baseName
+      ) ?? null;
+
+    this._idleAnim = findAnim('Idle');
+    this._walkAnim = findAnim('Walking_A');
+
+    if (!this._idleAnim) {
+      logger.warn('PlayerController: animacion Idle no encontrada', { filename });
+    }
+
+    // Arrancar Idle en loop como estado por defecto
+    this._idleAnim?.start(
+      /* loop     */ true,
+      /* speed    */ 1.0,
+      /* from     */ this._idleAnim.from,
+      /* to       */ this._idleAnim.to,
+      /* additive */ false
+    );
+
+    logger.info('PlayerController: modelo listo', { classId });
   }
 
   // ——————————————————————————————————————————
-  // Actualización por frame
+  // Actualizacion por frame
   // ——————————————————————————————————————————
 
   private _update(deltaTime: number): void {
-    // Esperar a que la cámara esté disponible
     if (!this._camera) { return; }
 
     const moveDir = this._computeMoveDirection(this._camera);
+    const isMovingNow = moveDir.lengthSquared() > 0.001;
 
-    if (moveDir.lengthSquared() < 0.001) { return; }
+    // Swap de animacion -- solo se ejecuta cuando cambia el estado
+    if (isMovingNow && !this._isWalking) {
+      this._idleAnim?.stop();
+      this._walkAnim?.start(
+        true, 1.0,
+        this._walkAnim.from,
+        this._walkAnim.to,
+        false
+      );
+      this._isWalking = true;
+    } else if (!isMovingNow && this._isWalking) {
+      this._walkAnim?.stop();
+      this._idleAnim?.start(
+        true, 1.0,
+        this._idleAnim.from,
+        this._idleAnim.to,
+        false
+      );
+      this._isWalking = false;
+    }
 
-    // Aplicar movimiento (frame-rate independiente)
+    if (!isMovingNow) { return; }
+
+    // Mover el pivot en el plano horizontal (frame-rate independiente)
     const displacement = moveDir.scale(PLAYER_SPEED * deltaTime);
-    this._mesh.position.addInPlace(displacement);
+    this._pivot.position.addInPlace(displacement);
 
-    // Rotar el personaje para que mire hacia donde se mueve
+    // Rotar el pivot hacia la direccion de movimiento
     this._applyRotation(moveDir);
   }
 
   /**
-   * Calcula el vector de movimiento en world space a partir del input y la cámara.
-   *
-   * Ahora que CameraController usa setTarget() directo (sin lerp), la orientación
-   * de la cámara es completamente estable durante el movimiento del personaje.
-   * getDirection(Forward) devuelve el mismo forward cada frame → strafe recto.
-   *
-   * El resultado está en world space y se aplica directamente sobre mesh.position
-   * (no con mesh.translate en local space, que rotaría la dirección con el mesh).
+   * Calcula el vector de movimiento en world space a partir del input y la camara.
+   * El resultado esta normalizado (diagonal no es mas rapida que recta).
    */
   private _computeMoveDirection(camera: ArcRotateCamera): Vector3 {
-    // Forward de la cámara en world space, proyectado al plano horizontal
     const camForward = camera.getDirection(Vector3.Forward());
     camForward.y = 0;
     if (camForward.lengthSquared() < 0.001) { return Vector3.Zero(); }
     camForward.normalize();
 
-    // Derecha de la cámara: Cross(Up, forward) en sistema zurdo de Babylon
     const camRight = Vector3.Cross(Vector3.Up(), camForward).normalize();
 
-    // Acumular dirección por tecla (addInPlace no muta camForward/camRight)
     const direction = Vector3.Zero();
     if (this._input.isKeyDown('KeyW')) { direction.addInPlace(camForward); }
     if (this._input.isKeyDown('KeyS')) { direction.addInPlace(camForward.negate()); }
@@ -128,71 +251,83 @@ export class PlayerController {
     if (this._input.isKeyDown('KeyA')) { direction.addInPlace(camRight.negate()); }
 
     if (direction.lengthSquared() < 0.001) { return Vector3.Zero(); }
-
-    // Normalizar para que diagonal no sea más rápido que recto
     return direction.normalize();
   }
 
   /**
-   * Rota el mesh hacia la dirección de movimiento mediante Quaternion.Slerp.
-   * Esto evita el problema de wrap-around de ángulos que tendría un lerp simple.
+   * Rota el pivot (y el modelo hijo) hacia la direccion de movimiento
+   * mediante Quaternion.Slerp para evitar wrap-around de angulos.
    */
   private _applyRotation(moveDir: Vector3): void {
-    // Ángulo en Y que apunta hacia la dirección de movimiento
     const targetAngle = Math.atan2(moveDir.x, moveDir.z);
     const targetQuat = Quaternion.RotationAxis(Vector3.Up(), targetAngle);
 
-    // Inicializar rotationQuaternion si el mesh solo tiene rotation (Euler)
-    if (!this._mesh.rotationQuaternion) {
-      this._mesh.rotationQuaternion = Quaternion.Identity();
+    if (!this._pivot.rotationQuaternion) {
+      this._pivot.rotationQuaternion = Quaternion.Identity();
     }
 
-    this._mesh.rotationQuaternion = Quaternion.Slerp(
-      this._mesh.rotationQuaternion,
+    this._pivot.rotationQuaternion = Quaternion.Slerp(
+      this._pivot.rotationQuaternion,
       targetQuat,
       ROTATION_LERP
     );
   }
 
   // ——————————————————————————————————————————
-  // Creación de meshes de escena
+  // Creacion del pivot
   // ——————————————————————————————————————————
 
-  private _createCapsule(scene: Scene): Mesh {
-    const capsule = MeshBuilder.CreateCapsule(
-      'player',
-      { height: CAPSULE_HEIGHT, radius: CAPSULE_RADIUS },
-      scene
-    );
-
-    // Y=1: la mitad de la altura, así el fondo de la cápsula queda exactamente en Y=0
-    capsule.position = new Vector3(0, CAPSULE_HEIGHT / 2, 0);
-
-    const material = new StandardMaterial('playerMaterial', scene);
-    material.diffuseColor = new Color3(0.5, 0.2, 0.8);   // morado Mettlebound
-    material.specularColor = new Color3(0.3, 0.1, 0.5);
-    capsule.material = material;
-
-    return capsule;
+  /**
+   * Crea un Mesh invisible de tamano infimo.
+   * Usamos Mesh (no TransformNode) porque rotationQuaternion
+   * es necesario para el Slerp de rotacion y es mas estable en Mesh.
+   */
+  private _createPivot(scene: Scene): Mesh {
+    const pivot = MeshBuilder.CreateBox('playerPivot', { size: 0.001 }, scene);
+    pivot.isVisible = false;
+    pivot.isPickable = false;
+    pivot.position = new Vector3(0, PIVOT_HEIGHT, 0);
+    return pivot;
   }
 
-  private _createGround(scene: Scene): void {
-    const ground = MeshBuilder.CreateGround(
-      'ground',
-      { width: GROUND_SIZE, height: GROUND_SIZE, subdivisions: 1 },
-      scene
-    );
+  // ——————————————————————————————————————————
+  // Visibilidad de armas y accesorios
+  // ——————————————————————————————————————————
 
-    const gridMaterial = new GridMaterial('groundMaterial', scene);
-    gridMaterial.gridRatio = 1;
-    gridMaterial.majorUnitFrequency = 5;
-    gridMaterial.minorUnitVisibility = 0.4;
-    gridMaterial.mainColor = new Color3(0.05, 0.06, 0.09);
-    gridMaterial.lineColor = new Color3(0.23, 0.25, 0.33);
-    gridMaterial.opacity = 1;
-    gridMaterial.backFaceCulling = false;
+  /**
+   * Muestra solo los nodos de arma/accesorio permitidos por la clase.
+   *
+   * Reglas:
+   *   1. Si el nodo es una parte del cuerpo (isBodyPart) -> siempre visible.
+   *   2. Si el nombre base (sin sufijo _instN) coincide exactamente con
+   *      alguna entrada de la whitelist, o empieza por "entrada." (variantes
+   *      Blender tipo Knife.001), se muestra.
+   *   3. El resto se oculta con setEnabled(false).
+   *
+   * Usamos getChildMeshes(false) en lugar de getDescendants() para evitar
+   * tocar los TransformNodes del esqueleto, que romperian las animaciones.
+   */
+  private _applyAttachmentVisibility(instance: AssetInstance, classId: ClassId): void {
+    const whitelist = getClassById(classId).visibleAttachments ?? [];
+    const allMeshes = instance.rootNode.getChildMeshes(false);
 
-    ground.material = gridMaterial;
+    for (const mesh of allMeshes) {
+      // Quitar sufijo _instN que anade instantiateModelsToScene
+      const baseName = mesh.name.replace(/_inst\d+$/, '');
+
+      // Las partes del cuerpo nunca se tocan
+      if (isBodyPart(baseName)) { continue; }
+
+      // Mostrar si el nombre base coincide (exacto o con sufijo ".NNN" de Blender)
+      const shouldShow = whitelist.some(
+        (w) => baseName === w || baseName.startsWith(w + '.'),
+      );
+      mesh.setEnabled(shouldShow);
+    }
+
+    logger.debug('PlayerController: visibilidad de attachments aplicada', {
+      classId,
+      whitelist,
+    });
   }
-
 }

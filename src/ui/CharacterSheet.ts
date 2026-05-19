@@ -19,11 +19,7 @@ import type { PlayerStats } from '@/game/player/PlayerStats';
 import type { Inventory } from '@/game/items/Inventory';
 import { getActiveSetBonuses } from '@/game/items/SetBonuses';
 import { xpProgressInCurrentLevel } from '@/game/progression/XPSystem';
-
-const CLASS_NAMES: Record<string, string> = {
-  guerrero: 'Guerrero', cazador: 'Cazador', mago: 'Mago',
-  picaro: 'Picaro', errante: 'Errante',
-};
+import { getClassById } from '@/config/classes.config';
 
 // Stats ofensivos, defensivos y de utilidad de la Zona 2
 const OFFENSIVE_STATS: Array<{ key: keyof DerivedStats; label: string; isPercent?: boolean }> = [
@@ -135,7 +131,7 @@ export class CharacterSheet {
   // --- Zona 1: clase, nivel, stats base ------------------------------------
 
   private buildZone1(snap: PlayerSnapshot): string {
-    const className    = CLASS_NAMES[snap.classId] ?? snap.classId;
+    const className    = getClassById(snap.classId).name;
     const xpProgress   = xpProgressInCurrentLevel(snap.xp, snap.level);
     const xpPct        = xpProgress.needed > 0
       ? Math.round((xpProgress.current / xpProgress.needed) * 100)

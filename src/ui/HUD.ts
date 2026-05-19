@@ -1,18 +1,19 @@
 /**
- * HUD — cabecera de interfaz en juego (HTML overlay).
+ * HUD -- cabecera de interfaz en juego (HTML overlay).
  *
  * Muestra: nombre de clase, nivel, barra de XP, barras de HP/MP,
  * los 4 stats primarios con sus derivados, y controles de debug.
  *
- * Se construye una sola vez y se actualiza vía updateFromSnapshot()
+ * Se construye una sola vez y se actualiza via updateFromSnapshot()
  * cada vez que el EventBus emite 'player:stats-changed'.
  *
- * Sin dependencia directa de Babylon.js — es HTML puro sobre el canvas.
+ * Sin dependencia directa de Babylon.js -- es HTML puro sobre el canvas.
  */
 
 import { eventBus } from '@/core/EventBus';
 import { xpProgressInCurrentLevel } from '@/game/progression/XPSystem';
 import type { PlayerSnapshot } from '@/types/game.types';
+import { getClassById } from '@/config/classes.config';
 
 export class HUD {
   private container: HTMLElement;
@@ -41,8 +42,8 @@ export class HUD {
     const corner = document.getElementById('ui-corner') ?? document.body;
     corner.appendChild(this.container);
 
-    // Pintar estado inicial si se pasa snapshot (evita HUD vacío cuando
-    // el EventBus ya emitió player:stats-changed antes de que HUD existiera).
+    // Pintar estado inicial si se pasa snapshot (evita HUD vacio cuando
+    // el EventBus ya emitio player:stats-changed antes de que HUD existiera).
     if (initialSnapshot) {
       this.updateFromSnapshot(initialSnapshot);
     }
@@ -53,7 +54,7 @@ export class HUD {
     });
   }
 
-  // ─── Construcción del DOM ────────────────────────────────────────────────
+  // ─── Construccion del DOM ────────────────────────────────────────────────
 
   private buildDOM(): HTMLElement {
     const el = document.createElement('div');
@@ -143,18 +144,10 @@ export class HUD {
     return el;
   }
 
-  // ─── Actualización ───────────────────────────────────────────────────────
+  // ─── Actualizacion ───────────────────────────────────────────────────────
 
   updateFromSnapshot(s: PlayerSnapshot): void {
-    const CLASS_NAMES: Record<string, string> = {
-      guerrero: 'Guerrero',
-      cazador: 'Cazador',
-      mago: 'Mago',
-      picaro: 'Pícaro',
-      errante: 'Errante',
-    };
-
-    this.elClassName.textContent = CLASS_NAMES[s.classId] ?? s.classId;
+    this.elClassName.textContent = getClassById(s.classId).name;
     this.elLevel.textContent = `Nv. ${s.level}`;
 
     // Badge de puntos pendientes

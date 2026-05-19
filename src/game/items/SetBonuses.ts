@@ -1,7 +1,7 @@
 /**
  * Calculo de bonus de conjuntos (sets) activos.
  * Funciones puras: dado el equipamiento, devuelve los bonos activos.
- * Sin efectos secundarios — solo leer y calcular.
+ * Sin efectos secundarios - solo leer y calcular.
  */
 
 import type { EquippedItems, SetBonus } from '@/types/items.types';

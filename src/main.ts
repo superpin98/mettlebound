@@ -2,10 +2,12 @@
 import { Engine } from '@/core/Engine';
 import { InputManager } from '@/core/InputManager';
 import { CameraController } from '@/core/CameraController';
+import { AssetManager } from '@/core/AssetManager';
 import { PlayerController } from '@/game/player/PlayerController';
 import { PlayerStats } from '@/game/player/PlayerStats';
 import { Inventory } from '@/game/items/Inventory';
 import { generateItemOfRarity } from '@/game/items/ItemGenerator';
+import { TestRoom } from '@/game/world/TestRoom';
 import { HUD } from '@/ui/HUD';
 import { LevelUpModal } from '@/ui/LevelUpModal';
 import { ClassSelectionModal } from '@/ui/ClassSelectionModal';
@@ -37,6 +39,7 @@ import './style.css';
 //  11. HUD + LevelUpModal + InventoryUI + CharacterSheet -> overlays HTML
 //  12. PanelManager        -> coordina un solo panel abierto a la vez
 //  13. ActionBar           -> barra inferior con botones y atajos de teclado
+//  14. TestRoom.build      -> sala de prueba (una sola vez, nunca en cambio de clase)
 // ============================================================
 
 const canvas = document.getElementById('renderCanvas');
@@ -52,7 +55,8 @@ const engine = new Engine(canvas);
 const scene = engine.scene;
 
 const inputManager = new InputManager();
-const playerController = new PlayerController(scene, inputManager);
+const assetManager = new AssetManager(scene);
+const playerController = new PlayerController(scene, inputManager, assetManager);
 const cameraController = new CameraController(scene, canvas, playerController.mesh);
 
 playerController.setCamera(cameraController.camera);
@@ -67,6 +71,12 @@ playerController.setCamera(cameraController.camera);
 
   // -- Seleccion de clase -----------------------------------------------------
   let chosenClass = await ClassSelectionModal.show();
+
+  // -- Cargar modelo 3D del personaje ----------------------------------------
+  await playerController.loadModel(chosenClass);
+
+  // -- Sala de prueba (se construye una sola vez, aqui) ----------------------
+  await TestRoom.build(scene, assetManager);
 
   // -- Crear sistemas de juego ------------------------------------------------
   let playerStats = new PlayerStats(chosenClass);
@@ -124,10 +134,10 @@ playerController.setCamera(cameraController.camera);
 
     // Selector de rareza para generar items
     const RARITIES = [
-      { id: 'common',    label: '+ Común',       color: '#aaa' },
-      { id: 'uncommon',  label: '+ Poco Común',  color: '#6a9a4a' },
+      { id: 'common',    label: '+ Comun',       color: '#aaa' },
+      { id: 'uncommon',  label: '+ Poco Comun',  color: '#6a9a4a' },
       { id: 'rare',      label: '+ Raro',        color: '#5a8acb' },
-      { id: 'epic',      label: '+ Épico',       color: '#9b59b6' },
+      { id: 'epic',      label: '+ Epico',       color: '#9b59b6' },
       { id: 'legendary', label: '+ Legendario',  color: '#e2a23b' },
     ] as const;
 
@@ -180,6 +190,9 @@ playerController.setCamera(cameraController.camera);
     classBtn.addEventListener('click', async () => {
       panelManager.closeAll();
       chosenClass = await ClassSelectionModal.show();
+      // Recargar modelo 3D (AssetManager cachea, asi que el 2.o cambio es instantaneo)
+      // TestRoom NO se reconstruye aqui -- la sala ya esta creada
+      await playerController.loadModel(chosenClass);
       playerStats.dispose();
       charSheet.dispose();
       playerStats  = new PlayerStats(chosenClass);

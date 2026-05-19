@@ -177,7 +177,7 @@ export class InventoryUI {
     if (item) {
       cell.classList.add('inv-slot-filled', `inv-rarity-${item.rarity}`);
       const emoji = getItemEmoji(item);
-      const nameText = item.name.length > 14 ? item.name.slice(0, 13) + '…' : item.name;
+      const nameText = item.name.length > 14 ? item.name.slice(0, 13) + '\u2026' : item.name;
       cell.innerHTML = `<div class="inv-slot-emoji">${emoji}</div><div class="inv-slot-name">${nameText}</div>`;
 
       // Clic derecho: equipar / desequipar

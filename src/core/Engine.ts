@@ -9,15 +9,18 @@ import {
   Color3,
 } from '@babylonjs/core';
 
+// Scene.FOGMODE_LINEAR es una constante estatica de la clase Scene.
+// El import de Scene ya la incluye -- no hay import adicional necesario.
+
 // Imports internos
 import { logger } from '@/core/Logger';
 
 // ============================================================
-// Engine — wrapper de BABYLON.Engine y BABYLON.Scene.
+// Engine -- wrapper de BABYLON.Engine y BABYLON.Scene.
 //
-// Responsabilidad única: inicializar el motor de renderizado,
-// la escena base y la iluminación global. Los sistemas de
-// cámara, personaje e input viven en sus propias clases.
+// Responsabilidad unica: inicializar el motor de renderizado,
+// la escena base y la iluminacion global. Los sistemas de
+// camara, personaje e input viven en sus propias clases.
 // ============================================================
 
 export class Engine {
@@ -45,45 +48,60 @@ export class Engine {
     return this._scene;
   }
 
-  // Expone el motor de Babylon (útil para getDeltaTime en los controllers)
+  // Expone el motor de Babylon (util para getDeltaTime en los controllers)
   get babylonEngine(): BabylonEngine {
     return this._engine;
   }
 
   // ——————————————————————————————————————————
-  // Métodos privados
+  // Metodos privados
   // ——————————————————————————————————————————
 
   private _createScene(): Scene {
     const scene = new Scene(this._engine);
-    // Fondo oscuro azulado — estética de mazmorra
-    scene.clearColor = new Color4(0.05, 0.05, 0.1, 1.0);
+
+    // —— Grimspire: fondo void ——
+    // #080612 — negro casi puro con tinte morado, igual que --bg-void en la paleta CSS.
+    scene.clearColor = new Color4(0.031, 0.024, 0.047, 1.0);
+
+    // —— Niebla lineal atmosferica ——
+    // Empieza a los 18 u y desaparece a los 35 u. La sala de prueba mide ~8 u
+    // de lado, asi que el jugador la ve completa; el exterior se disuelve en niebla.
+    scene.fogMode = Scene.FOGMODE_LINEAR;
+    scene.fogColor = new Color3(0.031, 0.024, 0.047); // mismo tinte que clearColor
+    scene.fogStart = 18;
+    scene.fogEnd = 35;
+
     return scene;
   }
 
   private _setupLight(): void {
-    // — Luz hemisférica: luz ambiente omnidireccional —
-    // Ilumina todo uniformemente según la normal de cada superficie.
-    // Se mantiene aquí hasta que tengamos iluminación por sala en sprints futuros.
+    // —— Grimspire: luz hemisferica de ambiente minimo ——
+    // Intensity muy baja: solo evita que los modelos sean siluetas negras.
+    // diffuse morado frio -> simula el reflejo de piedra humeda de mazmorra.
+    // groundColor casi negro -> sin rebote desde el suelo (es roca, no cielo).
     const hemi = new HemisphericLight(
-      'ambientLight',
+      'grimAmbient',
       new Vector3(0, 1, 0),
       this._scene
     );
-    hemi.intensity = 0.85;
-    hemi.diffuse = new Color3(0.9, 0.85, 1.0);       // tono frío violáceo
-    hemi.groundColor = new Color3(0.165, 0.145, 0.19); // #2a2530 — cálido oscuro desde abajo
+    hemi.intensity = 0.12;
+    hemi.diffuse = new Color3(0.3, 0.2, 0.5);     // morado frio
+    hemi.groundColor = new Color3(0.02, 0.01, 0.03); // casi negro
 
-    // — Luz direccional: da sombreado volumétrico a la cápsula —
-    // Llega desde arriba-frente para que se note la rotación del personaje.
-    // Dirección normalizada: (-0.5, -1, -0.5) → Vector3 normalizado.
+    // —— Grimspire: luz direccional tenue tipo luna ——
+    // Intensity minima: da forma a la geometria sin iluminar el entorno.
+    // diffuse azul frio -> contraste sutil con el ambar de las antorchas (TestRoom).
     const dir = new DirectionalLight(
-      'sunLight',
-      new Vector3(-0.5, -1, -0.5).normalize(),
+      'grimMoon',
+      new Vector3(-0.3, -1, -0.5).normalize(),
       this._scene
     );
-    dir.intensity = 0.5;
-    dir.diffuse = new Color3(0.95, 0.9, 1.0); // blanco ligeramente frío
+    dir.intensity = 0.05;
+    dir.diffuse = new Color3(0.4, 0.45, 0.7); // azul frio, luz de luna filtrada
+
+    // Las PointLights calidas de antorchas se crean en TestRoom.ts
+    // junto a sus meshes, para que posicion y luz esten siempre sincronizadas.
   }
 
   private _startRenderLoop(): void {

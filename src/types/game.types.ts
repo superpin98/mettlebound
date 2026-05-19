@@ -100,6 +100,14 @@ export interface ClassDefinition {
   freePoints: number;
   /** ID del template de item inicial. Omitido en Errante (empieza sin item). */
   startingItemId?: string;
+  /** Nombre del archivo GLB del personaje, p.ej. 'Knight.glb'. */
+  modelAssetId?: string;
+  /**
+   * Nombres de nodo de arma/accesorio que deben quedar visibles.
+   * Todos los demas accesorios se ocultan tras cargar el modelo.
+   * Lista vacia = sin armas (Errante a puno limpio).
+   */
+  visibleAttachments?: string[];
 }
 
 // Estado del jugador
