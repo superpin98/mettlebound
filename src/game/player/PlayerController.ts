@@ -4,6 +4,8 @@ import {
   MeshBuilder,
   Vector3,
   Quaternion,
+  PBRMaterial,
+  StandardMaterial,
 } from '@babylonjs/core';
 import type { Mesh, ArcRotateCamera, AnimationGroup } from '@babylonjs/core';
 
@@ -157,6 +159,21 @@ export class PlayerController {
 
     // Ocultar armas/accesorios que no corresponden a esta clase
     this._applyAttachmentVisibility(instance, classId);
+
+    // Garantizar maxSimultaneousLights = 8 en los materiales del personaje.
+    // En el arranque inicial, TestRoom.build() (que se ejecuta despues) aplica
+    // este limite globalmente y llama markAllMaterialsAsDirty(2).
+    // En cambio de clase (loadModel llamado despues de TestRoom), los materiales
+    // del nuevo modelo son frescos: al asignar el limite antes del primer frame
+    // los shaders compilan directamente para las 6 luces de la sala.
+    for (const mesh of instance.rootNode.getChildMeshes(false)) {
+      if (
+        mesh.material instanceof PBRMaterial ||
+        mesh.material instanceof StandardMaterial
+      ) {
+        mesh.material.maxSimultaneousLights = 8;
+      }
+    }
 
     // Diagnostico: loguear grupos para confirmar sufijos de instancia
     logger.debug('PlayerController: animationGroups detectados', {

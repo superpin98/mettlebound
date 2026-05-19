@@ -3,11 +3,16 @@ import {
   Vector3,
   Color3,
   PointLight,
+  TransformNode,
+  PBRMaterial,
+  StandardMaterial,
 } from '@babylonjs/core';
 import type { Scene, AssetContainer } from '@babylonjs/core';
 
 // Imports internos
 import type { AssetManager } from '@/core/AssetManager';
+import { FlameEffect } from '@/game/world/FlameEffect';
+import { FlameSprite } from '@/game/world/FlameSprite';
 import { logger } from '@/core/Logger';
 
 // ============================================================
@@ -29,10 +34,21 @@ const TORCH_Y = 1.0;
 
 // Separacion del rootNode de la antorcha respecto a la superficie de la pared.
 // Sin esto el modelo queda enterrado dentro del panel de piedra y no se ve.
-const TORCH_WALL_INSET = 0.35;
+// 0.25: valor calibrado para que la cruz naranja quede tocando la cara
+// interior de la piedra sin enterrarse.
+const TORCH_WALL_INSET = 0.25;
 
-// Altura de la llama sobre el punto de montaje (parte superior de la antorcha)
-const TORCH_FLAME_HEIGHT = 0.7;
+// Altura vertical desde el wrapper hasta la llama (tope de la U).
+const TORCH_LIGHT_Y = 0.55;
+
+// Desplazamiento hacia el centro de la sala para que la PointLight
+// salga desde la llama interior de la U y no desde la cruz pegada a la pared.
+// Valor pequeno: la antorcha es vertical, la llama casi en la vertical de la cruz.
+const TORCH_LIGHT_INWARD = 0.15;
+
+// Tamano del plane billboard de la llama (unidades Babylon).
+// 0.8 u: lo suficientemente grande para cubrir el agujero de la U.
+const FLAME_SPRITE_SIZE = 0.8;
 
 // Luz de antorcha: ambar calido
 const TORCH_DIFFUSE        = new Color3(1.0, 0.5, 0.15);
@@ -49,8 +65,10 @@ const PLACE_PILLARS = true;
 //   - Suelo    : cuadricula GRID_SIZE x GRID_SIZE de floor_tile_large
 //   - Paredes  : 4 x GRID_SIZE segmentos rectos perimetrales
 //   - Esquinas : 4 esquinas en los vertices del perimetro
-//   - Antorchas: 1 por pared (N, S, E, O) centradas, con PointLight
-//                en la posicion de la llama (TORCH_WALL_INSET hacia el interior)
+//   - Antorchas: 1 por pared (N, S, E, O) centradas, con:
+//                  * PointLight  (ilumina la sala)
+//                  * ParticleSystem FlameEffect (particulas ascendentes)
+//                  * Sprite billboard FlameSprite (llama pixel art animada)
 //   - Pilares  : 4 interiores (controlados por PLACE_PILLARS)
 //
 // _isBuilt previene doble llamada a build() (guard anti-duplicacion).
@@ -116,11 +134,27 @@ export class TestRoom {
       TestRoom._buildPillars(assetManager, pillarContainer, tileSize);
     }
 
+    // Subir maxSimultaneousLights a 8 en TODOS los materiales de la escena.
+    // El limite por defecto de Babylon es 4. Con 2 luces globales (hemi + dir)
+    // + 4 PointLights de antorchas = 6 luces totales, el limite de 4 trunca
+    // 2 PointLights y la sala aparece parcialmente oscura.
+    // Debe aplicarse ANTES de markAllMaterialsAsDirty para que la recompilacion
+    // de shaders ya use el nuevo limite.
+    scene.materials.forEach((mat) => {
+      if (mat instanceof PBRMaterial || mat instanceof StandardMaterial) {
+        mat.maxSimultaneousLights = 8;
+      }
+    });
+
     // FIX: fuerza recompilacion de shaders para que los materiales vean
-    // las 4 PointLights recien anadidas. Sin esto solo se activa 1 luz
-    // al inicio porque los shaders se compilaron antes con solo 2 luces globales.
-    // MATERIAL_LightDirtyFlag = 1
-    scene.markAllMaterialsAsDirty(1);
+    // las 4 PointLights recien anadidas.
+    // El suelo, paredes y esquinas se instancian antes de que existan las
+    // PointLights, asi que sus shaders se compilan con solo 2 luces (hemi + dir).
+    // markAllMaterialsAsDirty(2) usa Material.LightDirtyFlag = 2, que obliga a
+    // Babylon a recompilar el bloque de iluminacion de todos los shaders en el
+    // proximo frame, ya con las 6 luces presentes.
+    // NOTA: el flag 1 es TextureDirtyFlag, NO LightDirtyFlag -- no sirve aqui.
+    scene.markAllMaterialsAsDirty(2);
 
     logger.info('TestRoom: sala construida.', {
       tileSize,
@@ -243,15 +277,18 @@ export class TestRoom {
   /**
    * Coloca 1 antorcha por pared (N, S, E, O), centrada.
    *
-   * El rootNode se desplaza TORCH_WALL_INSET unidades hacia el interior
-   * de la sala para que la geometria del modelo quede visible delante
-   * de la superficie de piedra, no enterrada dentro del panel de pared.
+   * Cada antorcha tiene tres capas:
+   *   1. PointLight       -- ilumina la sala con ambar calido
+   *   2. FlameEffect      -- ParticleSystem de particulas ascendentes
+   *   3. FlameSprite      -- sprite billboard pixel art animado (el "cuerpo" de la llama)
    *
-   * La PointLight se coloca TORCH_FLAME_HEIGHT por encima del rootNode.
+   * Arquitectura wrapper:
+   *   TransformNode wrapper: posicion en la pared + yaw (rotY).
+   *   rootNode hijo: sin rotacion. El modelo KayKit torch_mounted viene
+   *   vertical de fabrica (Y+ = U+llama, Y- = cruz de montaje).
    *
-   * Rotaciones (antorchas E/O son 90 grados respecto a N/S):
-   *   Sur  rotY=0      Norte rotY=PI
-   *   Oeste rotY=PI/2  Este  rotY=-PI/2
+   * rotY por pared:
+   *   Sur rotY=0  Norte rotY=PI  Oeste rotY=PI/2  Este rotY=-PI/2
    */
   private static _buildTorches(
     scene: Scene,
@@ -259,9 +296,10 @@ export class TestRoom {
     container: AssetContainer,
     half: number,
   ): void {
-    const BY  = TORCH_Y;
-    const INS = TORCH_WALL_INSET;
-    const FH  = TORCH_FLAME_HEIGHT;
+    const BY      = TORCH_Y;
+    const INS     = TORCH_WALL_INSET;
+    const LIGHT_Y = TORCH_LIGHT_Y;
+    const INWARD  = TORCH_LIGHT_INWARD;
 
     // Diagnostico: meshes hijos del container de antorcha
     const probeInst = assetManager.instantiate(container);
@@ -272,27 +310,63 @@ export class TestRoom {
       names: childMeshNames,
     });
 
-    const torches: { pos: Vector3; rotY: number; label: string }[] = [
-      { pos: new Vector3(0,          BY, -half + INS), rotY: 0,           label: 'Sur'   },
-      { pos: new Vector3(0,          BY,  half - INS), rotY: Math.PI,     label: 'Norte' },
-      { pos: new Vector3(-half + INS, BY, 0),          rotY: Math.PI / 2, label: 'Oeste' },
-      { pos: new Vector3( half - INS, BY, 0),          rotY: -Math.PI / 2, label: 'Este' },
+    // inward: vector unitario hacia el centro de la sala en world space.
+    const torches: { pos: Vector3; rotY: number; label: string; inward: Vector3 }[] = [
+      { pos: new Vector3(0,           BY, -half + INS), rotY: 0,            label: 'Sur',   inward: new Vector3(0,  0,  1) },
+      { pos: new Vector3(0,           BY,  half - INS), rotY: Math.PI,      label: 'Norte', inward: new Vector3(0,  0, -1) },
+      { pos: new Vector3(-half + INS, BY,  0),          rotY: Math.PI / 2,  label: 'Oeste', inward: new Vector3(1,  0,  0) },
+      { pos: new Vector3( half - INS, BY,  0),          rotY: -Math.PI / 2, label: 'Este',  inward: new Vector3(-1, 0,  0) },
     ];
 
-    for (const { pos, rotY, label } of torches) {
-      const torch = assetManager.instantiate(container);
-      torch.rootNode.position = pos;
-      torch.rootNode.rotation = new Vector3(0, rotY, 0);
+    for (const { pos, rotY, label, inward } of torches) {
+      // Wrapper: posicion en la pared + yaw para orientar la antorcha
+      const wrapper = new TransformNode(`torchWrapper_${label}`, scene);
+      wrapper.position = pos;
+      wrapper.rotation.y = rotY;
 
-      const lightPos = new Vector3(pos.x, pos.y + FH, pos.z);
-      const light = new PointLight('torchLight_' + label, lightPos, scene);
+      // Modelo 3D: instancia vertical sin rotacion adicional
+      const torch = assetManager.instantiate(container);
+      torch.rootNode.parent = wrapper;
+      torch.rootNode.position = Vector3.Zero();
+
+      // Posicion de la llama: arriba (LIGHT_Y) + nudge al centro (INWARD)
+      const lightPos = new Vector3(
+        pos.x + inward.x * INWARD,
+        pos.y + LIGHT_Y,
+        pos.z + inward.z * INWARD,
+      );
+
+      // 1. Luz puntual ambar
+      const light = new PointLight(`torchLight_${label}`, lightPos, scene);
       light.diffuse   = TORCH_DIFFUSE;
       light.intensity = TORCH_INTENSITY;
       light.range     = TORCH_RANGE;
 
+      // 2. Particulas ascendentes (fondo de la llama, bordes)
+      FlameEffect.createAt(scene, lightPos);
+
+      // 3. Sprite billboard pixel art animado (cuerpo central de la llama).
+      //
+      // X/Z = pos.x, pos.z exactos (sin offsets laterales): el sprite se clava
+      //   en la vertical del palo, que coincide con el agujero central de la U.
+      // Y = pos.y + LIGHT_Y + FLAME_SPRITE_SIZE/2: el plane tiene su origin en
+      //   el CENTRO geometrico, asi que sumamos la mitad del tamano para que
+      //   la BASE quede a la altura del agujero de la U (pos.y + LIGHT_Y).
+      //
+      //   base del sprite = spritePos.y - FLAME_SPRITE_SIZE/2
+      //                   = (pos.y + LIGHT_Y + FLAME_SPRITE_SIZE/2) - FLAME_SPRITE_SIZE/2
+      //                   = pos.y + LIGHT_Y  <- altura del agujero de la U  ✓
+      const spritePos = new Vector3(
+        pos.x,
+        pos.y + LIGHT_Y + FLAME_SPRITE_SIZE / 2,
+        pos.z,
+      );
+      FlameSprite.createAt(scene, spritePos, FLAME_SPRITE_SIZE);
+
       logger.debug('TestRoom: antorcha colocada', {
         label,
-        pos: { x: pos.x.toFixed(2), y: pos.y.toFixed(2), z: pos.z.toFixed(2) },
+        rotY: rotY.toFixed(3),
+        pos:      { x: pos.x.toFixed(2),      y: pos.y.toFixed(2),      z: pos.z.toFixed(2)      },
         lightPos: { x: lightPos.x.toFixed(2), y: lightPos.y.toFixed(2), z: lightPos.z.toFixed(2) },
       });
     }
