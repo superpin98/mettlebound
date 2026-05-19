@@ -69,3 +69,26 @@ export function levelFromTotalXp(totalXp: number): number {
   }
   return level;
 }
+
+/**
+ * Devuelve el progreso de XP dentro del nivel actual.
+ *
+ * @param totalXp - XP total acumulada del jugador (snapshot.xp)
+ * @param level   - Nivel actual del jugador (snapshot.level)
+ * @returns { current: XP ganada desde el inicio del nivel actual,
+ *            needed:  XP total necesaria para pasar al siguiente nivel }
+ *
+ * Ejemplo: nivel 3 (xpForLevel(3)=263), totalXp=361
+ *   current = 361 - 263 = 98
+ *   needed  = xpForLevel(4) - xpForLevel(3) = 465 - 263 = 202
+ *   -> muestra "98 / 202"
+ */
+export function xpProgressInCurrentLevel(
+  totalXp: number,
+  level: number,
+): { current: number; needed: number } {
+  const levelStart = xpForLevel(level);
+  const current    = Math.max(0, totalXp - levelStart);
+  const needed     = xpToNextLevel(level);
+  return { current, needed };
+}

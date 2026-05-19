@@ -15,6 +15,7 @@
 
 import mitt from 'mitt';
 import type { PlayerSnapshot } from '@/types/game.types';
+import type { Item, EquipmentSlot, EquippedItems } from '@/types/items.types';
 
 /**
  * Mapa de eventos del juego.
@@ -22,11 +23,18 @@ import type { PlayerSnapshot } from '@/types/game.types';
  * Los eventos sin payload usan null como convencion.
  */
 export type GameEventMap = {
+  // Player
   'player:stats-changed': PlayerSnapshot;
   'player:level-up': { newLevel: number; snapshot: PlayerSnapshot };
   'player:xp-gained': { amount: number; snapshot: PlayerSnapshot };
   'ui:show-level-up-modal': { snapshot: PlayerSnapshot };
   'ui:close-level-up-modal': null;
+  // Inventory
+  'inventory:item-added':      { item: Item };
+  'inventory:item-equipped':   { item: Item; slot: EquipmentSlot; equipped: EquippedItems };
+  'inventory:item-unequipped': { item: Item; slot: EquipmentSlot; equipped: EquippedItems };
+  'inventory:item-discarded':  { item: Item };
+  'inventory:full':            null;
 };
 
 /** El EventBus tipado de la partida. Singleton. */

@@ -1,32 +1,25 @@
 /**
  * Tipos compartidos del juego.
- * Importar desde aquí en lugar de definir tipos locales en cada módulo.
+ * Importar desde aqui en lugar de definir tipos locales en cada modulo.
  */
 
-// ─── Identificadores ────────────────────────────────────────────────────────
+// Identificadores
 
 /** Las 5 clases jugables del juego. */
-export type ClassId =
-  | 'guerrero'
-  | 'cazador'
-  | 'mago'
-  | 'picaro'
-  | 'errante';
+export type ClassId = 'guerrero' | 'cazador' | 'mago' | 'picaro' | 'errante';
 
-/** Las 4 estadísticas primarias. */
+/** Las 4 estadisticas primarias. */
 export type StatKey = 'STR' | 'DEX' | 'INT' | 'LCK';
 
-/** Las 6 rarezas de mejoras. */
-export type UpgradeRarity =
-  | 'common'
-  | 'uncommon'
-  | 'rare'
-  | 'epic'
-  | 'legendary';
+/** Las 5 rarezas del juego (items, mejoras, efectos unicos). */
+export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 
-// ─── Stats ──────────────────────────────────────────────────────────────────
+/** Alias de Rarity para upgrades. Mantener por retrocompatibilidad. */
+export type UpgradeRarity = Rarity;
 
-/** Las 4 estadísticas primarias del jugador. */
+// Stats
+
+/** Las 4 estadisticas primarias del jugador. */
 export interface CoreStats {
   STR: number;
   DEX: number;
@@ -34,51 +27,82 @@ export interface CoreStats {
   LCK: number;
 }
 
-/** Stats derivados calculados a partir de los primarios y el nivel. */
+/**
+ * Stats derivados calculados a partir de los primarios, el nivel y los items.
+ * En el PlayerSnapshot, estos valores ya incluyen los bonus de items equipados.
+ * Los campos sin formula (flatDamage, lifesteal, etc.) son 0 si no hay items.
+ */
 export interface DerivedStats {
+  // Calculados por formula (StatCalculator)
   maxHp: number;
   maxMp: number;
-  critChance: number;  // porcentaje, 0-80
-  evasion: number;     // porcentaje, 0-70
+  critChance: number;      // porcentaje, 0-80
+  evasion: number;         // porcentaje, 0-70
   turnSpeed: number;
+
+  // Ofensivo -- fuente: items + posibles upgrades
+  critDamage: number;          // % bonus al dano en critico (0 = sin bonus)
+  physicalDamagePct: number;   // % bonus a dano fisico
+  rangedDamagePct: number;     // % bonus a dano a distancia
+  magicalDamagePct: number;    // % bonus a dano magico
+  flatPhysicalDamage: number;  // dano fisico plano anadido
+  flatRangedDamage: number;    // dano a distancia plano anadido
+  flatMagicalDamage: number;   // dano magico plano anadido
+
+  // Defensivo -- fuente: items + posibles upgrades
+  armor: number;               // reduccion de dano fisico (flat)
+  magicResist: number;         // reduccion de dano magico (flat)
+  damageReductionPct: number;  // % reduccion de todo dano
+  physicalReductionPct: number; // % reduccion de dano fisico (adicional a armor)
+
+  // Sustain -- fuente: items
+  lifestealPct: number;        // % de dano infligido recuperado como HP
+  manastealPct: number;        // % de dano infligido recuperado como MP
+
+  // Estados alterados -- fuente: items raros/epicos/legendarios
+  bleedDamage: number;         // dano plano por sangrado aplicado
+  poisonDamage: number;        // dano plano por veneno aplicado
+  stunChancePct: number;       // % de probabilidad de aturdir al golpear
+
+  // Resistencias -- fuente: items
+  statusResistancePct: number; // % resistencia a estados alterados
 }
 
-// ─── Mejoras (upgrades) ──────────────────────────────────────────────────────
+// Mejoras (upgrades)
 
-/**
- * Efecto que puede aplicar una mejora.
- * Cada variante modifica un aspecto diferente del jugador.
- */
+/** Efecto que puede aplicar una mejora al jugador. */
 export type UpgradeEffect =
   | { type: 'stat_flat';    stat: StatKey; amount: number }
   | { type: 'hp_flat';      amount: number }
   | { type: 'mp_flat';      amount: number }
-  | { type: 'crit_flat';    amount: number }  // porcentaje directo
-  | { type: 'evasion_flat'; amount: number }  // porcentaje directo
-  | { type: 'damage_pct';   amount: number }  // porcentaje multiplicativo
+  | { type: 'crit_flat';    amount: number }
+  | { type: 'evasion_flat'; amount: number }
+  | { type: 'damage_pct';   amount: number }
   | { type: 'speed_flat';   amount: number };
 
-/** Definición de una mejora disponible en el pool. */
+/** Definicion de una mejora disponible en el pool. */
 export interface UpgradeDefinition {
   id: string;
   name: string;
   description: string;
-  rarity: UpgradeRarity;
+  rarity: Rarity;
   effect: UpgradeEffect;
 }
 
-// ─── Clases ──────────────────────────────────────────────────────────────────
+// Clases
 
-/** Definición de una clase jugable. */
+/** Definicion de una clase jugable. */
 export interface ClassDefinition {
   id: ClassId;
   name: string;
   description: string;
   baseStats: CoreStats;
-  freePoints: number;  // puntos libres adicionales al crear el personaje (Errante: 8)
+  freePoints: number;
+  /** ID del template de item inicial. Omitido en Errante (empieza sin item). */
+  startingItemId?: string;
 }
 
-// ─── Estado del jugador ──────────────────────────────────────────────────────
+// Estado del jugador
 
 /**
  * Snapshot inmutable del estado completo del jugador.
@@ -95,8 +119,8 @@ export interface PlayerSnapshot {
   currentHp: number;
   currentMp: number;
   pendingStatPoints: number;
-  appliedUpgrades: string[];  // IDs de mejoras aplicadas
+  appliedUpgrades: string[];
 }
 
-// Nota: el mapa de eventos del EventBus vive en @/core/EventBus (GameEventMap).
-// Se define allí para evitar dependencia circular (EventBus → game.types → EventBus).
+// El mapa de eventos del EventBus vive en @/core/EventBus (GameEventMap)
+// para evitar dependencia circular (EventBus -> game.types -> EventBus).

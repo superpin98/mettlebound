@@ -1,12 +1,14 @@
 /**
- * PlayerStats — gestiona el estado completo del jugador durante la partida.
+ * PlayerStats -- gestiona el estado completo del jugador durante la partida.
  *
- * Es la única clase con estado mutable del sistema de stats.
- * El resto de módulos (StatCalculator, XPSystem, LevelUp) son funciones puras
+ * Es la unica clase con estado mutable del sistema de stats.
+ * El resto de modulos (StatCalculator, XPSystem, LevelUp) son funciones puras
  * que PlayerStats orquesta.
  *
- * Comunicación con la UI: nunca llama a nada de ui/ directamente.
+ * Comunicacion con la UI: nunca llama a nada de ui/ directamente.
  * Emite eventos al EventBus y la UI los escucha.
+ *
+ * Stats finales = base_clase + puntos_nivel + affixes_items + bonus_sets
  */
 
 import { eventBus } from '@/core/EventBus';
@@ -14,6 +16,11 @@ import { getClassById } from '@/config/classes.config';
 import { calcDerivedStats } from '@/game/stats/StatCalculator';
 import { xpForLevel, xpFromEnemy, xpToNextLevel } from '@/game/progression/XPSystem';
 import { applyStatPoint, applyUpgrade } from '@/game/progression/LevelUp';
+import {
+  calcTotalItemDeltas,
+  ZERO_ITEM_DELTAS,
+  type ItemStatDeltas,
+} from '@/game/stats/ItemStatModifiers';
 import type {
   ClassId,
   CoreStats,
@@ -21,21 +28,18 @@ import type {
   PlayerSnapshot,
   UpgradeDefinition,
 } from '@/types/game.types';
+import type { EquippedItems } from '@/types/items.types';
 
 export class PlayerStats {
-  // ─── Estado interno ─────────────────────────────────────────────────────
 
   private classId: ClassId;
   private level: number;
   private totalXp: number;
-
   private coreStats: CoreStats;
   private derivedStats: DerivedStats;
-
   private currentHp: number;
   private currentMp: number;
 
-  // Bonificaciones planas acumuladas por mejoras (no entran en la fórmula de stats)
   private bonusHpFlat: number = 0;
   private bonusMpFlat: number = 0;
   private bonusCritFlat: number = 0;
@@ -43,10 +47,12 @@ export class PlayerStats {
   private bonusDamagePct: number = 0;
   private bonusSpeedFlat: number = 0;
 
+  private itemDeltas: ItemStatDeltas = { ...ZERO_ITEM_DELTAS };
+
   private pendingStatPoints: number;
   private appliedUpgrades: string[] = [];
 
-  // ─── Constructor ────────────────────────────────────────────────────────
+  private readonly _onEquipChange: (payload: { equipped: EquippedItems }) => void;
 
   constructor(classId: ClassId) {
     const classDef = getClassById(classId);
@@ -57,64 +63,70 @@ export class PlayerStats {
     this.coreStats = { ...classDef.baseStats };
     this.pendingStatPoints = classDef.freePoints;
 
-    this.derivedStats = calcDerivedStats(this.coreStats, this.level);
-
-    // HP y MP empiezan al máximo
+    this.derivedStats = calcDerivedStats(this.getEffectiveCore(), this.level);
     this.currentHp = this.getMaxHp();
     this.currentMp = this.getMaxMp();
+
+    this._onEquipChange = ({ equipped }: { equipped: EquippedItems }): void => {
+      this.itemDeltas = calcTotalItemDeltas(equipped);
+      this.derivedStats = calcDerivedStats(this.getEffectiveCore(), this.level);
+      this.currentHp = Math.min(this.currentHp, this.getMaxHp());
+      this.currentMp = Math.min(this.currentMp, this.getMaxMp());
+      this.emitStatsChanged();
+    };
+    eventBus.on('inventory:item-equipped',   this._onEquipChange);
+    eventBus.on('inventory:item-unequipped', this._onEquipChange);
 
     this.emitStatsChanged();
   }
 
-  // ─── Helpers de stats máximos ────────────────────────────────────────────
+  private getEffectiveCore(): CoreStats {
+    return {
+      STR: this.coreStats.STR + this.itemDeltas.STR,
+      DEX: this.coreStats.DEX + this.itemDeltas.DEX,
+      INT: this.coreStats.INT + this.itemDeltas.INT,
+      LCK: this.coreStats.LCK + this.itemDeltas.LCK,
+    };
+  }
 
   getMaxHp(): number {
-    return this.derivedStats.maxHp + this.bonusHpFlat;
+    return this.derivedStats.maxHp + this.bonusHpFlat + this.itemDeltas.maxHpFlat;
   }
 
   getMaxMp(): number {
-    return this.derivedStats.maxMp + this.bonusMpFlat;
+    return this.derivedStats.maxMp + this.bonusMpFlat + this.itemDeltas.maxMpFlat;
   }
 
   getCritChance(): number {
-    return this.derivedStats.critChance + this.bonusCritFlat;
+    return this.derivedStats.critChance + this.bonusCritFlat + this.itemDeltas.critChanceFlat;
   }
 
   getEvasion(): number {
-    return this.derivedStats.evasion + this.bonusEvasionFlat;
+    return this.derivedStats.evasion + this.bonusEvasionFlat + this.itemDeltas.evasionFlat;
   }
 
   getTurnSpeed(): number {
-    return this.derivedStats.turnSpeed + this.bonusSpeedFlat;
+    return this.derivedStats.turnSpeed + this.bonusSpeedFlat + this.itemDeltas.turnSpeedFlat;
   }
 
   getDamageBonusPct(): number {
-    return this.bonusDamagePct;
+    const itemDmg = this.itemDeltas.physicalDamagePct
+      + this.itemDeltas.rangedDamagePct
+      + this.itemDeltas.magicalDamagePct;
+    return this.bonusDamagePct + itemDmg;
   }
 
-  // ─── XP y subida de nivel ────────────────────────────────────────────────
-
-  /**
-   * Añade XP al jugador (por matar un enemigo, explorar, etc.).
-   * Si la XP acumulada supera el umbral, sube de nivel automáticamente.
-   */
   addXp(amount: number): void {
     this.totalXp += amount;
-
     const snapshot = this.getSnapshot();
     eventBus.emit('player:xp-gained', { amount, snapshot });
 
-    // Comprobar si se sube de nivel (puede haber más de uno de golpe)
     let levelsGained = 0;
     while (this.totalXp >= xpForLevel(this.level + 1)) {
       this.level++;
-      this.pendingStatPoints += 3; // BALANCE.PLAYER.STAT_POINTS_PER_LEVEL se aplicaría aquí
+      this.pendingStatPoints += 3;
       levelsGained++;
-
-      // Recalcular stats con el nuevo nivel
-      this.derivedStats = calcDerivedStats(this.coreStats, this.level);
-
-      // Al subir de nivel, rellenar HP y MP a máximo
+      this.derivedStats = calcDerivedStats(this.getEffectiveCore(), this.level);
       this.currentHp = this.getMaxHp();
       this.currentMp = this.getMaxMp();
     }
@@ -128,20 +140,11 @@ export class PlayerStats {
     this.emitStatsChanged();
   }
 
-  /**
-   * Añade la XP correspondiente a derrotar un enemigo del nivel indicado.
-   */
   gainXpFromKill(enemyLevel: number): void {
     const xp = xpFromEnemy(enemyLevel, this.level);
     this.addXp(xp);
   }
 
-  // ─── Asignación de puntos de stat ────────────────────────────────────────
-
-  /**
-   * Asigna un punto al stat indicado.
-   * Lanza error si no hay puntos pendientes.
-   */
   spendStatPoint(stat: keyof CoreStats): void {
     const { newStats, newPending } = applyStatPoint(
       this.coreStats,
@@ -150,51 +153,40 @@ export class PlayerStats {
     );
     this.coreStats = newStats;
     this.pendingStatPoints = newPending;
-    this.derivedStats = calcDerivedStats(this.coreStats, this.level);
+    this.derivedStats = calcDerivedStats(this.getEffectiveCore(), this.level);
     this.emitStatsChanged();
   }
 
-  // ─── Aplicar mejora ──────────────────────────────────────────────────────
-
-  /**
-   * Aplica una mejora seleccionada por el jugador al subir de nivel.
-   */
   applyUpgrade(upgrade: UpgradeDefinition): void {
     if (this.appliedUpgrades.includes(upgrade.id)) {
-      throw new Error(`applyUpgrade: la mejora '${upgrade.id}' ya está aplicada`);
+      throw new Error('applyUpgrade: la mejora ya esta aplicada: ' + upgrade.id);
     }
 
     const result = applyUpgrade(upgrade.effect, this.coreStats);
 
-    this.coreStats = result.newCoreStats;
-    this.bonusHpFlat += result.hpBonusFlat;
-    this.bonusMpFlat += result.mpBonusFlat;
-    this.bonusCritFlat += result.critBonusFlat;
+    this.coreStats         = result.newCoreStats;
+    this.bonusHpFlat      += result.hpBonusFlat;
+    this.bonusMpFlat      += result.mpBonusFlat;
+    this.bonusCritFlat    += result.critBonusFlat;
     this.bonusEvasionFlat += result.evasionBonusFlat;
-    this.bonusDamagePct += result.damageBonusPct;
-    this.bonusSpeedFlat += result.speedBonusFlat;
+    this.bonusDamagePct   += result.damageBonusPct;
+    this.bonusSpeedFlat   += result.speedBonusFlat;
 
-    this.derivedStats = calcDerivedStats(this.coreStats, this.level);
+    this.derivedStats = calcDerivedStats(this.getEffectiveCore(), this.level);
     this.appliedUpgrades.push(upgrade.id);
-
     this.emitStatsChanged();
   }
 
-  // ─── HP y MP ─────────────────────────────────────────────────────────────
-
-  /** Recibe daño. El HP nunca baja de 0. */
   takeDamage(amount: number): void {
     this.currentHp = Math.max(0, this.currentHp - amount);
     this.emitStatsChanged();
   }
 
-  /** Cura HP. El HP nunca supera el máximo. */
   heal(amount: number): void {
     this.currentHp = Math.min(this.getMaxHp(), this.currentHp + amount);
     this.emitStatsChanged();
   }
 
-  /** Gasta MP. Devuelve false si no hay suficiente MP. */
   spendMp(amount: number): boolean {
     if (this.currentMp < amount) return false;
     this.currentMp -= amount;
@@ -202,28 +194,48 @@ export class PlayerStats {
     return true;
   }
 
-  /** Recupera MP. El MP nunca supera el máximo. */
   restoreMp(amount: number): void {
     this.currentMp = Math.min(this.getMaxMp(), this.currentMp + amount);
     this.emitStatsChanged();
   }
 
-  // ─── Snapshot y eventos ──────────────────────────────────────────────────
-
-  /** Devuelve una copia inmutable del estado actual. */
   getSnapshot(): PlayerSnapshot {
+    const effectiveCore = this.getEffectiveCore();
     return {
       classId: this.classId,
       level: this.level,
       xp: this.totalXp,
       xpToNext: xpToNextLevel(this.level),
-      coreStats: { ...this.coreStats },
+      coreStats: { ...effectiveCore },
       derivedStats: {
-        maxHp: this.getMaxHp(),
-        maxMp: this.getMaxMp(),
+        // Calculados por formula
+        maxHp:      this.getMaxHp(),
+        maxMp:      this.getMaxMp(),
         critChance: this.getCritChance(),
-        evasion: this.getEvasion(),
-        turnSpeed: this.getTurnSpeed(),
+        evasion:    this.getEvasion(),
+        turnSpeed:  this.getTurnSpeed(),
+        // Ofensivo
+        critDamage:          this.itemDeltas.critDamagePct,
+        physicalDamagePct:   this.itemDeltas.physicalDamagePct + this.bonusDamagePct,
+        rangedDamagePct:     this.itemDeltas.rangedDamagePct,
+        magicalDamagePct:    this.itemDeltas.magicalDamagePct,
+        flatPhysicalDamage:  this.itemDeltas.flatPhysicalDamage,
+        flatRangedDamage:    this.itemDeltas.flatRangedDamage,
+        flatMagicalDamage:   this.itemDeltas.flatMagicalDamage,
+        // Defensivo
+        armor:               this.itemDeltas.armor,
+        magicResist:         this.itemDeltas.magicResist,
+        damageReductionPct:  this.itemDeltas.damageReductionPct,
+        physicalReductionPct: this.itemDeltas.physicalReductionPct,
+        // Sustain
+        lifestealPct:        this.itemDeltas.lifestealPct,
+        manastealPct:        this.itemDeltas.manastealPct,
+        // Exoticos
+        bleedDamage:         this.itemDeltas.bleedDamage,
+        poisonDamage:        this.itemDeltas.poisonDamage,
+        stunChancePct:       this.itemDeltas.stunChancePct,
+        // Resistencias
+        statusResistancePct: this.itemDeltas.statusResistancePct,
       },
       currentHp: this.currentHp,
       currentMp: this.currentMp,
@@ -234,5 +246,10 @@ export class PlayerStats {
 
   private emitStatsChanged(): void {
     eventBus.emit('player:stats-changed', this.getSnapshot());
+  }
+
+  dispose(): void {
+    eventBus.off('inventory:item-equipped',   this._onEquipChange);
+    eventBus.off('inventory:item-unequipped', this._onEquipChange);
   }
 }

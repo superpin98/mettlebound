@@ -11,6 +11,7 @@
  */
 
 import { eventBus } from '@/core/EventBus';
+import { xpProgressInCurrentLevel } from '@/game/progression/XPSystem';
 import type { PlayerSnapshot } from '@/types/game.types';
 
 export class HUD {
@@ -178,10 +179,13 @@ export class HUD {
     this.elMpBar.style.width = `${Math.max(0, Math.min(100, mpPct))}%`;
     this.elMpText.textContent = `${s.currentMp}/${s.derivedStats.maxMp}`;
 
-    // XP
-    const xpPct = s.xpToNext > 0 ? ((s.xp - this.xpAtCurrentLevel(s)) / s.xpToNext) * 100 : 100;
+    // XP -- usa el helper compartido con CharacterSheet
+    const xpProgress = xpProgressInCurrentLevel(s.xp, s.level);
+    const xpPct = xpProgress.needed > 0
+      ? (xpProgress.current / xpProgress.needed) * 100
+      : 100;
     this.elXpBar.style.width = `${Math.max(0, Math.min(100, xpPct))}%`;
-    this.elXpText.textContent = `${s.xp - this.xpAtCurrentLevel(s)}/${s.xpToNext}`;
+    this.elXpText.textContent = `${xpProgress.current}/${xpProgress.needed}`;
 
     // Stats primarios
     this.elStr.textContent = String(s.coreStats.STR);
@@ -193,13 +197,6 @@ export class HUD {
     this.elCrit.textContent    = `${s.derivedStats.critChance.toFixed(1)}%`;
     this.elEvasion.textContent = `${s.derivedStats.evasion.toFixed(1)}%`;
     this.elSpeed.textContent   = String(s.derivedStats.turnSpeed);
-  }
-
-  /** Calcula la XP acumulada al inicio del nivel actual. */
-  private xpAtCurrentLevel(s: PlayerSnapshot): number {
-    // xpForLevel(level) − xpForLevel(level) = 0 cuando level=1
-    // Importar xpForLevel aquí crearía una dependencia circular; usamos la diferencia
-    return s.xp - (s.xp % (s.xpToNext || 1));  // aproximación visual; la lógica real está en XPSystem
   }
 
   /** Libera los listeners del EventBus. Llamar si el HUD se destruye. */
