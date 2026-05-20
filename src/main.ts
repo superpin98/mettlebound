@@ -132,6 +132,15 @@ playerController.setCamera(cameraController.camera);
     xpBtn.addEventListener('click', () => playerStats.addXp(100));
     devRow.appendChild(xpBtn);
 
+    // Boton -50 HP (cheat de daño para verificar escalado proporcional)
+    const dmgBtn = document.createElement('button');
+    dmgBtn.classList.add('dev-btn');
+    dmgBtn.id = 'debug-damage-btn';
+    dmgBtn.dataset['cheat'] = 'damage-50';
+    dmgBtn.textContent = '-50 HP';
+    dmgBtn.addEventListener('click', () => playerStats.takeDamage(50));
+    devRow.appendChild(dmgBtn);
+
     // Selector de rareza para generar items
     const RARITIES = [
       { id: 'common',    label: '+ Comun',       color: '#aaa' },
