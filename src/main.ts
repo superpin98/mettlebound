@@ -76,7 +76,7 @@ playerController.setCamera(cameraController.camera);
   await playerController.loadModel(chosenClass);
 
   // -- Sala de prueba (se construye una sola vez, aqui) ----------------------
-  await TestRoom.build(scene, assetManager);
+  const dummy = await TestRoom.build(scene, assetManager);
 
   // -- Crear sistemas de juego ------------------------------------------------
   let playerStats = new PlayerStats(chosenClass);
@@ -140,6 +140,26 @@ playerController.setCamera(cameraController.camera);
     dmgBtn.textContent = '-50 HP';
     dmgBtn.addEventListener('click', () => playerStats.takeDamage(50));
     devRow.appendChild(dmgBtn);
+
+    // Boton Damage Dummy -25 (daña al target dummy para validar barra de vida)
+    const dummyDmgBtn = document.createElement('button');
+    dummyDmgBtn.classList.add('dev-btn');
+    dummyDmgBtn.id = 'debug-dummy-damage-btn';
+    dummyDmgBtn.dataset['cheat'] = 'damage-dummy-25';
+    dummyDmgBtn.textContent = 'Dummy -25';
+    dummyDmgBtn.addEventListener('click', () => {
+      if (!dummy.isDead) dummy.takeDamage(25);
+    });
+    devRow.appendChild(dummyDmgBtn);
+
+    // Boton Respawn Dummy (restaura el dummy a HP completo)
+    const dummyRespawnBtn = document.createElement('button');
+    dummyRespawnBtn.classList.add('dev-btn');
+    dummyRespawnBtn.id = 'debug-dummy-respawn-btn';
+    dummyRespawnBtn.dataset['cheat'] = 'respawn-dummy';
+    dummyRespawnBtn.textContent = 'Respawn';
+    dummyRespawnBtn.addEventListener('click', () => dummy.respawn());
+    devRow.appendChild(dummyRespawnBtn);
 
     // Selector de rareza para generar items
     const RARITIES = [

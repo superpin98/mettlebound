@@ -1200,6 +1200,32 @@ body {
   background: rgba(255,255,255,0.08);
 }
 
+/* ─── Target Dummy HP Overlay (z-index: 1500) ───────────────────────────────── */
+
+.dummy-hp-overlay {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1500;
+  /* Centra la barra horizontalmente en el punto proyectado y escala con la UI */
+  transform: translateX(-50%) scale(var(--ui-scale, 1));
+  transform-origin: top center;
+  image-rendering: pixelated;
+}
+
+.dummy-hp-bar-wrap {
+  width: 80px;
+  height: 10px;
+  background: #1a0a0a;
+  border: 2px solid var(--border-gold-dim);
+  box-sizing: border-box;
+}
+
+.dummy-hp-bar-fill {
+  height: 100%;
+  width: 100%;             /* se sobreescribe por JS cada frame */
+  background: var(--hp-mid);   /* #c43a3a -- mismo rojo que la barra del jugador */
+}
+
 /* ─── UIScale selector (z-index: 3000) ──────────────────────────────────────── */
 
 #ui-scale-root {

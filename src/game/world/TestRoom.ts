@@ -13,6 +13,7 @@ import type { Scene, AssetContainer } from '@babylonjs/core';
 import type { AssetManager } from '@/core/AssetManager';
 import { FlameEffect } from '@/game/world/FlameEffect';
 import { FlameSprite } from '@/game/world/FlameSprite';
+import { TargetDummy } from '@/game/world/TargetDummy';
 import { logger } from '@/core/Logger';
 
 // ============================================================
@@ -104,10 +105,12 @@ export class TestRoom {
    * Llamar una sola vez tras playerController.loadModel().
    * Si se llama de nuevo, registra una advertencia y retorna sin hacer nada.
    */
-  static async build(scene: Scene, assetManager: AssetManager): Promise<void> {
+  static async build(scene: Scene, assetManager: AssetManager): Promise<TargetDummy> {
     if (TestRoom._isBuilt) {
       logger.warn('TestRoom: build() llamado mas de una vez -- ignorado.');
-      return;
+      // Devolver un dummy de emergencia nunca ocurre en uso normal,
+      // pero TypeScript requiere un retorno explicito.
+      throw new Error('TestRoom.build() llamado mas de una vez');
     }
     TestRoom._isBuilt = true;
 
@@ -174,12 +177,20 @@ export class TestRoom {
     // NOTA: el flag 1 es TextureDirtyFlag, NO LightDirtyFlag -- no sirve aqui.
     scene.markAllMaterialsAsDirty(2);
 
+    // ── Target Dummy ──────────────────────────────────────────────────────────
+    // Posicion: (0, 0, 2) -- norte del centro, bien iluminado por antorcha norte.
+    // Se crea despues de markAllMaterialsAsDirty para que su material ya reciba
+    // las 4 PointLights en el primer frame.
+    const dummy = new TargetDummy(scene, new Vector3(0, 0, 2));
+
     logger.info('TestRoom: sala construida.', {
       tileSize,
       sideLength: GRID_SIZE * tileSize,
       lucesEnEscena: scene.lights.length,
       nombresLuces: scene.lights.map((l) => l.name),
     });
+
+    return dummy;
   }
 
   // ----------------------------------------------------------
