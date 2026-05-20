@@ -12,8 +12,14 @@ export class Combatant {
   private _currentHp: number;
   readonly maxHp: number;
 
+  /**
+   * Nombre para mostrar en la UI (barra de vida, tooltips, etc.).
+   * Cadena vacia = sin nombre (entidades anonimas como mobs genericos).
+   */
+  displayName: string = '';
+
   constructor(maxHp: number) {
-    this.maxHp    = maxHp;
+    this.maxHp      = maxHp;
     this._currentHp = maxHp;
   }
 
@@ -33,8 +39,8 @@ export class Combatant {
   }
 
   /**
-   * Aplica daño. Clampea a 0 (no hay HP negativo ni resurreccion).
-   * @param amount Cantidad de daño (positivo).
+   * Aplica danio. Clampea a 0 (no hay HP negativo ni resurreccion).
+   * @param amount Cantidad de danio (positivo).
    */
   takeDamage(amount: number): void {
     this._currentHp = Math.max(0, this._currentHp - amount);

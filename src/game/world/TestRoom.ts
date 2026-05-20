@@ -177,11 +177,16 @@ export class TestRoom {
     // NOTA: el flag 1 es TextureDirtyFlag, NO LightDirtyFlag -- no sirve aqui.
     scene.markAllMaterialsAsDirty(2);
 
-    // ── Target Dummy ──────────────────────────────────────────────────────────
+    // ── Target Dummy (Rusty) ──────────────────────────────────────────────────
     // Posicion: (0, 0, 2) -- norte del centro, bien iluminado por antorcha norte.
-    // Se crea despues de markAllMaterialsAsDirty para que su material ya reciba
-    // las 4 PointLights en el primer frame.
-    const dummy = new TargetDummy(scene, new Vector3(0, 0, 2));
+    // create() es async: carga Skeleton_Minion.glb via AssetManager (cacheable).
+    // El modelo asigna maxSimultaneousLights=8 internamente antes del primer frame.
+    const dummy = await TargetDummy.create(
+      scene,
+      assetManager,
+      new Vector3(0, 0, 2),
+      'Rusty',
+    );
 
     logger.info('TestRoom: sala construida.', {
       tileSize,

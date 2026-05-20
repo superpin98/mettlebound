@@ -16,6 +16,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
+    "@gltf-transform/core": "^4.3.0",
     "@typescript-eslint/eslint-plugin": "^8.59.3",
     "@typescript-eslint/parser": "^8.59.3",
     "eslint": "^10.4.0",

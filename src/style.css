@@ -1226,6 +1226,17 @@ body {
   background: var(--hp-mid);   /* #c43a3a -- mismo rojo que la barra del jugador */
 }
 
+.dummy-name-label {
+  text-align: center;
+  font-family: monospace;
+  font-size: 11px;
+  color: #c0a060;               /* dorado oscuro Grimspire */
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  margin-bottom: 3px;
+  white-space: nowrap;
+}
+
 /* ─── UIScale selector (z-index: 3000) ──────────────────────────────────────── */
 
 #ui-scale-root {

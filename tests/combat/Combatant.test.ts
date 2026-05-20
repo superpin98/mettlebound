@@ -69,4 +69,15 @@ describe('Combatant', () => {
     expect(c.isDead).toBe(false);
   });
 
+  // --- displayName ----------------------------------------------------------
+
+  it('displayName por defecto es cadena vacia', () => {
+    expect(c.displayName).toBe('');
+  });
+
+  it('displayName se puede asignar y leer correctamente', () => {
+    c.displayName = 'Rusty';
+    expect(c.displayName).toBe('Rusty');
+  });
+
 });
