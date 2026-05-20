@@ -1,0 +1,13 @@
+﻿{
+  "version": 1,
+  "description": "Banco de assets para items únicos/legendarios. Stage previo a integración en el juego (public/assets/). Sprint 17+.",
+  "items": [
+    {
+      "path": "legendary-items/weapons/swords-1h/sword_of_the_black_vow/",
+      "category": "weapon",
+      "subcategory": "sword-1h",
+      "rarity": "legendary",
+      "promoted": false
+    }
+  ]
+}

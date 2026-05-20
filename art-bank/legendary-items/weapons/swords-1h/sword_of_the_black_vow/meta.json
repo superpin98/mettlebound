@@ -1,0 +1,27 @@
+﻿{
+  "id": "sword_of_the_black_vow",
+  "displayName": "Sword of the Black Vow",
+  "category": "weapon",
+  "subcategory": "sword-1h",
+  "rarity": "legendary",
+  "slot": "mainHand",
+  "compatibleClasses": ["knight", "warrior"],
+  "source": {
+    "origin": "Claude Design",
+    "license": "TBC",
+    "dateAdded": "2026-05-20"
+  },
+  "technical": {
+    "tris": 2935,
+    "vertices": 6548,
+    "materials": 26,
+    "textures": 0,
+    "fileSizeKB": 407,
+    "animations": 3,
+    "notes": "Procedural Three.js. 38 sub-meshes de partículas (mist+embers) sustituibles por sistema de partículas Babylon real."
+  },
+  "visualStyle": "dark-fantasy-emissive",
+  "lore": null,
+  "plannedSprint": "17+",
+  "promoted": false
+}
