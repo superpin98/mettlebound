@@ -47,8 +47,26 @@ const TORCH_LIGHT_Y = 0.55;
 const TORCH_LIGHT_INWARD = 0.15;
 
 // Tamano del plane billboard de la llama (unidades Babylon).
-// 0.8 u: lo suficientemente grande para cubrir el agujero de la U.
-const FLAME_SPRITE_SIZE = 0.8;
+// 0.5 u: ajustado para que la llama quepa dentro de la U sin sobresalir.
+const FLAME_SPRITE_SIZE = 0.90;
+
+// Altura del centro del sprite de llama respecto al wrapper de la antorcha.
+// Sube este valor para mover la llama hacia arriba, bajalo para bajarla.
+// El origen del plane esta en su centro geometrico.
+const TORCH_FLAME_OFFSET_Y = 0.70;
+
+// Cuanto sobresale la llama hacia el centro de la sala (en unidades Babylon).
+// 0.0 = la llama queda en la vertical del palo (pegada a la pared).
+// Sube este valor si la llama queda hundida dentro de la pared.
+const TORCH_FLAME_FORWARD = 0.3;
+
+// Desplazamiento lateral de la llama, paralelo a la pared y perpendicular a inward.
+// 0.0 = sin desplazamiento. Positivo = hacia la derecha vista de frente a la pared.
+// El vector lateral se calcula como Cross(Y_mundo, inward), que da el eje "derecha"
+// desde el punto de vista de alguien mirando la pared desde dentro de la sala.
+// Por pared: Sur→+X  Norte→-X  Oeste→-Z  Este→+Z
+// Consistente: TORCH_FLAME_LATERAL=0.1 desplaza las 4 llamas hacia su derecha propia.
+const TORCH_FLAME_LATERAL = 0.03;
 
 // Luz de antorcha: ambar calido
 const TORCH_DIFFUSE        = new Color3(1.0, 0.5, 0.15);
@@ -346,20 +364,17 @@ export class TestRoom {
       FlameEffect.createAt(scene, lightPos);
 
       // 3. Sprite billboard pixel art animado (cuerpo central de la llama).
-      //
-      // X/Z = pos.x, pos.z exactos (sin offsets laterales): el sprite se clava
-      //   en la vertical del palo, que coincide con el agujero central de la U.
-      // Y = pos.y + LIGHT_Y + FLAME_SPRITE_SIZE/2: el plane tiene su origin en
-      //   el CENTRO geometrico, asi que sumamos la mitad del tamano para que
-      //   la BASE quede a la altura del agujero de la U (pos.y + LIGHT_Y).
-      //
-      //   base del sprite = spritePos.y - FLAME_SPRITE_SIZE/2
-      //                   = (pos.y + LIGHT_Y + FLAME_SPRITE_SIZE/2) - FLAME_SPRITE_SIZE/2
-      //                   = pos.y + LIGHT_Y  <- altura del agujero de la U  ✓
+      // Posicion de la llama: offset relativo al wrapper.
+      // TORCH_FLAME_OFFSET_Y sube/baja la llama (Y).
+      // TORCH_FLAME_FORWARD la aleja de la pared hacia el centro de la sala (X/Z segun inward).
+      // TORCH_FLAME_LATERAL la mueve lateralmente paralela a la pared (X/Z segun lateral).
+      // lateral = Cross(Y_mundo, inward) -> eje "derecha" visto de frente a cada pared.
+      // Usando wrapper.position como base -> funciona en generacion procedural.
+      const lateral = Vector3.Cross(Vector3.Up(), inward);
       const spritePos = new Vector3(
-        pos.x,
-        pos.y + LIGHT_Y + FLAME_SPRITE_SIZE / 2,
-        pos.z,
+        wrapper.position.x + inward.x * TORCH_FLAME_FORWARD + lateral.x * TORCH_FLAME_LATERAL,
+        wrapper.position.y + TORCH_FLAME_OFFSET_Y,
+        wrapper.position.z + inward.z * TORCH_FLAME_FORWARD + lateral.z * TORCH_FLAME_LATERAL,
       );
       FlameSprite.createAt(scene, spritePos, FLAME_SPRITE_SIZE);
 
