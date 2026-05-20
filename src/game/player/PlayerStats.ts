@@ -64,14 +64,18 @@ export class PlayerStats {
     this.pendingStatPoints = classDef.freePoints;
 
     this.derivedStats = calcDerivedStats(this.getEffectiveCore(), this.level);
+    // Caso A: creacion inicial -> HP y MP al 100%
     this.currentHp = this.getMaxHp();
     this.currentMp = this.getMaxMp();
 
     this._onEquipChange = ({ equipped }: { equipped: EquippedItems }): void => {
+      const oldMaxHp = this.getMaxHp();
+      const oldMaxMp = this.getMaxMp();
       this.itemDeltas = calcTotalItemDeltas(equipped);
       this.derivedStats = calcDerivedStats(this.getEffectiveCore(), this.level);
-      this.currentHp = Math.min(this.currentHp, this.getMaxHp());
-      this.currentMp = Math.min(this.currentMp, this.getMaxMp());
+      // Caso B: recalculo en partida -> escalar proporcionalmente
+      this.currentHp = this._scaleCurrentHp(this.currentHp, oldMaxHp, this.getMaxHp());
+      this.currentMp = this._scaleCurrentMp(this.currentMp, oldMaxMp, this.getMaxMp());
       this.emitStatsChanged();
     };
     eventBus.on('inventory:item-equipped',   this._onEquipChange);
@@ -123,12 +127,15 @@ export class PlayerStats {
 
     let levelsGained = 0;
     while (this.totalXp >= xpForLevel(this.level + 1)) {
+      const oldMaxHp = this.getMaxHp();
+      const oldMaxMp = this.getMaxMp();
       this.level++;
       this.pendingStatPoints += 3;
       levelsGained++;
       this.derivedStats = calcDerivedStats(this.getEffectiveCore(), this.level);
-      this.currentHp = this.getMaxHp();
-      this.currentMp = this.getMaxMp();
+      // Caso B: level-up -> escalar proporcionalmente (no curacion gratis)
+      this.currentHp = this._scaleCurrentHp(this.currentHp, oldMaxHp, this.getMaxHp());
+      this.currentMp = this._scaleCurrentMp(this.currentMp, oldMaxMp, this.getMaxMp());
     }
 
     if (levelsGained > 0) {
@@ -146,6 +153,8 @@ export class PlayerStats {
   }
 
   spendStatPoint(stat: keyof CoreStats): void {
+    const oldMaxHp = this.getMaxHp();
+    const oldMaxMp = this.getMaxMp();
     const { newStats, newPending } = applyStatPoint(
       this.coreStats,
       stat,
@@ -154,6 +163,9 @@ export class PlayerStats {
     this.coreStats = newStats;
     this.pendingStatPoints = newPending;
     this.derivedStats = calcDerivedStats(this.getEffectiveCore(), this.level);
+    // Caso B: gasto de punto de stat -> escalar proporcionalmente
+    this.currentHp = this._scaleCurrentHp(this.currentHp, oldMaxHp, this.getMaxHp());
+    this.currentMp = this._scaleCurrentMp(this.currentMp, oldMaxMp, this.getMaxMp());
     this.emitStatsChanged();
   }
 
@@ -208,13 +220,11 @@ export class PlayerStats {
       xpToNext: xpToNextLevel(this.level),
       coreStats: { ...effectiveCore },
       derivedStats: {
-        // Calculados por formula
         maxHp:      this.getMaxHp(),
         maxMp:      this.getMaxMp(),
         critChance: this.getCritChance(),
         evasion:    this.getEvasion(),
         turnSpeed:  this.getTurnSpeed(),
-        // Ofensivo
         critDamage:          this.itemDeltas.critDamagePct,
         physicalDamagePct:   this.itemDeltas.physicalDamagePct + this.bonusDamagePct,
         rangedDamagePct:     this.itemDeltas.rangedDamagePct,
@@ -222,19 +232,15 @@ export class PlayerStats {
         flatPhysicalDamage:  this.itemDeltas.flatPhysicalDamage,
         flatRangedDamage:    this.itemDeltas.flatRangedDamage,
         flatMagicalDamage:   this.itemDeltas.flatMagicalDamage,
-        // Defensivo
         armor:               this.itemDeltas.armor,
         magicResist:         this.itemDeltas.magicResist,
         damageReductionPct:  this.itemDeltas.damageReductionPct,
         physicalReductionPct: this.itemDeltas.physicalReductionPct,
-        // Sustain
         lifestealPct:        this.itemDeltas.lifestealPct,
         manastealPct:        this.itemDeltas.manastealPct,
-        // Exoticos
         bleedDamage:         this.itemDeltas.bleedDamage,
         poisonDamage:        this.itemDeltas.poisonDamage,
         stunChancePct:       this.itemDeltas.stunChancePct,
-        // Resistencias
         statusResistancePct: this.itemDeltas.statusResistancePct,
       },
       currentHp: this.currentHp,
@@ -242,6 +248,25 @@ export class PlayerStats {
       pendingStatPoints: this.pendingStatPoints,
       appliedUpgrades: [...this.appliedUpgrades],
     };
+  }
+
+  /**
+   * Escala currentHp proporcionalmente cuando maxHp cambia en mitad de partida.
+   * Mantiene el ratio hp/maxHp anterior. Resultado redondeado y clampado a [0, newMax].
+   * Si oldMax es 0 (caso degenerado), devuelve newMax para evitar division por cero.
+   */
+  private _scaleCurrentHp(current: number, oldMax: number, newMax: number): number {
+    if (oldMax === 0) return newMax;
+    return Math.min(newMax, Math.max(0, Math.round((current / oldMax) * newMax)));
+  }
+
+  /**
+   * Escala currentMp proporcionalmente cuando maxMp cambia en mitad de partida.
+   * Misma logica que _scaleCurrentHp.
+   */
+  private _scaleCurrentMp(current: number, oldMax: number, newMax: number): number {
+    if (oldMax === 0) return newMax;
+    return Math.min(newMax, Math.max(0, Math.round((current / oldMax) * newMax)));
   }
 
   private emitStatsChanged(): void {
