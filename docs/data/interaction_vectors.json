@@ -4379,6 +4379,482 @@
           ]
         }
       ]
+    },
+    {
+      "category_id": "elemental_acid",
+      "category_name": "Daño elemental — Ácido / Corrosivo",
+      "category_definition": "Vectores de daño originados en sustancias corrosivas que atacan el material del receptor más que a la criatura en sí. El ácido es el único elemento del catálogo que degrada equipamiento y armadura de forma persistente dentro del run: el Knight que sobrevive un encuentro con ácido llega al siguiente combate con armadura dañada. Su efectividad es inversa a la del fuego en muchos aspectos: el metal que resiste el fuego es disuelto por el ácido; el hueso que resiste el fuego se disuelve en ácido concentrado; la madera que arde fácilmente resiste mejor el ácido que el metal. El ácido no propaga, no ilumina, no genera calor: es lento, silencioso y acumulativo. Su daño directo es moderado, pero sus consecuencias materiales son las más duraderas del sistema.",
+      "subcategories": [
+        {
+          "subcategory_id": "armor_corrosion",
+          "subcategory_name": "Corrosión de equipamiento",
+          "vectors": [
+            {
+              "id": "elemental_acid_corrode_armor",
+              "name": "Corrosión de armadura",
+              "description": "El ácido ataca la superficie de la armadura del receptor, degradando su capacidad de resistencia. Aplica status_armor_corroded: la armadura pierde 1 tier de efectividad por stack hasta quedar inoperativa. La degradación persiste entre combates del mismo run.",
+              "generators": [
+                "Proyectil de ácido de Slime ácido (ataque a distancia del subtipo de raza)",
+                "Hechizo del Mago (Acid Splash, Corrode: hechizo de debilitamiento de armadura)",
+                "Trampa de barril de ácido que baña al receptor al romperse",
+                "Pool de ácido que el receptor pisa con armadura"
+              ],
+              "receptors_affected": [
+                "Armadura de placas metálica (receptor primario: el metal se corroe rápidamente)",
+                "Cota de malla (corrosión media: los eslabones se debilitan)",
+                "Armadura de cuero (corrosión lenta: el cuero es más resistente al ácido que el metal)",
+                "Escudo metálico (puede corroerse igual que la armadura)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas metálica (receptor ideal: corrosión acelerada)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Cota de malla",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Armadura de cuero sin partes metálicas",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Armadura de madera o hueso (no existe en el juego base pero posible en futuro)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Armadura con barniz anti-ácido (ítem futuro)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sin armadura: el ácido impacta directamente en la carne (ver dissolve_organic)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La degradación persistente entre combates es la mecánica más tácticamente relevante del ácido. Un Knight con armadura de placas que recibe 2 stacks de corrode_armor en el primer combate llega al segundo combate con armadura que funciona como cota de malla. En el tercero, como cuero. La presión de gestión de recursos del run emerge sin ningún sistema de durabilidad explícito: el ácido lo implementa de forma orgánica. El jugador necesita decidir si repara la armadura en el hub (cost de run currency) o continúa debilitado. El sistema de tiers de armadura: placas → malla → cuero → sin armadura. Cada stack de corrode baja 1 tier efectivo.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "elemental_acid_corrode_weapon",
+              "name": "Corrosión de arma",
+              "description": "El ácido debilita el arma del receptor, reduciendo su daño base y eventualmente haciéndola inservible. Aplica status_weapon_corroded: el arma pierde porcentaje de daño por stack. Si el arma queda completamente corroída, el receptor lucha como si estuviera desarmado.",
+              "generators": [
+                "Slime ácido cuya superficie corroe el arma del atacante en golpe cuerpo a cuerpo",
+                "Pool de ácido en suelo donde el receptor entra blandiendo arma de metal",
+                "Trampa de ácido diseñada para corroer objetos metálicos"
+              ],
+              "receptors_affected": [
+                "Arma de metal del atacante (degradación por contacto con fuente ácida)",
+                "Arma de madera (menos vulnerable: corrosión muy lenta)",
+                "Arma encantada con protección material (resistente según encantamiento)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Arma de metal sin encantamiento de protección",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Arma de madera o hueso",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Arma encantada con sellado de protección material",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Puños del Errante (sin arma: inmune a corrode_weapon)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Arma mágica pura sin componente material físico (futuro)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El Slime ácido cuya superficie corroe las armas en golpe cuerpo a cuerpo es un disuasor poderoso para atacantes de melée: golpear al Slime ácido degrada tu arma. Esto premia el uso de distancia (Cazadora) o magia (Mago) contra esta raza. El Errante, al luchar con los puños, es inmune a corrode_weapon pero sí recibe dissolve_organic en los knuckles. El sistema de armas corroídas crea narrativa de run emergente: 'en este run, mi espada quedó inservible al tercer piso'. La Cazadora puede perder la ballesta si la sumerge en ácido por descuido.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "elemental_acid_corrode_shield",
+              "name": "Corrosión de escudo",
+              "description": "El ácido ataca específicamente el escudo del receptor, reduciendo su capacidad de bloqueo. Aplica status_shield_corroded: el escudo pierde porcentaje de efectividad de bloqueo por stack. A máximo de stacks, el escudo queda completamente inoperativo aunque el receptor siga llevándolo.",
+              "generators": [
+                "Proyectil ácido que impacta específicamente en el escudo levantado",
+                "Slime ácido cuya superficie corroe el escudo en bloqueo activo",
+                "Hechizo del Mago dirigido al escudo del receptor"
+              ],
+              "receptors_affected": [
+                "Escudo metálico activo (receptor primario)",
+                "Escudo de madera (corrosión más lenta pero sí efectiva)",
+                "Knight con escudo como arma principal de defensa"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Escudo metálico sin protección especial",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Escudo de madera reforzada",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Escudo con barniz o encantamiento anti-ácido",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Receptor sin escudo (el vector no aplica)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "corrode_shield es la respuesta táctica del ácido al Knight que usa block activo como principal defensa. Si el Slime ácido ataca y el Knight lo bloquea, el escudo se degrada. En 3 bloqueos el escudo puede quedar inoperativo. Dilema: bloquear y perder el escudo, o esquivar y recibir dissolve_organic directamente. El Slime ácido es un counter natural del Knight precisamente por esta razón. La Cazadora a distancia y el Mago son las clases que mejor manejan Slimes ácidos sin sufrir corrode en su equipo.",
+              "implementation_note": "needs_clarification"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "dissolution",
+          "subcategory_name": "Disolución orgánica",
+          "vectors": [
+            {
+              "id": "elemental_acid_dissolve_organic",
+              "name": "Disolución de tejido orgánico",
+              "description": "El ácido ataca directamente la carne, cuero o tejido orgánico expuesto. Daño moderado directo más aplicación de status_corroding: daño sostenido por turno mientras el ácido permanece activo sobre el receptor. Peor que el fuego en velocidad pero más difícil de tratar.",
+              "generators": [
+                "Proyectil ácido de Slime sobre carne expuesta",
+                "Pool de ácido en suelo que el receptor pisa sin armadura completa",
+                "Hechizo del Mago (Acid Burn: variante de daño orgánico directo)",
+                "Splash de ácido de corrode_armor que rebosa sobre la carne"
+              ],
+              "receptors_affected": [
+                "Carne expuesta sin armadura en zona de impacto",
+                "Cuero (se disuelve parcialmente: daño + degradación material)",
+                "Madera orgánica (disuelve fibras pero más lento que en carne)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal (sin tejido orgánico: inmune a dissolve_organic)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto sin tejido blando (sin carne que disolver)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime de ácido (inmune a su propio ácido o lo regenera)",
+                  "level": "heal"
+                },
+                {
+                  "trait": "Slime de agua (vulnerable: el ácido en masa acuosa la corroe)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Goblin (sin armadura habitual: recibe en carne directa)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al ácido (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Armadura de placas completa sin brecha (ácido no alcanza la carne)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Armadura de cuero intacta (el cuero resiste algo pero se degrada)",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "La nota de 'heal' para Slime de ácido es un caso único en el catálogo: una criatura que se cura del vector que más debería dañarla. Esto hace al Slime ácido contraintuitivo de forma memorable: atacarle con ácido es contraproducente. El status_corroding que aplica es diferente al fuego porque no hay forma de apagarlo con agua: el agua diluye el ácido pero no lo neutraliza completamente. Requiere un antídoto o un agente neutralizante (base química: futuro ítem de ceniza o leche de piedra). Duración de status_corroding sugerida: indefinida hasta tratamiento activo.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_acid_dissolve_bone",
+              "name": "Disolución de hueso",
+              "description": "Variante específica de disolución que ataca el calcio de estructuras óseas. Los Esqueletos, altamente resistentes al fuego y electricidad, son vulnerables a este vector. El ácido disuelve progresivamente los huesos del Esqueleto reduciendo su integridad estructural.",
+              "generators": [
+                "Ácido concentrado de alta potencia aplicado directamente sobre Esqueleto",
+                "Pool de ácido concentrado (no diluido) en contacto prolongado con hueso",
+                "Hechizo del Mago (Bone Dissolve: hechizo especializado anti-Esqueleto de tier medio)"
+              ],
+              "receptors_affected": [
+                "Esqueleto de cualquier subtipo (receptor primario: el hueso seco es ideal para la disolución)",
+                "Constructo de piedra calcárea (vulnerable si el ácido es lo suficientemente concentrado)",
+                "Hueso de cualquier criatura orgánica (aplica en paralelo con dissolve_organic)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (paradoja táctica: resiste fuego/frío pero vulnerable a ácido)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de piedra calcárea",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Constructo de piedra ígnea no calcárea",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de metal (sin hueso ni calcio)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Criatura orgánica sin hueso visible (Slime, formas amorfas)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al ácido (buff)",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "La vulnerabilidad del Esqueleto al ácido cierra el triángulo de sus resistencias/vulnerabilidades: resiste fuego (no tiene fluidos ni tejido), resiste frío (no tiene fluidos que congelar), resiste electricidad (hueso seco mal conductor), pero es VULNERABLE al ácido (el calcio del hueso se disuelve en ácido). Esto hace que cada enemigo tenga una vulnerabilidad específica que invita al jugador a buscar la herramienta correcta. El Mago con Bone Dissolve es el especialista anti-Esqueleto, igual que el Errante con blunt_heavy es el generalista. Esta especialización da valor a builds de Mago incluso en fases tempranas.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_acid_dissolve_gelatine",
+              "name": "Disolución de gelatina",
+              "description": "Interacción específica del ácido con la masa gelatinosa de los Slimes. El resultado varía dramáticamente según el subtipo de Slime: un Slime de agua se disuelve; un Slime de ácido se potencia; un Slime de veneno genera reacción química. El ácido cataliza las propiedades del Slime receptor.",
+              "generators": [
+                "Cualquier vector elemental_acid aplicado sobre un Slime",
+                "Pool de ácido que un Slime entra o atraviesa"
+              ],
+              "receptors_affected": [
+                "Slime de agua (el ácido lo disuelve: daño alto, pérdida de masa)",
+                "Slime de ácido (absorbe el ácido externo: se cura o se potencia)",
+                "Slime de veneno (reacción: genera nube tóxica, ver Cat.8)",
+                "Slime de fuego (reacción: neutralización mutua parcial)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Slime de agua",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Slime de ácido",
+                  "level": "heal"
+                },
+                {
+                  "trait": "Slime de veneno (reacción química: efecto diferente, no daño directo)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime básico gelatinoso sin subtipo especial",
+                  "level": "normal"
+                }
+              ],
+              "design_notes": "[EXPERIMENTAL] Este vector es declarativo por diseño: la reacción se resuelve según las propiedades del Slime receptor, no por hardcodeo. El sistema lee el subtipo del Slime y aplica la interacción declarada en sus propiedades. La nube tóxica generada por Slime de veneno + ácido es un vector secundario de Cat.8 que se activa como cadena. Esto es emergentismo químico puro: el jugador aprende qué reacciones genera cada ácido sobre cada Slime y puede explotarlo tácticamente. Requiere que el sistema de Slimes tenga subtipos declarados antes de implementar este vector.",
+              "implementation_note": "aspirational"
+            },
+            {
+              "id": "elemental_acid_status_corroding",
+              "name": "Estado: Corrosión activa",
+              "description": "El receptor tiene ácido activo sobre su superficie o en su tejido. Daño sostenido por turno que simultáneamente degrada el material del receptor: armadura, arma o tejido orgánico según lo que esté en contacto. No se extingue con agua: requiere neutralizante activo.",
+              "generators": [
+                "elemental_acid_dissolve_organic con magnitud suficiente",
+                "elemental_acid_corrode_armor con magnitud suficiente",
+                "elemental_acid_pool sobre el receptor durante 2+ turnos"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con tejido expuesto al ácido",
+                "Armadura o equipo en contacto con el ácido",
+                "Constructo de madera en pool de ácido"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Slime de ácido",
+                  "level": "heal"
+                },
+                {
+                  "trait": "Constructo de metal o piedra (sin tejido orgánico: corrosión solo material)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Esqueleto (si el ácido alcanzó el hueso directamente)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al ácido (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Neutralizante activo aplicado (ceniza, leche de piedra, ítem futuro)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Agua vertida sobre el receptor (dilución: reduce 1 stack pero no cancela)",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "La diferencia crítica con status_burn: el fuego se apaga con agua, la corrosión no. El agua diluye el ácido pero no lo neutraliza. Esto hace que la corrosión sea tácticamente más difícil de gestionar que el fuego a pesar de causar menos daño instantáneo. El neutralizante activo como ítem de hueco específico: ceniza de piedra, leche de roca, o antídoto de alquimista. Esto justifica la existencia de ítems consumibles especializados que no son solo 'más curación'. La corrosión activa en armadura hace que cada tick de daño también degrade la armadura: es el único estado que daña simultáneamente al receptor Y a su equipo.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "acid_terrain",
+          "subcategory_name": "Ácido en terreno",
+          "vectors": [
+            {
+              "id": "elemental_acid_pool",
+              "name": "Charco de ácido",
+              "description": "Acumulación de ácido líquido en el suelo que forma zona de daño persistente. Cualquier entidad que entre recibe dissolve_organic o corrode_armor según lo que esté en contacto con el suelo. El charco no se evapora ni propaga: permanece hasta que es neutralizado o diluido con suficiente agua.",
+              "generators": [
+                "Slime ácido destruido (su masa se derrama como pool de ácido al morir)",
+                "Barril de ácido roto (interactuable: barril con contenido de ácido declarado)",
+                "Trampa de suelo de ácido (activa en pisada: libera ácido)",
+                "Hechizo del Mago (Acid Pool: crea zona de ácido en suelo)"
+              ],
+              "receptors_affected": [
+                "Entidades que entren en el pool (reciben corrode_armor y/o dissolve_organic según equipo)",
+                "Suelo de madera (el ácido lo corroe: puede crear brecha en suelo de madera antiguo)",
+                "Objetos del entorno en el pool (se corroen si son de material susceptible)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro (flotan)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime de ácido (puede moverse por el pool sin daño)",
+                  "level": "heal"
+                },
+                {
+                  "trait": "Slime de agua (el pool los disuelve aún más rápido que splash)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de metal (las patas/base se corroen: pierde movilidad)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Knight con armadura de placas completa (el pool corroe la armadura por abajo)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Goblin (sin armadura: carne directamente en el ácido)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Resistencia al ácido (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al ácido (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El Slime ácido que muere crea automáticamente el pool con su masa: este comportamiento debe ser declarado en las propiedades de la criatura, no hardcodeado. El sistema lee 'al morir, generar acid_pool en zona de muerte con tamaño proporcional a masa del Slime'. Esto hace que matar Slimes ácidos en zonas estrechas sea peligroso: el cadáver bloquea el paso con ácido. El pool de ácido no ilumina (diferencia con fuego) y no genera calor: es silencioso y visual. El nivel necesita indicador claro de zona de ácido: textura burbujeante verde/amarilla en el suelo.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_acid_terrain_corrode",
+              "name": "Corrosión de elementos del terreno",
+              "description": "El ácido disuelve activamente elementos del entorno: puertas de madera, suelos de madera, barreras orgánicas, cuerdas. Puede crear nuevos accesos o eliminar obstáculos de forma más silenciosa que la destrucción física. También puede corroer cerraduras metálicas como alternativa a physical_structural_lock_break.",
+              "generators": [
+                "Pool de ácido en contacto prolongado con elemento del entorno susceptible",
+                "Proyectil de ácido concentrado dirigido específicamente a elemento del entorno",
+                "Slime de ácido empujado deliberadamente contra puerta de madera (acción de entorno emergente)"
+              ],
+              "receptors_affected": [
+                "Puerta de madera (el ácido la disuelve en 2-3 turnos de contacto con pool)",
+                "Cerradura metálica (el ácido la corrroe: alternativa silenciosa a lock_break físico)",
+                "Cuerda o cadena que bloquea mecanismo",
+                "Suelo de madera antiguo (puede crear agujero de caída al corroerse)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Puerta de madera sin tratamiento anti-ácido",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Puerta de metal macizo (el ácido la ataca pero más lento)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Piedra sólida (el ácido no penetra a velocidades jugables)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Elemento con runa de sellado activa",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Cerradura metálica (la corrroe en 2-3 turnos de exposición)",
+                  "level": "vulnerable"
+                }
+              ],
+              "design_notes": "Este es el tercer método de apertura de accesos en el catálogo, completando el triángulo junto a physical_structural_door_force (fuerza bruta, ruidoso) y physical_structural_lock_break del Pícaro (silencioso, habilidad). El ácido de terreno es: silencioso, lento (2-3 turnos de espera), y requiere tener la fuente de ácido en posición correcta. Es el método del Mago o del jugador creativo que empuja un Slime ácido contra una puerta. La emergencia de 'usar un enemigo como herramienta de apertura' es exactamente el tipo de situación que Mettlebound quiere generar.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "elemental_acid_splash",
+              "name": "Salpicadura de ácido",
+              "description": "El ácido salpica en radio pequeño al impactar un objeto o al estallar un contenedor. Cada salpicadura es dissolve_organic o corrode_armor de baja magnitud pero puede afectar a múltiples entidades en área de salpicadura. También salpica al atacante si está en cuerpo a cuerpo.",
+              "generators": [
+                "Barril de ácido impactado por daño físico (splash al romperse)",
+                "Proyectil de ácido que impacta en superficie dura y salpica",
+                "Slime de ácido golpeado en cuerpo a cuerpo (salpica al atacante)",
+                "Pool de ácido con entidad pesada que entra rápidamente (salpica alrededor)"
+              ],
+              "receptors_affected": [
+                "Entidades en radio de salpicadura del punto de impacto",
+                "Atacante en cuerpo a cuerpo contra Slime de ácido (salpica de vuelta)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas completa (la salpicadura no alcanza fácilmente la carne)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Escudo activo (reduce la salpicadura frontal)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime de ácido propio (no se daña con su propia salpicadura)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal (corrode la superficie externa)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al ácido (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al ácido (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El Slime de ácido que salpica al atacante en cuerpo a cuerpo es el principal disuasor de combate cuerpo a cuerpo contra esta raza. El Errante que golpea a un Slime de ácido a puño limpio recibe acid_splash en los knuckles: dissolve_organic directo en carne. El Knight que lo golpea con espada recibe corrode_weapon + corrode_armor de baja magnitud. El Mago y la Cazadora que atacan a distancia no reciben el splash. Esta mecánica de penalización de melée se implementa declarando la propiedad 'splash_on_hit' en las propiedades del Slime de ácido, no hardcodeando el comportamiento.",
+              "implementation_note": "standard"
+            }
+          ]
+        }
+      ]
     }
   ],
   "combinations": [],

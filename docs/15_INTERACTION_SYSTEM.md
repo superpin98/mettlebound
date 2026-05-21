@@ -47,5 +47,6 @@ en chat web. Estructura prevista: 30+ categorias)
 | 4 | Daño elemental — Fuego | elemental_fire | 16 | ✅ Poblado |
 | 5 | Daño elemental — Frío | elemental_cold | 12 | ✅ Poblado |
 | 6 | Daño elemental — Eléctrico | elemental_electric | 12 | ✅ Poblado |
+| 7 | Daño elemental — Ácido / Corrosivo | elemental_acid | 10 | ✅ Poblado |
 
 (Esta tabla se actualizara conforme entren las categorias)
