@@ -1,0 +1,17 @@
+{
+  "system_meta": {
+    "version": "0.1.0-draft",
+    "schema_doc": "../15_INTERACTION_SYSTEM.md",
+    "magnitude_scale": ["low", "medium", "high", "extreme"],
+    "range_types": ["touch", "melee", "ranged", "area", "ambient"],
+    "duration_types": ["instant", "sustained_turns", "permanent", "until_condition"],
+    "resistance_levels": ["heal", "extreme_vulnerable", "vulnerable", "normal", "resist_25", "resist_50", "resist_75", "immune"],
+    "implementation_notes": ["standard", "aspirational", "needs_research", "needs_clarification"],
+    "id_convention": "snake_case prefixed by category_id (ej: physical_external_slash_light)"
+  },
+  "categories": [],
+  "combinations": [],
+  "race_resistances": {},
+  "unique_buffs": [],
+  "additional_proposals": []
+}
