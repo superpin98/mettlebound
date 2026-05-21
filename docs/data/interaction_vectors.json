@@ -2386,6 +2386,753 @@
           ]
         }
       ]
+    },
+    {
+      "category_id": "elemental_fire",
+      "category_name": "Daño elemental — Fuego",
+      "category_definition": "Vectores de daño originados en calor extremo, llama directa, combustión o ignición. Se dividen según el mecanismo de entrega: contacto directo con llama, irradiación de calor sin contacto, llama persistente en el entorno, e ignición de superficies y materiales. El fuego es una mecánica jugable de doble naturaleza en Mettlebound: fuente de daño y fuente de luz. Una llama activa en la sala ilumina el área (interacción directa con Cat.16), penaliza a Sombras y Espectros que dependen de la oscuridad, y puede propagarse si hay combustibles. Extinguir una antorcha elimina simultáneamente el vector de calor irradiado y la contribución lumínica. Esta dualidad es el corazón de la mecánica de iluminación como herramienta táctica.",
+      "subcategories": [
+        {
+          "subcategory_id": "combustion",
+          "subcategory_name": "Combustión directa",
+          "vectors": [
+            {
+              "id": "elemental_fire_combustion_direct",
+              "name": "Combustión directa",
+              "description": "Contacto directo del receptor con una fuente de llama activa. Daño moderado-alto instantáneo. Alta probabilidad de aplicar status_burn. El vector más común de fuego en combate cuerpo a cuerpo o en interacción de entorno.",
+              "generators": [
+                "Antorcha portada por jugador usada como arma (acción de entorno: golpear con antorcha)",
+                "Antorcha caída al suelo en zona de movimiento del receptor",
+                "Hechizo de Mago (Fireball, Fire Touch básico)",
+                "Candelabro volcado cuya llama contacta directamente con receptor",
+                "Barril de aceite encendido que explota y baña al receptor en llama"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas (carne, cuero, tela)",
+                "Constructos de madera (muy vulnerables)",
+                "Objetos de madera del entorno",
+                "Slimes (dependiendo del tipo)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (hueso seco arde lentamente)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Constructo de madera",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de metal (se calienta pero no arde)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina (acuosa por defecto)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro (la llama las ilumina y daña)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Goblin (orgánico sin protección)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Resistencia al fuego (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al fuego (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Armadura de metal (no protege del calor transmitido, ver heat_radiated)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Saturación en agua activa (buff o estado)",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "La antorcha como arma de contacto es la interacción de entorno más básica de fuego. El jugador que porta una antorcha puede usarla como arma gastando 1 acción: daño bajo de fire_combustion_direct pero con alta probabilidad de status_burn. Al usarla como arma, la antorcha tiene probabilidad de apagarse si el impacto es fuerte (interacción con Cat.16). La dualidad herramienta/arma/luz-fuente es el ejemplo perfecto del pilar 'todo es interactuable'.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_fire_combustion_flash",
+              "name": "Destello de combustión",
+              "description": "Combustión instantánea de altísima temperatura pero duración muy breve. Daño alto concentrado en el instante de contacto. Menor probabilidad de status_burn que combustion_direct por la brevedad. Puede cegar temporalmente si hay contacto visual directo.",
+              "generators": [
+                "Hechizo del Mago (Flash Burn, variante de Fireball de impacto rápido)",
+                "Chispa de candelabro al caer sobre aceite (combustión instantánea de la mezcla)",
+                "Trampa de runa de detonación de fuego (activa en pisada, duración mínima pero daño alto)",
+                "Barril de aceite que recibe una chispa con presión (detona rápido sin llama sostenida)"
+              ],
+              "receptors_affected": [
+                "Criaturas en radio de flash",
+                "Materiales altamente inflamables (aceite, tela, madera seca)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Constructo de madera",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina (acuosa)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia al fuego (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al fuego (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Escudo activo frontal del Knight (bloquea el flash frontal)",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "La ceguera por contacto visual es un efecto secundario opcional de diseño: si el receptor tiene ojos expuestos y el flash ocurre en su línea de visión directa, puede aplicar status_blinded_brief (1 turno, reducción de accuracy). Criaturas sin ojos funcionales como Constructos o Esqueletos son inmunes a la ceguera aunque no al daño. La trampa de runa de destello es el interactuable más brutal del entorno de fuego: mucho daño en un instante sin aviso previo de llama visible.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_fire_combustion_concentrated",
+              "name": "Combustión concentrada",
+              "description": "Haz o punto de calor extremo concentrado en una zona mínima. Alta penetración térmica: puede traspasar algunos materiales resistentes al calor difuso. Puede fundir metal si la exposición es prolongada. Genera elemental_fire_melt en metales como efecto secundario.",
+              "generators": [
+                "Hechizo del Mago (Fire Lance, Concentrated Beam: variante enfocada no AoE)",
+                "Lupa mágica o cristal de enfoque (ítem futuro: concentra luz ambiental en punto)",
+                "Respiración de criatura de fuego (futuro, concentrada en chorro dirigido)"
+              ],
+              "receptors_affected": [
+                "Punto específico del receptor (no AoE, máximo daño en mínima área)",
+                "Metal (puede alcanzar temperatura de fusión con exposición prolongada)",
+                "Runa de cierre en puerta o cofre (puede destruirla con calor extremo)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de piedra (resiste pero puede agrietarse por expansión térmica)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de metal (resiste el daño inicial pero acumula calor)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Constructo de madera",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Esqueleto",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia al fuego (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Inmunidad al fuego (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (el calor concentrado seca y daña más que el difuso)",
+                  "level": "normal"
+                }
+              ],
+              "design_notes": "[EXPERIMENTAL] La penetración térmica en materiales resistentes lo diferencia de combustion_direct. Un Golem de piedra resiste combustion_direct a 75% pero solo a 50% este vector por la concentración. Esto da al Mago una herramienta específica anti-Constructo sin hardcodear debilidades: el vector más concentrado penetra más. Necesita definir cuántos turnos de exposición activan elemental_fire_melt en metal.",
+              "implementation_note": "needs_clarification"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "heat_radiated",
+          "subcategory_name": "Calor irradiado",
+          "vectors": [
+            {
+              "id": "elemental_fire_heat_radiated",
+              "name": "Calor irradiado",
+              "description": "Calor que emana de una fuente activa sin contacto directo de llama. Daño bajo sostenido por turno en entidades dentro del radio de irradiación. Genera status_overheated si la exposición es prolongada. También proporciona iluminación: la fuente ilumina el área y afecta a Cat.16.",
+              "generators": [
+                "Antorcha activa en radio de 6 unidades (PointLight de la antorcha)",
+                "Charco de aceite ardiendo en zona",
+                "Llama persistente activa en sala (elemental_fire_flame_persistent)",
+                "Barril explosivo ardiendo antes de detonar",
+                "Criatura de fuego en sala (futuro)"
+              ],
+              "receptors_affected": [
+                "Criaturas en radio sin protección específica de calor ambiental",
+                "Materiales inflamables en radio (acumulan calor hasta ignición)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal (transmite el calor pero lo disipa)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Esqueleto",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Slime gelatina (el calor lo evapora lentamente)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro (el calor como luz los daña)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Goblin (tolerancia baja al calor)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Resistencia al fuego (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al fuego (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Distancia mayor al radio de irradiación",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Este es el vector que conecta la antorcha como fuente de luz con la mecánica de daño. La antorcha de Grimspire tiene PointLight de intensidad 1.2 y rango 6: dentro de ese rango genera heat_radiated de baja magnitud. Normalmente inofensivo para el jugador, pero significativo para Sombras y Espectros. Si el jugador lleva una antorcha encendida, está generando heat_radiated continuamente: ventaja contra no-muertos oscuros, desventaja si hay trampa de gas inflamable cercana.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_fire_heat_ambient",
+              "name": "Calor ambiental de zona",
+              "description": "Temperatura extremadamente alta que afecta a toda una sala o zona como efecto de nivel. Distinto de heat_radiated en que no tiene fuente puntual: toda la sala es hostil. Aplica status_overheated progresivamente a todos los presentes.",
+              "generators": [
+                "Sala de forja maldita (diseño de nivel: zona de calor permanente)",
+                "Abertura a zona volcánica (futuro: nivel de tipo no-Grimspire)",
+                "Acumulación de múltiples fuentes de heat_radiated en espacio cerrado",
+                "Trampa de sala de calor (palanca activa calefactores de runa en las paredes)"
+              ],
+              "receptors_affected": [
+                "Todas las entidades en la sala sin excepción salvo inmunidades explícitas",
+                "Materiales inflamables del entorno acumulan calor hasta ignición espontánea"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de metal (en calor ambiental extremo: se calienta mucho)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Constructo de madera",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Esqueleto",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro (la sala iluminada por calor las daña)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Resistencia al fuego (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al fuego (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (suda, pierde DEX por calor)",
+                  "level": "normal"
+                }
+              ],
+              "design_notes": "Pensado para salas especiales de diseño de nivel donde el entorno en sí es el enemigo. Crea situaciones donde el jugador necesita resolver el combate rápido o gestionar el status_overheated. El status_overheated a nivel máximo aplica: -25% STR, -25% DEX, y daño sostenido por turno. Para el Sprint 6 de generación procedural: algunas salas pueden tener heat_ambient como modificador de zona permanente.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "elemental_fire_heat_proximity",
+              "name": "Penalización por proximidad a calor intenso",
+              "description": "Efecto de calor extremo en entidades adyacentes a una fuente de alta intensidad sin llegar a ser combustion_direct. No causa daño inmediato pero aplica status_heat_stressed: reducción de accuracy y DEX por el discomfort térmico. Distinto del calor ambiental difuso.",
+              "generators": [
+                "Estar en casilla adyacente a fuente de fuego de alta intensidad como barril ardiendo",
+                "Estar dentro del radio mínimo de una explosión de barril sin recibir el daño directo",
+                "Criatura de fuego de gran tamaño en casilla adyacente (futuro)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas en casillas inmediatamente adyacentes a fuente de calor extremo"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal o piedra (sin sistema nervioso para el discomfort)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin tejido vivo que estrese el calor)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Sombra / Espectro (el calor como luz sí les afecta)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia al fuego (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al fuego (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (muy sensible al calor: pierde valentía grupal)",
+                  "level": "normal"
+                }
+              ],
+              "design_notes": "status_heat_stressed: -15% accuracy, -15% DEX mientras dure la exposición. Crea decisiones de posicionamiento real: el jugador puede usar una fuente de fuego intensa como barrera táctica de zona de control no-letal que penaliza a enemigos que se acerquen demasiado. El Golem es immune a este vector: puede atravesar zonas de calor sin penalización táctica, lo que lo hace peligroso en entornos de fuego donde el jugador está penalizado.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "persistent_flame",
+          "subcategory_name": "Llama persistente",
+          "vectors": [
+            {
+              "id": "elemental_fire_flame_persistent",
+              "name": "Llama persistente",
+              "description": "Llama activa en una zona del entorno que permanece durante N turnos. Cualquier entidad que entre en la zona recibe elemental_fire_combustion_direct por turno de permanencia. Ilumina el área mientras está activa: impacto en Cat.16.",
+              "generators": [
+                "Charco de aceite encendido (aceite + fuego = llama persistente en esa casilla N turnos)",
+                "Hechizo del Mago (Wall of Fire, Persistent Flame en zona)",
+                "Antorcha caída al suelo en zona sin agua cercana",
+                "Trampa de runa de fuego persistente (activa al pisarla)"
+              ],
+              "receptors_affected": [
+                "Zona del entorno (receptor primario: el suelo se convierte en zona dañina)",
+                "Cualquier entidad que entre o permanezca en la zona por turno",
+                "Materiales combustibles en la zona (pueden extender la llama)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Sombra / Espectro (la zona iluminada por llama las daña y acorrala)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Esqueleto",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Constructo de madera (arde si permanece en la zona)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de piedra (atraviesa sin daño significativo)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de metal (atraviesa con calor acumulado)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina (acuosa: resist pero pierde masa por turno)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Resistencia al fuego (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al fuego (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Agua vertida sobre la zona (extingue la llama)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La llama persistente como zona de control es uno de los vectores ambientales más ricos tácticamente. Acorrala Sombras en esquinas donde la luz las daña. Fuerza al Golem por caminos alternativos si tiene DEX baja. Da al Mago un rol de control del terreno además de daño. La extinción por agua (Cat.27) es la contramedida directa: barril con agua sobre la llama la apaga inmediatamente. Duración sugerida: 3-5 turnos base, modificable por tamaño de la fuente.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_fire_flame_trail",
+              "name": "Rastro de fuego",
+              "description": "Línea de fuego persistente dejada a lo largo del camino de movimiento de una entidad o proyectil. Cada casilla del rastro es una zona de flame_persistent de corta duración. Crea barreras dinámicas de fuego que cambian con el movimiento.",
+              "generators": [
+                "Hechizo del Mago (Fire Trail: el hechizo deja fuego en su camino)",
+                "Criatura de fuego que deja rastro al moverse (futuro)",
+                "Bola de aceite encendida lanzada que rueda por el suelo",
+                "Entidad con status_ignited que se mueve dejando fuego donde pisa"
+              ],
+              "receptors_affected": [
+                "Casillas en el camino del rastro (zonas de fuego de corta duración)",
+                "Entidades que cruzan el rastro en turnos siguientes"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Mismas que elemental_fire_flame_persistent para entidades que cruzan",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Entidad con status_ignited ya activo (el rastro no la daña adicional)",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "El rastro de fuego crea geometría dinámica: el Mago puede usar Fire Trail para cortar la ruta de acercamiento de un enemigo. Una entidad con status_ignited que huye deja un rastro que puede quemar a aliados del jugador o crear obstáculos adicionales. Duración del rastro: 2 turnos por casilla. Se combina con aceite en suelo: si el rastro cruza una zona de aceite, activa flame_persistent de larga duración en esa zona.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "elemental_fire_flame_wall",
+              "name": "Pared de fuego",
+              "description": "Barrera lineal de llama activa que bloquea el paso y daña a cualquier entidad que intente cruzarla. Funciona como obstáculo táctico de control de zona. Puede ser cruzada pero con penalización de daño masivo.",
+              "generators": [
+                "Hechizo del Mago (Wall of Fire, hechizo de control de zona de tier medio-alto)",
+                "Línea de barriles de aceite simultáneamente encendidos",
+                "Trampa de runa de barrera de fuego activada por palanca"
+              ],
+              "receptors_affected": [
+                "Entidades que intentan cruzar la barrera (daño por cruce)",
+                "Zona de acceso que bloquea (efecto de corte de línea)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Inmunidad al fuego (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al fuego (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de piedra o metal (pueden cruzar con daño reducido)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro (no pueden cruzarla: la luz las frena)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Agua vertida sobre la barrera (reduce su extensión o la extingue por secciones)",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "El wall of fire es el hechizo de control de zona definitivo del Mago. Bloquea el acercamiento de enemigos melée sin inmunidad al fuego. Las Sombras no pueden cruzarla: quedan atrapadas al otro lado. El Knight puede cruzarla con su armadura si lleva resistencia al fuego activa. Sin esa resistencia, cruzar la pared es un sacrificio táctico calculado. Duración: 3 turnos base. El jugador puede crear walls naturales encendiendo una línea de barriles de aceite: más emergentismo sin hardcodeo.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "surface_ignition",
+          "subcategory_name": "Ignición de superficie",
+          "vectors": [
+            {
+              "id": "elemental_fire_surface_ignition",
+              "name": "Ignición de superficie",
+              "description": "Chispa, llama o calor que enciende un material combustible específico en el entorno. El material pasa a generar flame_persistent en su casilla. Requiere dos componentes: una superficie combustible y un iniciador de fuego.",
+              "generators": [
+                "Chispa de candelabro al caer sobre charco de aceite (Cat.27 + chispa física)",
+                "elemental_fire_combustion_direct aplicado a charco de aceite",
+                "Hechizo del Mago aplicado sobre zona de aceite o madera seca",
+                "elemental_fire_combustion_flash sobre material inflamable",
+                "Antorcha volcada que cae sobre superficie de aceite"
+              ],
+              "receptors_affected": [
+                "Charco de aceite (receptor primario: se convierte en flame_persistent de larga duración)",
+                "Madera del suelo o mobiliario (receptor secundario: se convierte en flame_persistent de menor duración)",
+                "Tela en el suelo o colgante (ignición rápida pero breve)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Piedra (no combustible: no puede recibir este vector)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Metal (no combustible salvo exposición extrema)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Agua en la superficie (extingue antes de que la ignición se establezca)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Aceite sin fuente de calor cercana (no se autoenciende)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Aceite en presencia de chispa o llama",
+                  "level": "extreme_vulnerable"
+                }
+              ],
+              "design_notes": "Este es el vector que da vida al sistema de fuego emergente del juego. Aceite en el suelo es inerte hasta que llega una fuente de calor. Candelabro volcado → chispa → si hay aceite cerca → incendio. Esta cadena no está hardcodeada: cada objeto declara sus propiedades (combustible, fuente de calor, contenido) y el sistema resuelve. Es el vector que más directamente implementa la inspiración de Noita/BG3 en Mettlebound.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_fire_surface_spread",
+              "name": "Propagación lateral de fuego",
+              "description": "Extensión del fuego desde una zona encendida a zonas adyacentes con material combustible. Cada turno, la llama activa tiene probabilidad de extenderse a casillas vecinas con aceite, madera u otros combustibles.",
+              "generators": [
+                "elemental_fire_flame_persistent activo en casilla adyacente a material combustible",
+                "Entidad con status_ignited que está adyacente a material combustible"
+              ],
+              "receptors_affected": [
+                "Casillas adyacentes a llama activa que tengan aceite, madera u otro combustible declarado",
+                "Objetos de madera del entorno en casillas adyacentes a llama"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Casilla de piedra sin combustible (no puede recibir propagación)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Casilla con agua activa (barrera contra propagación)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Casilla con aceite",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Casilla con madera",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Separación de 1 casilla sin combustible (cortafuegos natural)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La propagación lateral es el vector más peligroso en espacios cerrados con múltiples fuentes de aceite. Un jugador que enciende accidentalmente aceite puede perder el control del fuego. La mecánica de cortafuego emerge del diseño: una casilla de piedra entre dos zonas de aceite impide la propagación. En versión base: propagación por zonas predefinidas (no simulación de fluido pixel a pixel). La simulación dinámica es marcada como aspiracional para futuro.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "elemental_fire_surface_extinguish",
+              "name": "Extinción de fuego",
+              "description": "Vector inverso: agua, arena u otro agente extintor aplicado sobre una zona de fuego activo la extingue completamente o reduce su magnitud. Técnicamente un vector de modificación ambiental pero se define aquí por simetría con el sistema de fuego.",
+              "generators": [
+                "Barril de agua roto sobre zona de fuego activo",
+                "Hechizo de agua del Mago (si se añade en futuro)",
+                "Charco de agua preexistente que la llama intenta cruzar pero es frenada",
+                "Antorcha apagada con agua (extinción de fuente puntual)"
+              ],
+              "receptors_affected": [
+                "elemental_fire_flame_persistent activo en zona (se extingue)",
+                "elemental_fire_surface_ignition activo (se cancela la ignición)",
+                "Entidad con status_burn activo (reduce o cancela el estado)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Llama alimentada por aceite en cantidad extrema (el agua no la extingue, solo la reduce)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Llama persistente de Mago de tier alto (requiere más agua)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Fuego mágico de tier legendario",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "La extinción es necesaria para que el sistema de fuego no sea un bucle infinito de retroalimentación. El agua es la contramedida directa al fuego. Barril de agua sobre zona encendida: extinción completa si el fuego no es de aceite en exceso. Este vector justifica que el jugador piense en posicionar barriles de agua estratégicamente. También justifica que algunos enemigos lleven agua como ítem o tengan ataques de agua. [POSIBLE OVERLAP CON Cat.27 vectores de fluidos] — la extinción es mejor vista como interacción de Cat.27 con Cat.4, pero se define aquí para completitud del sistema de fuego.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "fire_states",
+          "subcategory_name": "Estados y efectos derivados del fuego",
+          "vectors": [
+            {
+              "id": "elemental_fire_status_burn",
+              "name": "Estado: Quemadura activa",
+              "description": "Daño sostenido de fuego por turno sobre el receptor. Aplicado por contacto con fuego. Se acumula en stacks: cada stack añade daño por turno. Apagable con agua o habilidades específicas. El receptor emite humo visible.",
+              "generators": [
+                "elemental_fire_combustion_direct con probabilidad según magnitud",
+                "Permanencia en zona de elemental_fire_flame_persistent",
+                "elemental_fire_surface_ignition que afecta a receptor orgánico"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con tejido o tela",
+                "Constructos de madera"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de piedra o metal (no pueden arder)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (puede arder: el hueso seco arde aunque lento)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro (si se aplica fuego a ella, el burn es muy efectivo)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Slime gelatina (acuosa: el burn se autoextingue en 1 turno)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Resistencia al fuego (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al fuego (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Saturación en agua (buff o estado): apaga el burn inmediatamente",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El humo visible del receptor en burn es retroalimentación visual importante: el jugador sabe que el enemigo está ardiendo sin necesidad de consultar la UI. Los stacks de burn se representan visualmente con más intensidad de partículas. La extinción requiere acción activa: el receptor (si es IA) intentará buscar agua o rodar por el suelo (gastar 1 acción para reducir un stack). El jugador puede hacer lo mismo.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_fire_status_ignited",
+              "name": "Estado: Receptor en llamas",
+              "description": "El receptor completo está en llamas. Variante severa de status_burn con daño mayor por turno. El receptor en llamas propaga elemental_fire_surface_ignition a materiales combustibles que toque. Genera elemental_fire_heat_radiated en su radio mínimo.",
+              "generators": [
+                "status_burn a máximo de stacks (transición automática)",
+                "Sumersión directa en zona de elemental_fire_flame_persistent durante 2+ turnos",
+                "elemental_fire_combustion_direct de magnitud extrema"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas y constructos de madera (únicos que pueden alcanzar estado ignited completo)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de piedra o metal",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Resistencia al fuego (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Inmunidad al fuego (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Un Esqueleto en llamas que corre hacia el jugador propaga el fuego al contacto: emergentismo oscuro. La IA de un enemigo en status_ignited debería: priorizar buscar agua, si no hay agua atacar desesperadamente, si tiene alta INT alejarse del jugador para no propagar. El estado es esencialmente terminal sin agua cercana: el daño por turno es suficientemente alto para ser letal en 3-4 turnos. Crea urgencia táctica real para ambos bandos.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_fire_status_smolder",
+              "name": "Estado: Brasas residuales",
+              "description": "Calor residual de muy bajo daño pero duración muy larga. Aplicado tras extinguir un status_burn sin tratamiento completo. El receptor ya no arde visiblemente pero sigue sufriendo calor residual. Puede reactivarse a status_burn si recibe cualquier fuente de fuego.",
+              "generators": [
+                "status_burn extinguido parcialmente (con agua insuficiente o que se evapora antes)",
+                "Contacto breve con elemental_fire_heat_radiated de alta intensidad repetido varios turnos"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas que tuvieron status_burn previamente",
+                "Madera tratada con agua pero no completamente enfriada"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de piedra o metal",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al fuego (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Saturación completa en agua (extingue smolder definitivamente)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La reactivación a status_burn si recibe nueva fuente de fuego es la mecánica táctica clave: el jugador puede aprovechar el smolder de un enemigo para volver a encenderlo sin necesidad de superar sus resistencias base. status_smolder es la brasa que espera una chispa. Duración: 6-8 turnos. Daño por turno: 10-15% del daño de status_burn activo.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_fire_melt",
+              "name": "Fusión por calor extremo",
+              "description": "Calor tan extremo y sostenido que funde o deforma materiales resistentes como metal o piedra. No causa daño biológico directo: sus efectos son ambientales y sobre objetos. Una armadura de metal fundida reduce su resistencia permanentemente.",
+              "generators": [
+                "elemental_fire_combustion_concentrated sostenido sobre metal durante varios turnos",
+                "heat_ambient extremo prolongado sobre objeto metálico",
+                "Criatura de fuego de tier alto en contacto prolongado con objeto metálico (futuro)"
+              ],
+              "receptors_affected": [
+                "Armadura de metal del jugador o enemigo (resistencia reducida permanentemente en el run)",
+                "Cerradura metálica de puerta o cofre (puede derretirla como alternativa a lock_break)",
+                "Objeto metálico del entorno (puede crear forma nueva: metal líquido como trampa de suelo)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Acero de altísima calidad (requiere más tiempo)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Metal encantado (resistente a fusión mágica o física)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Piedra (requiere calor aún más extremo para fundir)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Madera y materiales orgánicos (no se funden: arden antes)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "[EXPERIMENTAL] El metal líquido como resultado de fusión puede crear una zona de daño de contacto en el suelo: una nueva trampa ambiental emergente. La armadura degradada por fusión parcial es un sistema de persistencia de estado dentro del run: el jugador siente las consecuencias de haber sido alcanzado por calor extremo más allá del combate que lo causó. Necesita definir los umbrales de temperatura y tiempo de exposición antes de comprometerse con los valores.",
+              "implementation_note": "needs_clarification"
+            }
+          ]
+        }
+      ]
     }
   ],
   "combinations": [],
