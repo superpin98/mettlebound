@@ -4855,6 +4855,742 @@
           ]
         }
       ]
+    },
+    {
+      "category_id": "elemental_poison",
+      "category_name": "Daño elemental — Veneno / Orgánico",
+      "category_definition": "Vectores de daño originados en toxinas, venenos biológicos, gases tóxicos, esporas y agentes de necrosis. El veneno opera de forma completamente distinta a los elementos anteriores: no ataca la materia inerte sino los sistemas biológicos vivos. El metal no es afectado. El hueso seco tampoco. El constructo de piedra es inmune. El veneno es el elemento más letal contra lo orgánico vivo y completamente ineficaz contra lo inorgánico. Su principal mecanismo táctico no es el daño inmediato sino la acumulación de estados que degradan la capacidad del receptor: envenenamiento base, necrosis que bloquea la curación, y parálisis química que roba turnos de forma más duradera que la eléctrica. La clase Pícaro es la principal generadora de vectores de veneno en el bando del jugador: pierce_light actúa como vector de entrega y el veneno como efecto. La armadura que bloquea el pierce bloquea también la entrega del veneno.",
+      "subcategories": [
+        {
+          "subcategory_id": "contact_poison",
+          "subcategory_name": "Veneno de contacto",
+          "vectors": [
+            {
+              "id": "elemental_poison_contact_skin",
+              "name": "Veneno por contacto dérmico",
+              "description": "Toxina que penetra directamente a través de la piel orgánica al contacto. No requiere herida previa. Penetra cuero fino y tela pero no armadura metálica ni de cuero grueso. Aplica status_poisoned de forma inmediata a baja magnitud.",
+              "generators": [
+                "Daga del Pícaro con veneno de contacto aplicado (la hoja basta para transferir)",
+                "Slime venenoso que toca al receptor (su masa es el veneno)",
+                "Trampa de guantes envenenados en cofre (trampa de contacto al abrir)",
+                "Planta venenosa que toca la piel (futuro: interactuable vegetal maldito)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con piel expuesta o cubierta solo por tela",
+                "Criaturas orgánicas con cuero fino (la toxina penetra parcialmente)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas completa (la piel no está accesible)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Armadura de cuero grueso (reduce la penetración dérmica)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Piel de Acero (buff) (la superficie metálica no absorbe veneno)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de cualquier tipo (sin piel orgánica)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin piel ni tejido dérmico)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (absorbe toxinas pero su masa las distribuye: efecto reducido)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Goblin (piel fina y expuesta: alta absorción)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al veneno (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La diferencia con contact_wound: contact_skin no requiere herida previa pero es menos efectivo. La armadura que cubre completamente la piel niega el vector. El Pícaro con daga envenenada de contacto dérmico puede aplicar el veneno incluso si el enemigo esquiva el daño físico: si el filo roza la piel (hit parcial), el veneno pasa. Distinción de implementación: un hit que hace 0 daño físico por esquive puede aún entregar el veneno de contacto si hay contacto físico mínimo.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "elemental_poison_contact_wound",
+              "name": "Veneno por herida abierta",
+              "description": "Toxina que penetra directamente en una herida preexistente, saltándose completamente las defensas dérmicas. Requiere que el receptor tenga status_bleeding o status_lacerated activo. La magnitud del envenenamiento es significativamente mayor que contact_skin. Es el vector de veneno principal del Pícaro.",
+              "generators": [
+                "Daga del Pícaro con veneno aplicado sobre receptor con sangrado activo",
+                "pierce_light del Pícaro seguido de veneno en la misma herida",
+                "Zarpa venenosa de bestia que abre y envenena en el mismo ataque (futuro)",
+                "Flecha envenenada de la Cazadora que crea herida y entrega veneno simultáneamente"
+              ],
+              "receptors_affected": [
+                "Cualquier criatura orgánica con status_bleeding o status_lacerated activo",
+                "Receptor con brecha en armadura generada por lacerate_tear o corrode_armor"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Receptor sin herida activa (el vector no aplica: requiere estado previo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin sistema vascular: herida no recibe veneno biológicamente)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin heridas definidas: el veneno se distribuye en la masa)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Goblin con herida activa",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Inmunidad al veneno (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Este es el vector que hace al Pícaro peligroso como combo de dos acciones: turno 1, slash_light para generar status_bleeding. Turno 2, pierce_light con veneno → contact_wound con magnitud máxima. Si el Pícaro encadena dos turnos por DEX alta, puede ejecutar el combo en el mismo turno. El sistema de DEX-chaining diseñado para el juego habilita que el Pícaro full-DEX pueda hacer el combo completo antes de que el enemigo actúe. La Cazadora con flecha envenenada genera ambos estados simultáneamente: la flecha hace la herida y entrega el veneno en el mismo impacto.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_poison_contact_surface",
+              "name": "Superficie envenenada",
+              "description": "Objeto o zona del entorno recubierta de veneno de contacto. Cualquier entidad orgánica que lo toque directamente recibe contact_skin automáticamente. Persiste hasta que se lava con agua o se activa por primera vez. Trampa silenciosa.",
+              "generators": [
+                "Trampa de cofre con interior envenenado (al abrir toca el veneno)",
+                "Pícaro que aplica veneno a objeto del entorno como palanca o puerta",
+                "Slime venenoso que se arrastra dejando rastro en el suelo",
+                "Trampa de aguja envenenada en pomo de puerta"
+              ],
+              "receptors_affected": [
+                "Cualquier entidad orgánica que toque la superficie directamente",
+                "Entidades que pisen la zona envenenada sin calzado protector"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas o guantes de metal (sin contacto dérmico directo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (absorbe el veneno de la superficie)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Agua vertida sobre la superficie (neutraliza el veneno)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El Pícaro puede usar este vector ofensivamente: envenenar una palanca que el enemigo vaya a usar (si la IA enemiga usa interactuables, que es un pilar del diseño). También puede envenenar el suelo en la ruta de patrulla de un enemigo. La trampa de cofre envenenado es el caso clásico: el jugador aprende a inspectar antes de abrir. La detección de superficie envenenada requiere STE alto: con STE bajo, el jugador no ve el brillo tóxico y activa la trampa. Agua en la superficie neutraliza el veneno: interacción con Cat.27.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "inhaled_poison",
+          "subcategory_name": "Veneno inhalado",
+          "vectors": [
+            {
+              "id": "elemental_poison_inhaled_gas",
+              "name": "Gas tóxico",
+              "description": "Nube de gas venenoso en zona. Cualquier entidad con sistema respiratorio que permanezca en ella recibe envenenamiento creciente por turno. Sin efecto en criaturas sin respiración. La nube se disipa en N turnos o con viento fuerte. Se combina con fuego: gas + llama = explosión.",
+              "generators": [
+                "Trampa de suelo de gas (pressure plate libera nube tóxica)",
+                "Barril con contenido de gas tóxico roto",
+                "Hechizo del Mago (Toxic Cloud: hechizo de zona de gas)",
+                "Reacción química: Slime de veneno + ácido (Cat.7 dissolve_gelatine → nube tóxica)",
+                "Cadáver de criatura venenosa que libera gas al morir (futuro)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con sistema respiratorio en la zona",
+                "Fuente de fuego en la zona (el gas es inflamable: detonación posible)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de cualquier tipo (sin respiración)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin sistema respiratorio activo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin pulmones: el gas no penetra su masa)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Goblin (pequeño: inhala más gas por peso corporal)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al veneno (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Pañuelo o máscara improvisada (ítem: reduce acumulación)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Viento fuerte en zona (dispersa la nube)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La interacción gas + fuego es la cadena emergente más explosiva de esta categoría: una nube de gas tóxico en sala cerrada más una antorcha encendida o un hechizo de fuego = detonación masiva que hace explosion_wave + daño de fuego en toda la zona. Esto penaliza al Mago de fuego que ignora el gas: lanzar fireball en sala con nube tóxica es un autoataque masivo. El jugador debe leer el entorno antes de actuar. Los Esqueletos son inmunes al gas: esto los convierte en combatientes ideales para salas gaseadas si están bajo control de la mazmorra.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_poison_inhaled_spore",
+              "name": "Esporas tóxicas",
+              "description": "Partículas orgánicas microscópicas inhaladas. Más lentas de activar que el gas pero de duración mucho mayor: las esporas se instalan en el sistema respiratorio y continúan dañando durante muchos turnos incluso fuera de la zona de exposición. Variante biológica del veneno inhalado.",
+              "generators": [
+                "Planta maldita esporulante en la sala (interactuable ambiental futuro)",
+                "Cadáver fúngico que libera esporas al dañarlo",
+                "Trampa de urna con esporas al romperse",
+                "Hechizo de Skeleton Mage de tipo orgánico (variante futura de subtipo)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con sistema respiratorio",
+                "Criaturas orgánicas que permanecen en zona durante más de 1 turno"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin sistema respiratorio)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al veneno (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Agua sobre el receptor (las esporas en superficie se eliminan)",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "La diferencia táctica con inhaled_gas: el gas es una zona de peligro activo que termina cuando sales. Las esporas se instalan y siguen dañando cuando ya estás fuera de la zona. El jugador puede salir de la sala de esporas pero sigue tomando daño. Requiere tratamiento activo (antídoto, habilidad de purificación del Mago) no solo alejarse. Las esporas también tienen vector de propagación: una criatura que recibe esporas y muere cerca de otra criatura orgánica puede transferir parte de la carga. Marcado aspiracional por la complejidad del sistema de propagación.",
+              "implementation_note": "aspirational"
+            },
+            {
+              "id": "elemental_poison_inhaled_smoke",
+              "name": "Humo tóxico por combustión",
+              "description": "Gas venenoso generado como subproducto al quemar ciertos materiales: plantas malditas, cuerpos de Slime, barriles de veneno. El fuego no solo quema: genera humo que envenena el área circundante. Conecta los sistemas de fuego y veneno.",
+              "generators": [
+                "Planta maldita quemada (elemental_fire_combustion_direct sobre planta → genera humo tóxico)",
+                "Slime de veneno quemado (al arder su masa orgánica libera toxinas en humo)",
+                "Barril de veneno quemado en vez de explotado (fuego lento sin explosión = humo tóxico)",
+                "Cadáver de criatura venenosa sometido a fuego"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con respiración en radio del humo",
+                "La propia fuente de fuego puede ser bloqueada con humo (si hay suficiente opacidad)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin respiración)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin en zona de humo (pequeño: la concentración es mayor a su altura)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al veneno (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Viento o corriente de aire que dispersa el humo",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Este vector crea un dilema emergente con el fuego: quemar plantas malditas elimina el interactuable pero genera humo que puede envenenar al jugador en sala cerrada. Quemar un Slime de veneno en vez de atacarlo con ácido o físico puede parecer seguro pero genera humo. El jugador aprende que el fuego tiene consecuencias secundarias según qué quema. El humo también reduce visibilidad: opacidad del humo aplica penalización a Cat.16 (iluminación reducida por partículas) además del veneno. Doble penalización en espacio cerrado.",
+              "implementation_note": "needs_research"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "ingested_poison",
+          "subcategory_name": "Veneno ingerido",
+          "vectors": [
+            {
+              "id": "elemental_poison_ingested_direct",
+              "name": "Veneno ingerido directamente",
+              "description": "Toxina en alimento, bebida o poción consumida voluntaria o involuntariamente. Daño alto con retardo de 1-2 turnos tras la ingesta antes de activarse. Ignora armadura y piel completamente: el veneno va directo al sistema digestivo. Los efectos son internos (ver Cat.2).",
+              "generators": [
+                "Trampa de poción de veneno disfrazada como poción de curación en cofre",
+                "Jugador envenena la comida o bebida de un enemigo (acción de entorno con ítem)",
+                "Pícaro aplica veneno a ítem consumible del inventario enemigo (habilidad furtiva futura)",
+                "Poción envenenada de tienda (evento de mala suerte de run: mercader deshonesto)"
+              ],
+              "receptors_affected": [
+                "Cualquier criatura orgánica que consuma el ítem",
+                "El sistema digestivo e interno del receptor (ignora todas las protecciones externas)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas completa (irrelevante: el veneno ya está dentro)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Piel de Acero (buff) (irrelevante: el veneno está en el sistema digestivo)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Constructo de cualquier tipo (no consume ítems)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin sistema digestivo funcional)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (consume sin discriminar: muy vulnerable a esta trampa)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Inmunidad al veneno (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Antídoto tomado antes de la activación del retardo",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El retardo de 1-2 turnos antes de la activación es la mecánica táctica clave: el receptor no sabe inmediatamente que está envenenado. En PvE, la trampa de poción envenenada es el escenario principal. El jugador que toma una poción dudosa puede ver sus stats caer 2 turnos después y no entender por qué hasta que conecta los puntos. STE alto permite detectar el veneno antes de consumir: 'Presientes algo extraño en este vial'. Sin STE suficiente, no hay advertencia. Los Goblins son el objetivo ideal de esta trampa: consumen ítems encontrados en el suelo si la IA se implementa con ese comportamiento.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "elemental_poison_ingested_coating",
+              "name": "Veneno en recubrimiento de arma",
+              "description": "Veneno aplicado a la superficie de un arma que se entrega al penetrar tejido orgánico. Requiere que el ataque físico supere las defensas externas para entregar el veneno. Si el impacto físico falla, el veneno no se entrega. Si el impacto perfora hasta tejido blando, el veneno se inyecta internamente.",
+              "generators": [
+                "Pícaro aplica veneno a daga antes del combate (o durante con habilidad rápida)",
+                "Cazadora aplica veneno a virote de ballesta",
+                "Trampa de punta envenenada en mecanismo",
+                "Skeleton Rogue con daggers envenenadas (subtipo futuro)"
+              ],
+              "receptors_affected": [
+                "Tejido orgánico alcanzado por el arma envenenada",
+                "Sistema interno del receptor si la penetración es suficiente (actúa como ingested_direct)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas sin brecha (el arma no penetra: el veneno no se entrega)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Piel de Acero (buff) (la piel metálica bloquea la penetración)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto sin tejido blando que absorba el veneno",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin sin armadura (penetración directa: veneno entregado en máxima magnitud)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al veneno (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Este es el vector que formaliza el sistema de veneno del Pícaro: pierce_light es el vector de entrega física, ingested_coating es el vector de veneno que viaja con él. La armadura que bloquea el pierce bloquea también el veneno. El Pícaro que enfrenta a un Knight necesita pierce_armor_bypass para entregar el veneno. Sin bypass, puede aplicar veneno a la daga toda la partida sin que surta efecto contra el Knight. Esto no es un bug sino un diseño intencional: el veneno necesita entrar.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "necrosis",
+          "subcategory_name": "Necrosis",
+          "vectors": [
+            {
+              "id": "elemental_poison_necrosis_tissue",
+              "name": "Necrosis de tejido",
+              "description": "Veneno de alta concentración que destruye tejido orgánico de forma permanente en la zona afectada. Aplica status_necrotic: el tejido muerto bloquea la regeneración natural y reduce la efectividad de hechizos de curación aplicados a esa zona. El daño sostenido es bajo pero el bloqueo de curación es severo.",
+              "generators": [
+                "Veneno concentrado de alta potencia de Slime venenoso de subtipo necrótico (futuro)",
+                "Hechizo del Mago de necromancia (Necrotic Touch: hechizo de debilitamiento extremo)",
+                "status_poisoned a máximo de stacks sin tratamiento (la toxina escala a necrosis)",
+                "Trampa de aguja con veneno necrótico (ítem de nivel alto)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con tejido blando",
+                "La zona de impacto específica del receptor (no el cuerpo entero: la necrosis es localizada)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin tejido vivo que necrosar)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin tejido diferenciado: la necrosis se distribuye)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al veneno (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Curación mágica avanzada aplicada antes de que la necrosis se establezca",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "status_necrotic en una extremidad aplica: -50% efectividad de toda curación recibida en esa zona, -25% STR si la extremidad afectada es el brazo de ataque. El bloqueo de curación hace que el jugador no pueda simplemente tomar pociones para recuperarse: necesita un anti-necrosis específico o sobrevivir con la penalización. Interacción con el sistema de curación de Cat.25: las pociones de curación ordinarias son 50% efectivas en zona necrótica. La curación mágica del Mago tiene mayor efectividad contra necrosis que las pociones físicas.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "elemental_poison_necrosis_spread",
+              "name": "Propagación de necrosis",
+              "description": "La necrosis activa en un receptor se propaga lentamente desde la zona inicial hacia áreas adyacentes del cuerpo. Sin tratamiento, puede alcanzar órganos vitales. Cada turno sin tratamiento, la zona necrótica se expande: el stack de status_necrotic crece y la penalización de curación aumenta.",
+              "generators": [
+                "elemental_poison_necrosis_tissue sin tratamiento durante 3+ turnos",
+                "Veneno necrótico de alta concentración con propiedad de propagación declarada"
+              ],
+              "receptors_affected": [
+                "El propio receptor con status_necrotic activo (la propagación es interna)",
+                "El receptor alcanza status_necrotic_critical si la propagación llega a zona vital"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al veneno (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Tratamiento activo anti-necrosis en el mismo turno de propagación",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El status_necrotic_critical es el estado final: cuando la necrosis alcanza zona vital, el receptor tiene N turnos antes de muerte por fallo orgánico. No es muerte instantánea pero sí inevitable sin tratamiento. En el jugador, este es el estado más angustiante del catálogo porque la pantalla de muerte tiene un temporizador implícito. La IA enemiga con necrosis activa entra en modo de urgencia: busca al jugador más agresivamente si sabe que va a morir de todas formas (lore de Esqueleto consciente de su condena: los conscientes luchan hasta el final).",
+              "implementation_note": "aspirational"
+            },
+            {
+              "id": "elemental_poison_necrosis_bone_rot",
+              "name": "Podredumbre ósea",
+              "description": "Variante necrótica que ataca específicamente el tejido óseo vivo desde dentro. Distinto del ácido que disuelve el hueso desde fuera: la podredumbre ósea infecta el calcio vivo y lo destruye internamente. Efectiva contra Esqueletos si el veneno es de origen mágico-orgánico, no puramente bioquímico.",
+              "generators": [
+                "Hechizo del Mago de necromancia avanzada (Bone Rot: de tier alto, anti-esqueleto)",
+                "Veneno de criatura mágico-orgánica con propiedad anti-no-muerto (futuro)",
+                "Ítem legendario con propiedad de podredumbre ósea (futuro)"
+              ],
+              "receptors_affected": [
+                "Esqueletos (receptor primario: el hueso es toda su estructura)",
+                "Criaturas orgánicas con sistema óseo (daño adicional en huesos)",
+                "Constructos de piedra calcárea (variante estructural)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (vulnerable: el vector apunta específicamente al hueso)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Slime gelatina (sin huesos)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal (sin calcio)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de piedra calcárea",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Constructo de piedra ígnea",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia anti-no-muerto (buff o arma sagrada)",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "Este vector completa el cuadro de anti-Esqueleto en el catálogo: elemental_acid_dissolve_bone los ataca desde fuera (ácido externo), elemental_poison_necrosis_bone_rot los ataca desde dentro (veneno interno mágico). La distinción importa porque Piel de Acero bloquea el ácido exterior pero no la podredumbre interna mágica. Esqueleto que acumula bone_rot ve cómo sus huesos se deshacen estructuralmente desde dentro: manifestación visual de grietas que se forman en los propios huesos. Estado único visualmente en esta raza.",
+              "implementation_note": "aspirational"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "chemical_paralysis",
+          "subcategory_name": "Parálisis química",
+          "vectors": [
+            {
+              "id": "elemental_poison_paralysis_motor",
+              "name": "Parálisis motora química",
+              "description": "Toxina que bloquea la transmisión neuromuscular, impidiendo el movimiento voluntario de extremidades. El receptor no puede moverse ni atacar con las extremidades afectadas pero puede realizar acciones no físicas como hechizos mentales o hablar. Más lenta de activar que la eléctrica pero dura el doble.",
+              "generators": [
+                "Daga del Pícaro con veneno paralizante (variante de veneno con efecto de parálisis motora)",
+                "Mordedura de criatura con veneno paralizante (futuro: araña gigante, serpiente)",
+                "Trampa de dardo paralizante",
+                "Hechizo del Mago (Paralytic Mist: nube de agente paralizante)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con sistema nervioso y musculatura",
+                "Extremidades específicas si el veneno se aplica localmente"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de cualquier tipo (sin sistema neuromuscular)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin músculos: ya se mueve por control mágico, no neuromusculatura)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin músculos diferenciados)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (sistema nervioso orgánico: vulnerable)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al veneno (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Antídoto anti-paralizante específico",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La diferencia táctica clave con la parálisis eléctrica (Cat.6): la parálisis motora química tarda 1 turno adicional en activarse (retardo) pero dura 2 turnos más. También permite acciones no físicas: un Mago paralizado motoreamente puede seguir lanzando hechizos mentales (no gestuales). Esto crea interacciones interesantes: paralizar a un Mago físicamente no lo neutraliza si tiene hechizos puramente mentales. El receptor con parálisis motora en un brazo puede atacar con el otro si tiene habilidades de esa mano.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_poison_paralysis_neural",
+              "name": "Parálisis neural total",
+              "description": "Toxina que bloquea el sistema nervioso central completo. A diferencia de la motora, esta paraliza también las funciones mentales activas: el receptor no puede ejecutar ninguna acción, ni física ni mágica. Estado total de inacción. Más difícil de aplicar que la motora.",
+              "generators": [
+                "Veneno de alta concentración de criatura con neurotoxina total (futuro: medusa, anémona abismal)",
+                "elemental_poison_paralysis_motor a máximo de stacks sin tratamiento (escala a neural)",
+                "Hechizo del Mago de tier muy alto (Total Shutdown: hechizo de neutralización neural)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con sistema nervioso centralizado",
+                "Criaturas orgánicas que ya tenían paralysis_motor activa"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin sistema nervioso orgánico)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin sistema nervioso centralizado)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al veneno (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Voluntad de hierro (buff mental: reduce duración a la mitad)",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "La parálisis neural total es el estado de veneno más severo y debería ser raro. Reservada para criaturas de veneno muy específicas en fases avanzadas del juego. La diferencia con el estado de freeze_solid del frío: freeze_solid hace que el receptor físicamente sea incapaz de moverse pero está consciente. Neural_paralysis hace que el receptor esté consciente pero sin poder ejecutar ningún comando. Ambos resultan en pérdida de turnos pero por mecanismos distintos y con interacciones distintas con buffs y resistencias.",
+              "implementation_note": "aspirational"
+            },
+            {
+              "id": "elemental_poison_status_poisoned",
+              "name": "Estado: Envenenado",
+              "description": "Estado base de envenenamiento activo. Daño sostenido bajo por turno que escala con el número de stacks. Sin efectos adicionales en 1-2 stacks. En 3 stacks puede escalar a necrosis_tissue. Curable con antídoto o habilidad de purificación. Es el estado de veneno más común del catálogo.",
+              "generators": [
+                "Cualquier vector elemental_poison de baja magnitud aplicado una o dos veces",
+                "contact_skin con toxina baja",
+                "contact_wound con poca concentración de veneno",
+                "ingested_coating en primer hit sin veneno de alta concentración"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con sistema biológico activo"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (puede absorber toxinas de baja concentración)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Goblin (sin resistencia especial)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Resistencia al veneno (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al veneno (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Antídoto básico",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Poción de curación básica (no cura el estado, solo compensa el daño)",
+                  "level": "normal"
+                }
+              ],
+              "design_notes": "Cadena de progresión completa del veneno: status_poisoned (1-2 stacks) → necrosis_tissue (3 stacks sin tratamiento) → necrosis_spread (necrosis sin tratamiento) → necrotic_critical (propagación a zona vital). La cadena es más lenta que la de frío pero más duradera. La poción de curación básica NO cancela el envenenamiento: solo compensa el daño sostenido mientras el veneno sigue activo. El jugador que solo toma pociones de vida contra un Pícaro enemigo nunca resuelve el problema. Necesita específicamente un antídoto. Esto da valor a los ítems especializados en el sistema de inventario.",
+              "implementation_note": "standard"
+            }
+          ]
+        }
+      ]
     }
   ],
   "combinations": [],
