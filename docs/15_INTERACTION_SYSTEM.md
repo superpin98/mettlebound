@@ -46,5 +46,6 @@ en chat web. Estructura prevista: 30+ categorias)
 | 3 | Daño físico estructural | physical_structural | 14 | ✅ Poblado |
 | 4 | Daño elemental — Fuego | elemental_fire | 16 | ✅ Poblado |
 | 5 | Daño elemental — Frío | elemental_cold | 12 | ✅ Poblado |
+| 6 | Daño elemental — Eléctrico | elemental_electric | 12 | ✅ Poblado |
 
 (Esta tabla se actualizara conforme entren las categorias)

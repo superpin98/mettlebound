@@ -3756,6 +3756,629 @@
           ]
         }
       ]
+    },
+    {
+      "category_id": "elemental_electric",
+      "category_name": "Daño elemental — Eléctrico",
+      "category_definition": "Vectores de daño originados en descarga eléctrica, arco voltaico o conducción de energía eléctrica. La electricidad tiene una asimetría táctica fundamental respecto a otros elementos: es amplificada por conductores como metal y agua en vez de bloqueada por ellos. La armadura de placas metálica, que resiste físico y fuego, amplifica el daño eléctrico. Un charco de agua, que apaga el fuego, propaga la electricidad en área. Esto invierte las jerarquías habituales de resistencia: el Knight armado es más vulnerable a electricidad que el Errante sin arma; el Slime acuoso conduce la descarga por toda su masa. Los estados derivados son los más tácticamente disruptivos del catálogo: status_shocked roba precisión y status_paralysis roba turnos directamente.",
+      "subcategories": [
+        {
+          "subcategory_id": "direct_discharge",
+          "subcategory_name": "Descarga directa",
+          "vectors": [
+            {
+              "id": "elemental_electric_discharge_direct",
+              "name": "Descarga eléctrica directa",
+              "description": "Contacto directo de carga eléctrica sobre el receptor. Daño moderado inmediato. Alta probabilidad de aplicar status_shocked. Si el receptor lleva armadura metálica, la descarga se amplifica: la armadura actúa como conductor y distribuye la descarga por todo el cuerpo.",
+              "generators": [
+                "Hechizo del Mago (Shock Touch, Lightning Strike de contacto)",
+                "Trampa de runa eléctrica en suelo (activa en pisada)",
+                "Palanca o mecanismo metálico con carga acumulada",
+                "Objeto metálico cargado como arma improvisada (ítem futuro)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas en general",
+                "Constructos de metal (amplificación extrema por conductividad)",
+                "Receptor con armadura de placas metálica (amplificación por conductor externo)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal (conductor: amplificación del daño)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de madera (aislante: resistente)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de piedra (mal conductor)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Esqueleto sin armadura (hueso seco: mal conductor)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Esqueleto con armadura metálica (el metal conduce igual)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Slime gelatina (masa húmeda: muy buen conductor)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo: sin masa conductora)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Goblin (orgánico sin armadura: recibe daño normal)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Armadura de placas metálica en receptor (amplifica en vez de proteger)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia eléctrica (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad eléctrica (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Receptor en contacto con charco de agua (descarga se propaga al charco)",
+                  "level": "extreme_vulnerable"
+                }
+              ],
+              "design_notes": "La inversión de la armadura metálica como amplificador en vez de protección es el punto de diseño más memorable de este elemento. Un Knight enemigo con placas de metal completas es el objetivo ideal para un Mago de electricidad: su mejor defensa se convierte en su mayor vulnerabilidad. Esto crea un equilibrio de piedra-papel-tijera entre elementos: el Knight resiste fuego con su metal pero es vulnerable a electricidad por el mismo metal. El jugador que elige clase Knight debe gestionar esta vulnerabilidad activamente.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_electric_discharge_bolt",
+              "name": "Rayo dirigido",
+              "description": "Proyectil de energía eléctrica a distancia. Viaja en línea recta y puede rebotar en superficies metálicas lisas hasta N veces. Daño alto concentrado en punto de impacto. Aplica status_shocked garantizado. Si impacta en zona de agua, convierte el impacto en arc_water inmediatamente.",
+              "generators": [
+                "Hechizo del Mago (Lightning Bolt, Thunder Lance: proyectil eléctrico dirigido)",
+                "Trampa de runa que dispara rayo al activarse",
+                "Skeleton Mage con hechizo eléctrico (subtipo futuro de Sprint 5)"
+              ],
+              "receptors_affected": [
+                "Entidad objetivo directa",
+                "Entidades en la línea de rebote si el rayo rebota en superficie metálica",
+                "Zona de agua si el rayo impacta en charco (activa arc_water)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal (amplificación)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de madera",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Esqueleto sin armadura",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Escudo metálico activo (refleja o absorbe el rayo según ángulo)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Escudo de madera activo (aísla: bloquea el rayo)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Resistencia eléctrica (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad eléctrica (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El rebote en superficies metálicas crea geometría táctica única: el Mago puede apuntar a una pared metálica para alcanzar a un enemigo detrás de cobertura. Pero el rebote también puede alcanzar aliados o al propio jugador si el ángulo es incorrecto. El escudo de metal del Knight rebota el rayo: si el Knight está entre el Mago y el enemigo, el rayo puede volver al Mago. Necesita aviso visual claro de trayectoria. El impacto en agua es la conversión más poderosa: convierte un ataque de objetivo único en AoE de zona.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "elemental_electric_discharge_arc",
+              "name": "Arco eléctrico entre conductores",
+              "description": "Arco de electricidad que salta entre dos puntos conductores cuando existe un conductor entre ellos. No requiere lanzamiento directo: se genera espontáneamente entre dos cargas opuestas separadas por un conductor. Puede activarse accidentalmente si el receptor está entre dos fuentes cargadas.",
+              "generators": [
+                "Dos runas eléctricas de polaridad opuesta con el receptor entre ellas",
+                "Hechizo del Mago (Arc Bolt: activa un punto de carga fija y el arco salta al conductor más cercano)",
+                "Dos Constructos de metal cargados en lados opuestos del receptor (futuro)",
+                "Trampa de sala con dos pilares de runa cargados que arcan entre sí"
+              ],
+              "receptors_affected": [
+                "Entidad conductora entre los dos puntos de carga (receptor del arco)",
+                "Múltiples entidades si hay línea de conductores entre los dos puntos"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal (excelente conductor: atrae el arco activamente)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de madera (aislante: el arco lo evita)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Armadura metálica completa (actúa como atractor del arco)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Resistencia eléctrica (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad eléctrica (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Aislante activo (buff o material no conductor entre los dos puntos)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "[EXPERIMENTAL] El arco requiere que el sistema sea consciente de la geometría y los materiales entre dos puntos de carga. Es el vector eléctrico más complejo de implementar pero el más emergente: el jugador puede crear situaciones de arco accidentalmente o deliberadamente posicionando objetos metálicos. Un Knight que se mueve entre dos runas eléctricas opuestas recibe el arco automáticamente. Requiere prototipo del sistema de detección de conductores entre dos puntos antes de comprometerse.",
+              "implementation_note": "needs_research"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "conduction",
+          "subcategory_name": "Conducción y cadena",
+          "vectors": [
+            {
+              "id": "elemental_electric_conduction_chain",
+              "name": "Cadena de conducción",
+              "description": "La descarga eléctrica salta de receptor en receptor si están en contacto físico directo o a distancia corta y son conductores. El daño decrece en cada salto. Puede encadenar hasta N receptores. La cadena se detiene en un aislante o en un receptor no conductor.",
+              "generators": [
+                "discharge_direct sobre receptor en contacto con otro receptor conductor",
+                "discharge_bolt que impacta en grupo de entidades contiguas",
+                "Hechizo del Mago (Chain Lightning: hechizo diseñado específicamente para cadena)",
+                "arc_water que se propaga a entidades dentro del charco"
+              ],
+              "receptors_affected": [
+                "Hasta N entidades conductoras en cadena desde el receptor primario",
+                "Entidades en cadena: cada una recibe daño decreciente (75% → 50% → 25% del original)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal (atrae la cadena y la propaga)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de madera (corta la cadena: aislante)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Goblin en grupo (todos conducen si están adyacentes)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Slime gelatina (conduce perfectamente)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo: corta la cadena)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto sin armadura (corta la cadena por ser mal conductor)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Resistencia eléctrica (buff) — el receptor resiste pero no corta la cadena",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad eléctrica (buff) — el receptor detiene la cadena completamente",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Chain Lightning es el hechizo que más directamente explota la naturaleza de grupos de Grimspire. Los Goblins cazan en grupo: son el objetivo ideal para la cadena. Si el jugador está cerca de un grupo de Goblins que reciben Chain Lightning y el jugador no tiene inmunidad eléctrica, la cadena puede alcanzarle. Gestión del posicionamiento crítica. Un receptor con inmunidad eléctrica no solo se protege: corta la cadena y protege a lo que haya detrás de él. El Knight con inmunidad podría posicionarse para proteger al Mago.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_electric_conduction_metal",
+              "name": "Conducción por armadura metálica",
+              "description": "La armadura metálica del receptor actúa como conductor que distribuye la descarga por toda la superficie del cuerpo en vez de concentrarla en el punto de impacto. El resultado es daño amplificado a todo el cuerpo simultáneamente. Penalización adicional específica de armadura metálica.",
+              "generators": [
+                "Cualquier vector elemental_electric aplicado a receptor con armadura metálica",
+                "Arc_water que alcanza a receptor con armadura metálica dentro del charco"
+              ],
+              "receptors_affected": [
+                "Receptor con armadura de placas metálicas completa (amplificación máxima)",
+                "Receptor con cota de malla (amplificación media)",
+                "Receptor con armadura mixta (amplificación proporcional a cantidad de metal)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas completa (amplificación +75% del daño eléctrico base)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Cota de malla (amplificación +50%)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Armadura de cuero sin partes metálicas (no conduce: resistencia normal)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Sin armadura (daño base sin amplificación)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Armadura mágica aislante (anula la conducción)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Este vector no es un ataque independiente: es un modificador que se activa automáticamente cuando cualquier vector eléctrico alcanza a un receptor con armadura metálica. El sistema lo calcula como parte de la resolución del impacto. No necesita ser generado explícitamente: la armadura del receptor activa el modificador pasivamente. El jugador con clase Knight necesita una forma de gestionar esta vulnerabilidad: guantes aislantes, hechizo de aislamiento del Mago sobre el Knight, o evitar ser alcanzado por electricidad repositionándose.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_electric_conduction_water",
+              "name": "Conducción a través de agua",
+              "description": "El agua actúa como conductor masivo de electricidad. Una descarga eléctrica aplicada a un charco de agua electrifica toda la masa de agua conectada instantáneamente. Distinto de arc_water: este vector describe el mecanismo de conducción, no el efecto de zona.",
+              "generators": [
+                "discharge_direct o discharge_bolt que impactan en charco de agua",
+                "Receptor con estado status_drenched (empapado) recibe descarga: el agua corporal conduce",
+                "Runa eléctrica activada bajo charco de agua"
+              ],
+              "receptors_affected": [
+                "Toda la masa de agua conectada al punto de impacto",
+                "Cualquier entidad en contacto con esa masa de agua",
+                "Receptor con status_drenched (empapado): la conducción ocurre en su propio cuerpo"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Agua sin ninguna entidad dentro (conduce pero sin receptor que sufra daño)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Entidad en el agua sin resistencia eléctrica",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Slime gelatina (principalmente agua: extreme_vulnerable)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro (flotan: no tocan el agua)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia eléctrica (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad eléctrica (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "status_drenched es un estado que puede aplicarse al jugador o enemigos mediante barril de agua roto, lluvia (futuro), o nadar en charco. Un receptor empapado recibe conducción eléctrica amplificada como si fuera un charco andante. Interacción emergente: el jugador usa barril de agua sobre Golem de metal → Golem queda drenched → descarga eléctrica del Mago sobre Golem = triple amplificación (metal + agua + descarga). Puede ser el combo más devastador del sistema: necesita balance cuidadoso.",
+              "implementation_note": "needs_clarification"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "arc_water",
+          "subcategory_name": "Arco en charco",
+          "vectors": [
+            {
+              "id": "elemental_electric_arc_water",
+              "name": "Electrocución de zona acuática",
+              "description": "Descarga eléctrica aplicada a un charco de agua que electrifica toda la zona del charco. Cualquier entidad dentro del charco o en contacto con él recibe daño eléctrico masivo por turno mientras permanezca en la zona. Incluye al generador del efecto si está en el charco.",
+              "generators": [
+                "discharge_bolt impacta en charco de agua",
+                "discharge_direct aplicado a entidad dentro de charco (la descarga se propaga al agua)",
+                "Runa eléctrica bajo charco de agua activada",
+                "Hechizo del Mago (Electrify Water: hechizo específico de zona acuática)"
+              ],
+              "receptors_affected": [
+                "Todas las entidades dentro del charco en el momento de la electrificación",
+                "Entidades que entren al charco electrificado en turnos siguientes",
+                "El propio charco queda como zona electrificada N turnos"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Slime gelatina (principalmente agua: letal o near-letal)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de metal dentro del charco (doble amplificación)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Esqueleto dentro del charco (el agua no mejora su conductividad seca)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro (no toca el agua)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin en el charco (probable: están en grupos y los empujas al agua)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia eléctrica (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad eléctrica (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "elemental_cold_freeze_blast aplicado al charco (lo congela: cancela la electrificación)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La combinación agua + electricidad es la más evocadora de BG3 en el catálogo de Mettlebound. El combo barril de agua + discharge_bolt del Mago crea una zona de electrocución masiva en un turno. La contramedida directa es congelar el charco: freeze_blast cancela la electrificación al solidificar el agua. Esto crea un triángulo elemental: fuego evapora el agua, frío la congela, electricidad la electrifica. Cada estado del agua tiene consecuencias tácticas distintas. El propio Mago no debe estar en el charco cuando lo electrifica: gestión de posicionamiento fundamental.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_electric_arc_spread",
+              "name": "Propagación de arco por zonas acuáticas conectadas",
+              "description": "Si dos charcos de agua están conectados o son adyacentes, la electrificación de uno se propaga al otro instantáneamente. La electrificación se propaga en cadena por todas las masas de agua conectadas en la sala. Puede alcanzar zonas muy alejadas del punto de impacto original.",
+              "generators": [
+                "arc_water sobre charco que está conectado a otro charco adyacente",
+                "discharge_bolt que impacta en sistema de agua conectado"
+              ],
+              "receptors_affected": [
+                "Todas las zonas de agua conectadas a la zona electrificada inicial",
+                "Todas las entidades en cualquiera de esas zonas conectadas"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Masa de agua no conectada (separada por suelo seco: la propagación se detiene)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Entidades en zonas conectadas: mismas que arc_water",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia eléctrica (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad eléctrica (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "[EXPERIMENTAL] Este vector requiere que el sistema de nivel defina la conectividad de masas de agua: qué charcos están unidos y cuáles son independientes. En versión simple: charcos adyacentes (1 casilla de separación máxima) se consideran conectados. El jugador puede crear accidentalmente una red eléctrica extensa volcando barriles de agua en distintas zonas y luego lanzando un rayo. La sorpresa al ver que la electricidad llega a la otra punta de la sala es el tipo de momento emergente que define este sistema. El level designer puede usar esto deliberadamente: una sala con sistema de agua prediseñado que el jugador puede electrificar estratégicamente.",
+              "implementation_note": "aspirational"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "overload",
+          "subcategory_name": "Sobrecarga",
+          "vectors": [
+            {
+              "id": "elemental_electric_overload_construct",
+              "name": "Sobrecarga de constructo",
+              "description": "Descarga eléctrica que supera la tolerancia del núcleo o sistema interno del constructo. No solo daña: puede causar status_overloaded en el constructo, haciendo que actúe de forma errática durante N turnos: ataca al azar, se mueve sin orden, o queda en cortocircuito completo.",
+              "generators": [
+                "Descarga eléctrica de alta magnitud sobre Constructo de metal",
+                "arc_water sobre Constructo de metal dentro del charco",
+                "Hechizo del Mago (System Overload: hechizo especializado anticonstructo)",
+                "physical_structural_construct_core combinado con descarga eléctrica sobre el núcleo expuesto"
+              ],
+              "receptors_affected": [
+                "Constructo de metal (receptor primario: altísima conductividad)",
+                "Constructo de piedra con núcleo de runa eléctrica",
+                "Mecanismos de trampa eléctrica del entorno (pueden redirigirse o desactivarse)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal (vulnerable al daño pero el overload es el efecto crítico)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de madera (aislante: inmune al overload)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de piedra (depende de si tiene componente eléctrico interno)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Criaturas orgánicas (sin sistema eléctrico artificial que sobrecargar)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Inmunidad eléctrica en constructo (buff raro o diseño especial)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "status_overloaded en el Golem es una de las mecánicas más interesantes del combate: el Golem sobrecargado puede atacar a sus propios aliados, moverse de forma impredecible, o bloquearse completamente. Esto convierte al Mago en un controlador de enemigos, no solo un dealer de daño. Un Golem sobrecargado entre un grupo de Goblins es un desastre para el bando enemigo. Duración sugerida: 2-3 turnos. La IA del Golem en overload debe ser simple y errática: ataca a lo más cercano independientemente de facción.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "elemental_electric_overload_rune",
+              "name": "Sobrecarga de runa activa",
+              "description": "Una descarga eléctrica sobre una runa mágica activa la sobrecarga, haciéndola detonar con el doble de su efecto normal o destruyéndola. Permite convertir trampas de runa del entorno en armas o neutralizarlas. Cualquier glifo activo es vulnerable.",
+              "generators": [
+                "discharge_direct o discharge_bolt sobre cualquier runa o glifo activo",
+                "arc_water que alcanza una runa de suelo activa",
+                "Hechizo del Mago dirigido específicamente a glifo activo"
+              ],
+              "receptors_affected": [
+                "Runa activa del entorno (se detona con efecto amplificado o se destruye)",
+                "Glifo en suelo activo",
+                "Trampa de runa de cualquier tipo",
+                "Runa en palanca o mecanismo activo"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Runa de fuego activa (detona: genera elemental_fire_combustion_direct de área doble)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Runa de hielo activa (detona: genera freeze_blast de área doble)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Runa eléctrica activa (detona: genera arc de área máxima)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Runa inactiva o runa sellada (no tiene carga: no detona)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Runa con protección anti-interferencia mágica",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "Este vector convierte el campo de batalla lleno de runas en una caja de herramientas para el Mago. Una trampa de runa de fuego que el enemigo activó para dañar al jugador puede ser detonada con una descarga eléctrica, amplificando el efecto sobre los propios enemigos. También permite neutralizar trampas: un discharge sobre la runa la detona en dirección controlada, en vez de activarla por presión donde el jugador estaría en la zona. El Mago como desactivador de trampas ambientales es un rol secundario rico que emerge de este vector.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_electric_status_shocked",
+              "name": "Estado: Descargado",
+              "description": "Estado de descarga eléctrica activa sobre el receptor. Daño sostenido bajo por turno. Aplica -20% accuracy por interferencia eléctrica en el sistema nervioso o mecanismo de control. Acumulable: 3 stacks de shocked sin tratamiento pueden escalar a status_paralysis.",
+              "generators": [
+                "Cualquier vector elemental_electric de magnitud baja o media sobre receptor",
+                "discharge_direct con probabilidad según magnitud",
+                "conduction_chain en receptor no primario de la cadena"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con sistema nervioso",
+                "Constructos con sistema de control activo"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (sin sistema nervioso orgánico: el estado es diferente, ver notas)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de madera (sin sistema nervioso ni eléctrico)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (el shocked se distribuye en toda la masa: efecto diferente)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia eléctrica (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad eléctrica (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La penalización de accuracy del 20% es más tácticamente significativa de lo que parece: hace que el receptor falle ataques críticos con más frecuencia, reduciendo su eficacia sin inmovilizarlo. El Esqueleto tiene variante del estado: sin sistema nervioso, el shocked le afecta de forma diferente — le genera interferencia en los vínculos mágicos que lo controlan. La mazmorra tiene menos control sobre él durante el estado: en Esqueletos conscientes como Rusty, esto podría crear interacciones de diálogo únicas si se desarrolla el sistema de NPC.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_electric_status_paralysis",
+              "name": "Estado: Parálisis eléctrica",
+              "description": "Inmovilización completa del sistema nervioso o de control del receptor por sobrecarga eléctrica. El receptor no puede ejecutar ninguna acción durante N turnos. No pierde HP adicional pero queda totalmente expuesto. Estado terminal de la cadena eléctrica.",
+              "generators": [
+                "3 stacks de status_shocked sin tratamiento (transición automática)",
+                "discharge_direct de magnitud extrema en un solo impacto",
+                "overload_construct en Constructo de metal (puede generar parálisis total del sistema)",
+                "arc_water sobre receptor con status_shocked previo activo"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con sistema nervioso (parálisis biológica)",
+                "Constructos con sistema de control eléctrico (cortocircuito total)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto sin sistema nervioso orgánico (inmune a parálisis biológica)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de madera (sin sistema eléctrico de control)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal (vulnerable: la parálisis es cortocircuito de sus sistemas)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Slime gelatina (sin sistema nervioso centralizado: no paraliza)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (sin protección: parálisis completa)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia eléctrica (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad eléctrica (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La parálisis es el estado más disruptivo del catálogo de electricidad: roba turnos completos. Un receptor paralizado es un objetivo fijo durante N turnos: el Knight puede desplegar su daño máximo sin riesgo. El Pícaro puede ejecutar su flurry garantizado. La electricidad como habilitadora de otros vectores (no solo como daño) es el diseño más sofisticado del Mago. La parálisis de Golem es especialmente valiosa: el Golem paralizado deja de amenazar al jugador durante 2-3 turnos, suficiente para que el Errante lo desmonte por secciones.",
+              "implementation_note": "standard"
+            }
+          ]
+        }
+      ]
     }
   ],
   "combinations": [],
