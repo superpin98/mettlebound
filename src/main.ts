@@ -1,3 +1,7 @@
+// Havok Physics Engine
+import HavokPhysics from '@babylonjs/havok';
+import { HavokPlugin, Vector3 } from '@babylonjs/core';
+
 // Imports internos
 import { Engine } from '@/core/Engine';
 import { InputManager } from '@/core/InputManager';
@@ -64,6 +68,15 @@ playerController.setCamera(cameraController.camera);
 // --- Inicializacion async ----------------------------------------------------
 
 (async () => {
+
+  // -- Havok Physics Engine ---------------------------------------------------
+  // Inicializamos el motor de fisicas ANTES de construir cualquier elemento
+  // de juego. En B2A no se usan colliders todavia; esto solo registra el plugin
+  // en la scene para que B2B pueda activarlos directamente.
+  const havokInstance = await HavokPhysics();
+  const havokPlugin   = new HavokPlugin(true, havokInstance);
+  scene.enablePhysics(new Vector3(0, -9.81, 0), havokPlugin);
+  logger.info('main: Havok Physics Engine inicializado (gravedad -9.81).');
 
   // -- Escala de UI -----------------------------------------------------------
   applyScale();
