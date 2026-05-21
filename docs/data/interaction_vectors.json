@@ -3133,6 +3133,629 @@
           ]
         }
       ]
+    },
+    {
+      "category_id": "elemental_cold",
+      "category_name": "Daño elemental — Frío",
+      "category_definition": "Vectores de daño originados en temperatura extremadamente baja, contacto criogénico, escarcha o ambientes de frío letal. El frío opera tácticamente de forma opuesta al fuego: no genera luz, no propaga, pero acumula estados que culminan en inmovilización total. La progresión del frío sigue la cadena status_chilled → frost_coat → freeze_partial → freeze_solid. A diferencia del fuego, el frío no destruye el entorno sino que lo transforma: convierte agua en hielo transitable, hace metal y hueso quebradizos, y crea superficies resbaladizas que reordenan la geometría táctica. La interacción frío-fuego es asimétrica: el frío puede ralentizar la propagación del fuego pero no extinguirlo directamente salvo magnitudes extremas. El agua es el puente entre ambos sistemas: agua + frío extremo = hielo.",
+      "subcategories": [
+        {
+          "subcategory_id": "freeze",
+          "subcategory_name": "Congelación",
+          "vectors": [
+            {
+              "id": "elemental_cold_freeze_touch",
+              "name": "Congelación por contacto",
+              "description": "Frío extremo transmitido por contacto directo con una fuente criogénica. Daño moderado inmediato. Aplica status_chilled y puede escalar a frost_coat si la magnitud es alta. Congela parcialmente la zona de contacto: extremidad afectada pierde movilidad parcial.",
+              "generators": [
+                "Hechizo del Mago (Ice Touch, Frost Bolt de contacto)",
+                "Trampa de runa criogénica (activa en pisada)",
+                "Criatura de frío con ataque de contacto (futuro)",
+                "Ítem de arma encantada con frío (futuro)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas (carne, tejido)",
+                "Constructos de metal (el metal conduce el frío y se vuelve quebradizo)",
+                "Agua en la zona de contacto (se convierte en hielo)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (sin fluidos que congelar: resiste congelación biológica)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de piedra (mala conductividad térmica)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de metal (buena conductividad: recibe y acumula el frío)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Constructo de madera",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina (el frío lo solidifica parcialmente)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo: sin cuerpo que congelar)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (orgánico expuesto)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Resistencia al frío (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al frío (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "status_burn activo (el calor del burn compensa el frío: cancelación mutua)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La interacción con status_burn activo es tácticamente significativa: si un receptor está ardiendo y recibe freeze_touch, ambos estados se cancelan mutuamente y ninguno causa daño adicional en ese turno. El resultado es neutro pero ambos estados se eliminan. Esto da al jugador una opción de 'apagar' un aliado en llamas usando un hechizo de frío sobre él, a costa de gastar una acción. Constructo de metal recibe bien el frío: conductividad alta lo hace vulnerable a la acumulación.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_cold_freeze_blast",
+              "name": "Explosión de frío",
+              "description": "Ráfaga de frío extremo en área cónica o radial. Daño frío moderado a todas las entidades en zona. Aplica status_chilled a todos los afectados. Puede congelar agua en suelo instantáneamente. Menor daño individual que freeze_touch pero cobertura AoE.",
+              "generators": [
+                "Hechizo del Mago (Frost Nova, Cold Burst: hechizo de área de frío)",
+                "Trampa de runa criogénica de área",
+                "Barril con contenido criogénico que explota (ítem futuro)",
+                "Criatura de frío con habilidad de AoE (futuro)"
+              ],
+              "receptors_affected": [
+                "Múltiples entidades en cono o radio",
+                "Agua en suelo dentro del radio (se convierte en zona de hielo transitable)",
+                "Charcos de aceite en radio (aceite se espesa: reduce velocidad de propagación de fuego)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Slime gelatina (solidificación parcial en área)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (en grupo: todos reciben status_chilled)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Resistencia al frío (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al frío (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Escudo activo del Knight (bloquea el frío frontal)",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "La conversión de charcos de aceite es una interacción emergente: el aceite espeso no desaparece pero sí reduce su inflamabilidad y velocidad de propagación de fuego. Si el Mago congela el aceite antes de que el Pícaro lo encienda, el sistema de fuego queda parcialmente desactivado. Crear zonas de hielo en agua crea superficies transitables sobre zonas que antes bloqueaban (un charco grande congelado = puente de hielo). Interacción con Cat.17 (modificación de terreno).",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_cold_freeze_solid",
+              "name": "Congelación completa",
+              "description": "Frío tan extremo y sostenido que congela el receptor completamente. Aplica status_frozen_solid: inmovilización total durante N turnos. El receptor congelado es físicamente muy frágil: recibe +100% daño de vectores físicos contundentes mientras esté en este estado. Terminal de la cadena de frío.",
+              "generators": [
+                "status_frost_coat a máximo de stacks más impacto adicional de frío",
+                "Hechizo del Mago de tier alto (Deep Freeze, hechizo de congelación completa)",
+                "Exposición prolongada a elemental_cold_ambient_chill extremo",
+                "Criatura de frío de tier alto con habilidad de congelación completa (futuro)"
+              ],
+              "receptors_affected": [
+                "Cualquier criatura orgánica con suficiente acumulación de frío",
+                "Slimes (la congelación los solidifica completamente: nuevo estado físico)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (sin fluidos: muy resistente a la congelación completa)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de piedra o metal (sin fluidos: inmune a freeze_solid como estado biológico)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (solidificable: vulnerable al estado pero diferente resultado)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (sin resistencia especial)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia al frío (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al frío (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "status_burn activo en el receptor (el calor impide la congelación completa)",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "Un receptor en status_frozen_solid recibe +100% daño de blunt_heavy o blunt_slam: se astilla como una estatua de hielo. Esto crea el combo clásico de fantasía: congelar al enemigo y luego romperlo de un golpe. El Knight con mazo (futuro) o el Errante son los que mejor explotan este estado. Un Slime congelado no muere: queda en estado sólido, inamovible durante N turnos. Al descongelarse vuelve a ser Slime normal. Mecánica especial única para esa raza.",
+              "implementation_note": "needs_clarification"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "frost",
+          "subcategory_name": "Escarcha",
+          "vectors": [
+            {
+              "id": "elemental_cold_frost_coat",
+              "name": "Capa de escarcha",
+              "description": "Formación de cristales de hielo en la superficie del receptor. Daño bajo directo. Aplica status_frost_coat: -25% DEX por el peso y rigidez de la escarcha, penalización de movimiento. Acumulable. Es el eslabón intermedio de la cadena de frío: entre chilled y freeze_solid.",
+              "generators": [
+                "elemental_cold_freeze_touch repetido sin alcanzar freeze completo",
+                "Hechizo del Mago (Frost Coat, Ice Armor inverso aplicado al enemigo)",
+                "Permanecer en zona de elemental_cold_ambient_chill durante varios turnos",
+                "Proyectil de hielo que impacta y se fragmenta sobre el receptor"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas (la escarcha se forma sobre piel, cuero, tela)",
+                "Constructos de madera (la madera absorbe humedad que se congela)",
+                "Slimes (la superficie se solidifica parcialmente)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (la escarcha se forma pero no penaliza al no tener músculos)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de metal (la escarcha se forma pero el metal no cede)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina (la capa exterior se solidifica: sí penaliza movimiento)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al frío (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al frío (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "elemental_fire_heat_radiated activo cerca (derrite la escarcha: cancela el estado)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La escarcha es visible en el modelo 3D: partículas de hielo y textura blanquecina sobre el receptor. El calor de una antorcha cercana derrite la escarcha pasivamente: un enemigo con frost_coat que se acerca a una antorcha pierde el estado sin que el jugador haga nada. Esto es emergentismo posicionamiento-temperatura. La acumulación de stacks lleva a freeze_solid: 3 stacks de frost_coat sin tratamiento = freeze_solid automático.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_cold_frost_surface",
+              "name": "Escarcha en superficie",
+              "description": "Capa de hielo o escarcha formada sobre el suelo u objetos. Convierte la zona en superficie resbaladiza: entidades que la atraviesen tienen probabilidad de perder el control del movimiento y aplicar movement_slip (ver Cat.15). Puede extenderse lateralmente si la temperatura ambiente es baja.",
+              "generators": [
+                "elemental_cold_freeze_blast aplicado sobre suelo húmedo o agua",
+                "elemental_cold_ambient_chill extremo sobre zona con humedad",
+                "Hechizo del Mago (Ice Patch: hechizo de control de zona con hielo en suelo)",
+                "Barril de agua roto en zona de frío ambiental intenso"
+              ],
+              "receptors_affected": [
+                "Zona del suelo (receptor primario: se convierte en zona resbaladiza)",
+                "Entidades que atraviesan la zona (reciben status_slipping: pueden perder su siguiente acción)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Sombra / Espectro (flotan: no tocan el suelo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal con pies magnéticos (anclaje)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (alta DEX: puede moverse en hielo con penalización menor)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Knight con armadura pesada (la masa ayuda: menor probabilidad de deslizarse)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Errante descalzo (baja fricción de pies: muy vulnerable al deslizamiento)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "elemental_fire_flame_persistent sobre la zona (derrite el hielo)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La superficie helada cambia la táctica de movimiento: los Goblins con alta DEX la atraviesan mejor que el Knight con armadura pesada, invirtiendo la jerarquía habitual. El Errante descalzo es el más vulnerable a deslizarse, lo que crea un punto débil interesante para su build. Interacción con Cat.15: un deslizamiento puede llevar al receptor al borde de una grieta de suelo, convirtiendo frost_surface en trampa indirecta de fall_damage.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_cold_frost_projectile",
+              "name": "Proyectil de cristal de hielo",
+              "description": "Fragmento o shard de hielo lanzado como proyectil. Combina daño físico perforante (pierce_light) con daño elemental de frío (freeze_touch leve). Se fragmenta en impacto: puede generar frost_surface en zona de impacto si hay humedad. Baja temperatura implica que el proyectil pierde masa en salas muy cálidas.",
+              "generators": [
+                "Hechizo del Mago (Ice Shard, Frost Bolt en variante proyectil)",
+                "Criatura de frío con ataque a distancia (futuro)",
+                "Trampa de runa que lanza shards de hielo al activarse"
+              ],
+              "receptors_affected": [
+                "Entidades a rango",
+                "Zona de impacto (puede crear frost_surface si hay humedad en el suelo)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (resiste el frío, recibe el pierce normal)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de metal (resiste el frío, recibe el pierce reducido)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de madera (vulnerable al frío, el pierce normal)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Slime gelatina (vulnerable al frío, el pierce parcialmente absorbido)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo: el físico no aplica, el frío tampoco)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Armadura de placas (resiste el pierce, no el frío)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Resistencia al frío (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sala de alta temperatura (el proyectil pierde masa: -25% daño)",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "El proyectil de hielo es el único vector de frío que combina daño físico y elemental en la misma instancia. Las resistencias se calculan por separado: un receptor con resistencia al frío solo mitiga la parte elemental, no el pierce. La pérdida de masa en salas calientes es una interacción ambiental del entorno de Grimspire: si hay fuego activo en la sala, los proyectiles de hielo del Mago son menos efectivos. Penaliza al Mago de frío en entornos de fuego activo.",
+              "implementation_note": "needs_clarification"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "cold_ambient",
+          "subcategory_name": "Frío ambiental",
+          "vectors": [
+            {
+              "id": "elemental_cold_ambient_chill",
+              "name": "Enfriamiento ambiental de zona",
+              "description": "Temperatura extremadamente baja que afecta a toda una sala o zona. Sin fuente puntual: toda la sala es hostil al calor. Aplica status_chilled progresivamente. Puede congelar agua en suelo espontáneamente si dura suficientes turnos. Interacción inversa con fuentes de calor: las antorchas en sala fría tienen rango de calor reducido.",
+              "generators": [
+                "Sala criogénica de diseño de nivel (zona de frío permanente)",
+                "Acumulación de múltiples fuentes de frío en espacio cerrado sin ventilación",
+                "Trampa de palanca que activa enfriadores de runa en las paredes",
+                "Efecto de jefe de frío (futuro: boss que congela la sala gradualmente)"
+              ],
+              "receptors_affected": [
+                "Todas las entidades en la sala sin excepción salvo inmunidades explícitas",
+                "Fuentes de luz y calor (antorchas reducen su rango efectivo)",
+                "Agua en suelo (puede congelarse espontáneamente tras varios turnos)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (sin fluidos: prácticamente inmune al frío ambiental)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de metal (acumula frío: se vuelve quebradizo progresivamente)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina (se solidifica en sala fría)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro (la oscuridad fría es su ambiente natural)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (orgánico: pierde velocidad en frío)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Resistencia al frío (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al frío (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Fuente de calor activa cerca del receptor (compensa parcialmente)",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "El frío ambiental penaliza al Knight por una razón inesperada: la armadura de metal conduce el frío y hace que el Constructo de metal también acumule fragilidad criogénica. Simetría con heat_ambient de Cat.4: las salas especiales de temperatura extrema son el campo de batalla más peligroso. Sombras son inmunes y aquí son más peligrosas que en sala normal: el jugador tiene frío, las Sombras no. La antorcha con rango reducido hace que la oscuridad sea mayor y más amenazante: el frío y la oscuridad se refuerzan mutuamente tácticamente.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "elemental_cold_ambient_hypothermia",
+              "name": "Hipotermia por exposición prolongada",
+              "description": "Daño sostenido acumulativo aplicado a criaturas orgánicas que permanecen en frío extremo durante múltiples turnos sin fuente de calor. La hipotermia es lenta pero tiene cadena de estados severos: status_chilled → status_hypothermic → status_frozen_solid.",
+              "generators": [
+                "Permanencia en zona de elemental_cold_ambient_chill durante 3+ turnos sin calor compensatorio",
+                "status_chilled acumulado sin ser tratado en sala de frío ambiental",
+                "Inmersión en agua helada (charco congelado que se pisa y rompe: futuro)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas exclusivamente (sin sistema termorregulador artificial)",
+                "Slimes (la hipotermia los solidifica gradualmente)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (sin metabolismo que ralentizar)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de cualquier tipo (sin termorregulación orgánica)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (tamaño pequeño: hipotermia más rápida que en criaturas grandes)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia al frío (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al frío (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Fuente de calor activa en zona (antorcha cerca compensa parcialmente)",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "status_hypothermic aplica: -25% STR, -25% DEX, -15% a todos los checks de precisión, y daño sostenido de frío cada turno. Es el equivalente de frío al status_overheated del fuego pero más lento y más letal si no se trata. La antorcha como fuente de calor compensatoria crea un dilema: ¿mantengo la antorcha encendida para combatir la hipotermia (más vulnerable a Sombras), o la apago para ocultarme (más hipotermia)? Este es el corazón de la mecánica de iluminación como decisión táctica.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "cryo_fracture",
+          "subcategory_name": "Fractura criogénica",
+          "vectors": [
+            {
+              "id": "elemental_cold_cryo_brittle",
+              "name": "Fragilización criogénica",
+              "description": "El frío extremo hace que materiales normalmente resistentes se vuelvan quebradizos. No causa daño directo: aplica status_brittle al receptor. Mientras dure el estado, todos los vectores physical_external y physical_structural que reciba el receptor tienen su daño multiplicado por 1.5.",
+              "generators": [
+                "Exposición prolongada a elemental_cold_freeze_touch o freeze_blast",
+                "elemental_cold_ambient_chill extremo sobre material susceptible",
+                "Hechizo del Mago (Embrittlement: hechizo especializado en fragilización, no daño directo)"
+              ],
+              "receptors_affected": [
+                "Constructo de metal (el metal a baja temperatura pierde ductilidad: muy susceptible)",
+                "Constructo de piedra (la piedra criogénica se astilla fácilmente)",
+                "Esqueleto (el hueso seco ya es frágil: la fragilización lo hace aún más vulnerable al físico)",
+                "Madera (se vuelve quebradiza en frío extremo)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal (paradoja: conductividad lo hace vulnerable a brittle)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Constructo de madera",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Esqueleto (ya frágil: el brittle lo hace extreme_vulnerable al físico)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Criatura orgánica sin estructura rígida (Slime, carne blanda)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Inmunidad al frío (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al frío (buff)",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "La paradoja del Constructo de metal es tácticamente memorable: el metal resiste bien el fuego pero es MUY vulnerable a la fragilización criogénica. Un Mago que usa cold_cryo_brittle sobre un Golem de metal y luego llama al Errante para que lo golpee con blunt_heavy puede derribar a un Golem en 2 turnos. Sin el combo, el Errante tardaría 8 turnos. Esto recompensa la coordinación táctica y hace que el Mago sea un amplificador de daño, no solo un dealer directo.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_cold_cryo_shatter",
+              "name": "Rotura criogénica",
+              "description": "Destrucción instantánea de un material en estado status_brittle por aplicación de impacto físico. El receptor se astilla en fragmentos. Los fragmentos generan physical_external_shrapnel en radio pequeño. Si el receptor era una criatura en status_frozen_solid, la rotura es instantáneamente letal.",
+              "generators": [
+                "physical_external_blunt_heavy sobre receptor con status_brittle activo",
+                "physical_external_blunt_slam sobre receptor con status_frozen_solid activo",
+                "Cualquier impacto físico de magnitud media o alta sobre receptor en status_brittle"
+              ],
+              "receptors_affected": [
+                "Constructos con status_brittle (destrucción estructural parcial o total)",
+                "Criaturas orgánicas en status_frozen_solid (muerte instantánea en criaturas de bajo tier)",
+                "Objetos del entorno con status_brittle (estatua congelada que se astilla)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Receptor sin status_brittle o status_frozen_solid activo (este vector no aplica)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Receptor con status_brittle activo",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Receptor con status_frozen_solid activo",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Slime en estado congelado sólido (no muere, se rompe en trozos que se recongelan)",
+                  "level": "vulnerable"
+                }
+              ],
+              "design_notes": "La muerte instantánea por cryo_shatter en criaturas de bajo tier es el remate más espectacular del sistema de frío. El combo completo: freeze_touch hasta frost_coat → freeze_solid → blunt_slam del Errante → cryo_shatter = el enemigo explota en pedazos de hielo que luego generan frost_surface en el suelo. Cuatro vectores encadenados, todos resueltos por el sistema declarativo, ninguno hardcodeado. Slime congelado que se astilla: los trozos son Slimes menores que se descongelan en N turnos y vuelven a ser activos. Mecánica única de la raza.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "elemental_cold_cryo_metal_crack",
+              "name": "Agrietado criogénico de metal",
+              "description": "Variante específica de fragilización criogénica aplicada a objetos metálicos: cerradura, armadura, cadena, bisagra. El frío extremo agrieta el metal de forma localizada. Puede abrir cerraduras o bisagras sin necesidad de impacto adicional si el crack es suficiente. Versión estructural de cryo_brittle.",
+              "generators": [
+                "elemental_cold_freeze_blast sobre cerradura o bisagra metálica",
+                "elemental_cold_cryo_brittle sostenido sobre objeto metálico pequeño",
+                "Hechizo del Mago dirigido específicamente a componente metálico del entorno"
+              ],
+              "receptors_affected": [
+                "Cerradura metálica de puerta o cofre (puede agrietarse hasta abrirse)",
+                "Bisagra metálica de puerta (la puerta cae sola si la bisagra cede)",
+                "Cadena metálica que bloquea paso",
+                "Sección de armadura de metal enemigo (reduce su resistencia en esa zona)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Metal de alta calidad sin defectos previos",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Metal ya dañado o con defecto previo",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Metal encantado con protección de temperatura",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Metal reforzado magicamente",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Madera, piedra, tela (no aplica: este vector es específico de metal)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Alternativa silenciosa a physical_structural_lock_break: el Mago puede abrir una cerradura con frío sin hacer el ruido de un impacto físico. Diferente del lock_break del Pícaro (que es habilidad de sigilo): el Mago usa frío ambiental, el Pícaro usa ganzúa, el Errante usa fuerza bruta. Cada clase tiene su método de apertura de puertas y cofres: esto implementa el pilar de diversidad de clase sin hardcodear 'solo el Pícaro abre cerraduras'. La armadura de metal enemigo agrietada reduce su resistencia a physical_external en esa zona: la Cazadora puede apuntar al punto agrietado para un punto débil adicional.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "elemental_cold_status_chilled",
+              "name": "Estado: Enfriamiento leve-moderado",
+              "description": "Estado base de la cadena de frío. Daño sostenido mínimo por turno. Aplica penalización de DEX del 15%: el receptor se mueve más lento por el frío corporal. Acumulable en stacks que progresan hacia frost_coat. Contrarrestable con fuente de calor o poción de resistencia.",
+              "generators": [
+                "Cualquier vector de frío de magnitud baja aplicado una vez",
+                "elemental_cold_ambient_chill durante el primer turno de exposición",
+                "elemental_cold_frost_surface pisada sin resistencia al frío activa"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas (receptor primario)",
+                "Constructos de madera (afectados parcialmente)",
+                "Slime gelatina (el enfriamiento inicia la solidificación)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (sin fluidos que enfriar)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal o piedra (sin termorregulación)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al frío (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al frío (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Fuente de calor activa en radio (reduce stacks pasivamente por turno)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "status_burn activo (el calor del burn cancela chilled completamente)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "status_chilled es el estado de entrada de toda la cadena de frío. El jugador puede acumularlo sin intención al explorar zonas frías. Cadena de progresión completa del sistema de frío: status_chilled (1-2 stacks) → status_frost_coat (3 stacks) → status_frozen_solid (frost_coat a máximo sin tratamiento). El tratamiento activo puede ser: alejarse del frío, beber poción de calor, permanecer cerca de una antorcha durante 2 turnos. El calor pasivo de una antorcha reduce 1 stack de chilled por turno si el receptor está dentro de su rango.",
+              "implementation_note": "standard"
+            }
+          ]
+        }
+      ]
     }
   ],
   "combinations": [],
