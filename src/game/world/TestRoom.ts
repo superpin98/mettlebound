@@ -6,6 +6,9 @@ import {
   TransformNode,
   PBRMaterial,
   StandardMaterial,
+  MeshBuilder,
+  PhysicsAggregate,
+  PhysicsShapeType,
 } from '@babylonjs/core';
 import type { Scene, AssetContainer } from '@babylonjs/core';
 
@@ -176,6 +179,12 @@ export class TestRoom {
     // proximo frame, ya con las 6 luces presentes.
     // NOTA: el flag 1 es TextureDirtyFlag, NO LightDirtyFlag -- no sirve aqui.
     scene.markAllMaterialsAsDirty(2);
+
+    // ── Colliders de fisica (suelo + 4 paredes + 4 pilares) ──────────────────
+    // Cajas/cilindros invisibles estaticos (mass:0) que definen la geometria de
+    // colision de la sala. Deben crearse ANTES de que el player reciba su
+    // PhysicsAggregate (initPhysics() en main.ts se llama despues de build()).
+    TestRoom._buildPhysicsColliders(scene, half, tileSize);
 
     // ── Target Dummy (Rusty) ──────────────────────────────────────────────────
     // Posicion: (0, 0, 2) -- norte del centro, bien iluminado por antorcha norte.
@@ -402,6 +411,90 @@ export class TestRoom {
       });
     }
     logger.debug('TestRoom: antorchas colocadas', { count: torches.length });
+  }
+
+  // ----------------------------------------------------------
+
+  /**
+   * Crea 9 colliders invisibles y estaticos (mass:0) para la sala:
+   * - 1 suelo plano  : cubre todo el suelo, grosor 0.1u, top en Y=0.
+   * - 4 paredes      : una por lado (N/S/E/O), altura 2u, grosor 0.3u.
+   * - 4 pilares      : cilindros en (+-tileSize, 0, +-tileSize),
+   *                    radio 0.75u (medido con gltf-transform en B2C), altura 2u.
+   *
+   * Mediciones B2C con gltf-transform:
+   *   pillar.gltf.glb: X -0.75..+0.75, Z -0.75..+0.75, radio = 0.75u
+   *   tileSize = 4u, posiciones pilar = (+-4, 0, +-4)
+   *
+   * No modifica la geometria visual (tiles/pilares GLB intactos).
+   * Llamar desde build() con scene.enablePhysics() ya activo.
+   */
+  private static _buildPhysicsColliders(scene: Scene, half: number, tileSize: number): void {
+    const WALL_H   = 2;    // altura de pared/pilar (u)
+    const WALL_T     = 0.7;   // grosor collider de pared (subido de 0.3 en B2C-tweak)
+    // Desplazamos el centro de cada pared hacia el interior para que la cara
+    // exterior siga alineada con el tile visual (cara exterior = half + 0.15 original).
+    // WALL_SHIFT = (0.7 - 0.3) / 2 = 0.2u hacia el centro de la sala.
+    const WALL_SHIFT = (WALL_T - 0.3) / 2;
+    const FLOOR_T    = 0.1;  // grosor del collider de suelo
+    const PILLAR_D   = 1.5;  // diametro del pilar KayKit (radio = 0.75u, medido B2C)
+    const side       = half * 2;
+
+    // -- Suelo + 4 paredes (BOX) --
+    const boxColliders = [
+      // Suelo: top en Y=0, centro en Y = -FLOOR_T/2.
+      { name: 'col_floor',  w: side,   h: FLOOR_T, d: side,   x: 0,                  y: -FLOOR_T / 2, z: 0                  },
+      // Pared Sur  (cara exterior en z=-(half+0.15), centro desplazado +WALL_SHIFT)
+      { name: 'col_wall_S', w: side,   h: WALL_H,  d: WALL_T, x: 0,                  y: WALL_H / 2,   z: -half + WALL_SHIFT  },
+      // Pared Norte (cara exterior en z=+(half+0.15), centro desplazado -WALL_SHIFT)
+      { name: 'col_wall_N', w: side,   h: WALL_H,  d: WALL_T, x: 0,                  y: WALL_H / 2,   z:  half - WALL_SHIFT  },
+      // Pared Oeste (cara exterior en x=-(half+0.15), centro desplazado +WALL_SHIFT)
+      { name: 'col_wall_W', w: WALL_T, h: WALL_H,  d: side,   x: -half + WALL_SHIFT, y: WALL_H / 2,   z: 0                  },
+      // Pared Este  (cara exterior en x=+(half+0.15), centro desplazado -WALL_SHIFT)
+      { name: 'col_wall_E', w: WALL_T, h: WALL_H,  d: side,   x:  half - WALL_SHIFT, y: WALL_H / 2,   z: 0                  },
+    ];
+
+    for (const c of boxColliders) {
+      const box = MeshBuilder.CreateBox(
+        c.name,
+        { width: c.w, height: c.h, depth: c.d },
+        scene,
+      );
+      box.position   = new Vector3(c.x, c.y, c.z);
+      box.isVisible  = false;
+      box.isPickable = false;
+      new PhysicsAggregate(box, PhysicsShapeType.BOX, { mass: 0 }, scene);
+    }
+
+    // -- 4 pilares interiores (CYLINDER) --
+    // Mismas posiciones que _buildPillars: (+-tileSize, 0, +-tileSize).
+    // Centro del cilindro en Y = WALL_H/2 para que la base toque Y=0.
+    const pd = tileSize;
+    const cy = WALL_H / 2;
+    const pillarPositions = [
+      { px: -pd, pz: -pd },
+      { px:  pd, pz: -pd },
+      { px: -pd, pz:  pd },
+      { px:  pd, pz:  pd },
+    ];
+
+    for (const p of pillarPositions) {
+      const cyl = MeshBuilder.CreateCylinder(
+        `col_pillar_${p.px}_${p.pz}`,
+        { height: WALL_H, diameter: PILLAR_D, tessellation: 8 },
+        scene,
+      );
+      cyl.position   = new Vector3(p.px, cy, p.pz);
+      cyl.isVisible  = false;
+      cyl.isPickable = false;
+      new PhysicsAggregate(cyl, PhysicsShapeType.CYLINDER, { mass: 0 }, scene);
+    }
+
+    logger.debug('TestRoom: colliders de fisica creados', {
+      cajas:   boxColliders.length,
+      pilares: pillarPositions.length,
+      total:   boxColliders.length + pillarPositions.length,
+    });
   }
 
   // ----------------------------------------------------------

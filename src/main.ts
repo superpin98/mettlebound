@@ -89,7 +89,13 @@ playerController.setCamera(cameraController.camera);
   await playerController.loadModel(chosenClass);
 
   // -- Sala de prueba (se construye una sola vez, aqui) ----------------------
+  // IMPORTANTE: build() crea los colliders de suelo y paredes (B2B).
+  // initPhysics() debe llamarse DESPUES para que la capsula del player
+  // no caiga al vacio antes de que exista el suelo.
   const dummy = await TestRoom.build(scene, assetManager);
+
+  // -- Activar fisica del player (colliders de sala ya existen) --------------
+  playerController.initPhysics();
 
   // -- Crear sistemas de juego ------------------------------------------------
   let playerStats = new PlayerStats(chosenClass);

@@ -6,6 +6,8 @@ import {
   Quaternion,
   PBRMaterial,
   StandardMaterial,
+  PhysicsAggregate,
+  PhysicsShapeType,
 } from '@babylonjs/core';
 import type { Mesh, ArcRotateCamera, AnimationGroup } from '@babylonjs/core';
 
@@ -35,6 +37,15 @@ const PIVOT_HEIGHT = 1;
 // pivot.y = 1, modelo.y_local = -1 -> modelo.y_world = 0 (suelo).
 const MODEL_Y_OFFSET = -1;
 
+// Dimensiones de la capsula fisica invisible del player.
+// Altura total = 2u (modelo KayKit mide ~2u).
+// Radio calibrado en B2C con gltf-transform sobre Knight.glb:
+//   Z half (profundidad cuerpo) = 0.627u. Torso estimado = 0.45-0.50u.
+//   Valor aplicado: 0.5u. Si el player roza paredes subir a 0.55;
+//   si se atasca en puertas bajar a 0.45.
+const CAPSULE_HEIGHT = 2;
+const CAPSULE_RADIUS = 0.5;
+
 // URL base de los modelos de personaje
 const CHAR_BASE_URL = '/assets/models/characters/';
 
@@ -54,10 +65,18 @@ const CHAR_BASE_URL = '/assets/models/characters/';
 // ============================================================
 
 export class PlayerController {
+  private readonly _scene: Scene;
   private readonly _pivot: Mesh;
   private readonly _input: InputManager;
   private readonly _assetManager: AssetManager;
   private _camera: ArcRotateCamera | null = null;
+
+  // Capsula invisible: cuerpo fisico Havok del player.
+  // Se crea en el constructor (geometria pura) y recibe su PhysicsAggregate
+  // en initPhysics(), llamado desde main.ts despues de scene.enablePhysics()
+  // y despues de que los colliders de la sala ya existan.
+  private readonly _capsule: Mesh;
+  private _capsuleAggregate: PhysicsAggregate | null = null;
 
   // Instancia 3D activa. Null hasta que loadModel() resuelva.
   private _currentInstance: AssetInstance | null = null;
@@ -70,17 +89,19 @@ export class PlayerController {
   private _isWalking = false;
 
   constructor(scene: Scene, input: InputManager, assetManager: AssetManager) {
+    this._scene = scene;
     this._input = input;
     this._assetManager = assetManager;
 
-    this._pivot = this._createPivot(scene);
+    this._pivot   = this._createPivot(scene);
+    this._capsule = this._createPhysicsCapsule(scene);
 
     scene.registerBeforeRender(() => {
       const deltaTime = scene.getEngine().getDeltaTime() / 1000;
       this._update(deltaTime);
     });
 
-    logger.info('PlayerController: pivot creado', { position: this._pivot.position });
+    logger.info('PlayerController: pivot y capsula creados', { position: this._pivot.position });
   }
 
   // ——————————————————————————————————————————
@@ -103,6 +124,36 @@ export class PlayerController {
   setCamera(camera: ArcRotateCamera): void {
     this._camera = camera;
     logger.debug('PlayerController: camara inyectada');
+  }
+
+  /**
+   * Conecta la capsula invisible al motor Havok y bloquea la inercia angular.
+   *
+   * CUANDO llamar: desde main.ts, DESPUES de scene.enablePhysics() (B2A)
+   * y DESPUES de TestRoom.build() (para que los colliders de suelo y paredes
+   * ya existan y la capsula no caiga al vacio durante la carga).
+   *
+   * Por que no en el constructor: PhysicsAggregate requiere que
+   * scene.enablePhysics() ya haya sido llamado, pero el constructor de
+   * PlayerController se ejecuta de forma sincrona antes del bloque async
+   * donde Havok se inicializa.
+   */
+  initPhysics(): void {
+    this._capsuleAggregate = new PhysicsAggregate(
+      this._capsule,
+      PhysicsShapeType.CAPSULE,
+      { mass: 1, restitution: 0 },
+      this._scene,
+    );
+
+    // Bloquear inercia angular: sin esto el player se inclina o tumba
+    // al empujar contra una pared o colisionar con un enemigo.
+    this._capsuleAggregate.body.setMassProperties({
+      inertia:             new Vector3(0, 0, 0),
+      inertiaOrientation:  Quaternion.Identity(),
+    });
+
+    logger.info('PlayerController: capsula fisica Havok activada.');
   }
 
   /**
@@ -239,14 +290,30 @@ export class PlayerController {
       this._isWalking = false;
     }
 
-    if (!isMovingNow) { return; }
-
-    // Mover el pivot en el plano horizontal (frame-rate independiente)
-    const displacement = moveDir.scale(PLAYER_SPEED * deltaTime);
-    this._pivot.position.addInPlace(displacement);
+    // --- Movimiento ---
+    if (this._capsuleAggregate) {
+      // Con fisica Havok: setLinearVelocity para X/Z, preservar Y (gravedad).
+      // setLinearVelocity sobreescribe la velocidad directamente cada frame
+      // (no es una fuerza acumulativa), lo que da control preciso e inmediato.
+      const vel = this._capsuleAggregate.body.getLinearVelocity();
+      this._capsuleAggregate.body.setLinearVelocity(new Vector3(
+        isMovingNow ? moveDir.x * PLAYER_SPEED : 0,
+        vel.y,  // Y gestionado por Havok (gravedad + colisiones)
+        isMovingNow ? moveDir.z * PLAYER_SPEED : 0,
+      ));
+      // Sincronizar pivot con la posicion real de la capsula (incluye Y de gravedad).
+      // El modelo hijo del pivot sigue al pivot exactamente igual que antes.
+      this._pivot.position.copyFrom(this._capsule.position);
+    } else {
+      // Fallback sin fisica (no deberia ocurrir en juego normal, solo pre-initPhysics)
+      if (!isMovingNow) { return; }
+      this._pivot.position.addInPlace(moveDir.scale(PLAYER_SPEED * deltaTime));
+    }
 
     // Rotar el pivot hacia la direccion de movimiento
-    this._applyRotation(moveDir);
+    if (isMovingNow) {
+      this._applyRotation(moveDir);
+    }
   }
 
   /**
@@ -291,7 +358,7 @@ export class PlayerController {
   }
 
   // ——————————————————————————————————————————
-  // Creacion del pivot
+  // Creacion del pivot y de la capsula fisica
   // ——————————————————————————————————————————
 
   /**
@@ -305,6 +372,29 @@ export class PlayerController {
     pivot.isPickable = false;
     pivot.position = new Vector3(0, PIVOT_HEIGHT, 0);
     return pivot;
+  }
+
+  /**
+   * Crea la capsula invisible que actua como cuerpo fisico del player.
+   *
+   * Geometria: altura total = CAPSULE_HEIGHT (2u = KayKit player), radio CAPSULE_RADIUS.
+   * Posicion inicial: Y = CAPSULE_HEIGHT/2 = 1u, igual que PIVOT_HEIGHT.
+   *   -> fondo de la capsula en Y=0 (suelo), tope en Y=2 (cabeza del modelo).
+   *
+   * El PhysicsAggregate se asigna en initPhysics() (llamado desde main.ts),
+   * no aqui, porque PhysicsAggregate requiere scene.enablePhysics() previo
+   * y el constructor se ejecuta antes de que Havok este inicializado.
+   */
+  private _createPhysicsCapsule(scene: Scene): Mesh {
+    const capsule = MeshBuilder.CreateCapsule(
+      'playerCapsule',
+      { height: CAPSULE_HEIGHT, radius: CAPSULE_RADIUS, tessellation: 8 },
+      scene,
+    );
+    capsule.isVisible  = false;
+    capsule.isPickable = false;
+    capsule.position   = new Vector3(0, CAPSULE_HEIGHT / 2, 0);
+    return capsule;
   }
 
   // ——————————————————————————————————————————
