@@ -2,14 +2,2392 @@
   "system_meta": {
     "version": "0.1.0-draft",
     "schema_doc": "../15_INTERACTION_SYSTEM.md",
-    "magnitude_scale": ["low", "medium", "high", "extreme"],
-    "range_types": ["touch", "melee", "ranged", "area", "ambient"],
-    "duration_types": ["instant", "sustained_turns", "permanent", "until_condition"],
-    "resistance_levels": ["heal", "extreme_vulnerable", "vulnerable", "normal", "resist_25", "resist_50", "resist_75", "immune"],
-    "implementation_notes": ["standard", "aspirational", "needs_research", "needs_clarification"],
+    "magnitude_scale": [
+      "low",
+      "medium",
+      "high",
+      "extreme"
+    ],
+    "range_types": [
+      "touch",
+      "melee",
+      "ranged",
+      "area",
+      "ambient"
+    ],
+    "duration_types": [
+      "instant",
+      "sustained_turns",
+      "permanent",
+      "until_condition"
+    ],
+    "resistance_levels": [
+      "heal",
+      "extreme_vulnerable",
+      "vulnerable",
+      "normal",
+      "resist_25",
+      "resist_50",
+      "resist_75",
+      "immune"
+    ],
+    "implementation_notes": [
+      "standard",
+      "aspirational",
+      "needs_research",
+      "needs_clarification"
+    ],
     "id_convention": "snake_case prefixed by category_id (ej: physical_external_slash_light)"
   },
-  "categories": [],
+  "categories": [
+    {
+      "category_id": "physical_external",
+      "category_name": "Daño físico externo",
+      "category_definition": "Daño causado por impacto, corte, perforación o fricción aplicado desde el exterior del cuerpo o estructura del receptor. Interactúa con armadura, piel, escamas, cascarones. Bloqueado o mitigado por capas externas. NO penetra protecciones externas hacia el interior (ver category physical_internal).",
+      "subcategories": [
+        {
+          "subcategory_id": "slash",
+          "subcategory_name": "Cortante",
+          "vectors": [
+            {
+              "id": "physical_external_slash_light",
+              "name": "Tajo ligero",
+              "description": "Corte rápido y superficial. Daño bajo, alta frecuencia. Puede causar status_bleed_minor con acumulación de 3 hits en el mismo combate.",
+              "generators": [
+                "Daga offhand (Pícaro)",
+                "Zarpazo de Goblin",
+                "Cuchilla de trampa rotatoria"
+              ],
+              "receptors_affected": [
+                "Carnes",
+                "Telas",
+                "Cueros ligeros",
+                "Madera blanda"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de cuero grueso",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Cota de malla",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Armadura de placas",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de piedra o metal",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "normal"
+                }
+              ],
+              "design_notes": "Base del Pícaro en modo flurry. 3 stacks en el mismo combate activan status_bleed_minor automáticamente. Alta sinergia con builds DEX: encadenamiento de turnos permite acumular los 3 stacks en la misma ronda.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_slash_heavy",
+              "name": "Tajo pesado",
+              "description": "Corte profundo con masa y velocidad. Daño alto. Causa status_bleed_major directamente sin necesidad de acumulación. En criaturas frágiles puede separar miembros.",
+              "generators": [
+                "Espada 1H del Knight (ataque especial cargado)",
+                "Hacha de Skeleton Warrior",
+                "Trampa de péndulo con cuchilla"
+              ],
+              "receptors_affected": [
+                "Carnes",
+                "Cueros",
+                "Madera",
+                "Constructos ligeros"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas completa",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Escudo activo en block",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Hueso desnudo (Esqueleto sin armadura)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "Causa status_bleed_major sin acumulación previa. El Knight puede ejecutarlo tras abrir guardia con su habilidad de apertura. Diferencia clave con slash_light: no requiere acumulación pero cuesta más AP o se activa solo en ataques especiales.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_slash_sweep",
+              "name": "Barrido cortante",
+              "description": "Arco horizontal amplio. Daño medio por objetivo individual, afecta múltiples entidades en cono o línea. Menor daño individual que slash_heavy a cambio de cobertura AoE.",
+              "generators": [
+                "Espada 1H del Knight (wide swing)",
+                "Skeleton Warrior furioso",
+                "Trampa de cuchillas rotatorias de área"
+              ],
+              "receptors_affected": [
+                "Múltiples entidades en cono",
+                "Objetos alineados como velas o antorchas en fila",
+                "Mesas"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas completa",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Escudo activo",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "En combate por turnos: 1 acción, afecta a todos en arco. Trade-off vs foco. Puede destruir velas o antorchas en el mismo golpe que daña al enemigo: interacción directa con Cat.16 de iluminación. Perder una antorcha al barrer el área es un coste emergente real.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_slash_cleave",
+              "name": "Tajo limpio",
+              "description": "Corte preciso y profundo en un punto. Ignora 25% de resistencia de armadura base. Alta penetración relativa. Daño base menor que slash_heavy.",
+              "generators": [
+                "Ataque cargado del Knight (habilidad Cleave)",
+                "Skeleton Warrior ejecutando con hacha"
+              ],
+              "receptors_affected": [
+                "Entidades con armadura media",
+                "Constructos de madera",
+                "Puertas de madera reforzada"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas completa",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Escudo activo",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "El bypass del 25% es fijo y se aplica antes de calcular la resistencia restante del receptor. Diseñado para dar al Knight herramienta contra enemigos muy armados. No se apila con otros bypasses: máximo 1 fuente de armor bypass activa simultánea.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "pierce",
+          "subcategory_name": "Perforante",
+          "vectors": [
+            {
+              "id": "physical_external_pierce_light",
+              "name": "Perforación ligera",
+              "description": "Punta fina de baja masa. Daño moderado. Alta penetración de armaduras blandas, baja contra placas metálicas. Vector de entrega habitual para venenos de contacto.",
+              "generators": [
+                "Daga offhand (Pícaro)",
+                "Espina de trampa de agujas",
+                "Zarpa afilada de insecto (futuro)"
+              ],
+              "receptors_affected": [
+                "Cuero",
+                "Tela",
+                "Carne sin armadura",
+                "Madera blanda"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Cota de malla",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Escamas de criatura",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de piedra o metal",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "El Pícaro lo combina con veneno: pierce_light es el vector de entrega, elemental_poison es el vector de daño real. La perforación abre el canal, el veneno viaja por él. Esto significa que armadura que bloquee pierce_light bloquea también la entrega del veneno.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_pierce_heavy",
+              "name": "Perforación pesada",
+              "description": "Punta gruesa con masa significativa. Penetra armaduras medias. Puede causar status_impale: el receptor pierde 1 acción en su siguiente turno.",
+              "generators": [
+                "Lanza de Skeleton Warrior",
+                "Virote de ballesta pesado de la Cazadora (cargado)",
+                "Trampa de lanza de presión"
+              ],
+              "receptors_affected": [
+                "Carne",
+                "Cuero grueso",
+                "Armadura media",
+                "Madera gruesa"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Escudo activo (desvía parcialmente)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "status_impale: criaturas sin sistema nervioso como Constructos y Esqueletos sufren el pin físico pero NO pierden acciones por ello. Para ellos el impale es solo restricción de movimiento. Para criaturas orgánicas es pérdida real de acción táctica.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_pierce_ranged",
+              "name": "Proyectil perforante",
+              "description": "Proyectil a distancia con masa cinética. Penalización de daño a rango máximo. Bonus por punto débil: zona descubierta, visera, hueco de armadura. Requiere línea de visión.",
+              "generators": [
+                "Ballesta (Cazadora)",
+                "Dardo lanzado por Goblin",
+                "Trampa de agujas de presión"
+              ],
+              "receptors_affected": [
+                "Cualquier entidad a rango",
+                "Barril de madera (puede perforar tablones)",
+                "Puerta de madera ligera"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas a rango medio",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Armadura de placas a rango corto",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Escudo activo usado activamente",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "Mecánica de punto débil de la Cazadora: +50% daño si acierta zona descubierta. Interacción directa con Cat.16: menos iluminación reduce el porcentaje de acertar punto débil. Apagar antorchas penaliza tácticamente a la Cazadora. Esto crea dilemas: ¿oscuridad para sigilo o luz para precisión?",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_pierce_armor_bypass",
+              "name": "Perforación antiarmadura",
+              "description": "Punta diseñada o encantada para ignorar capas físicas externas. Ignora 50% de resistencia de armadura. Daño base menor que pierce_heavy.",
+              "generators": [
+                "Virote especial con encantamiento (Cazadora, ítem legendario)",
+                "Estocada de precisión extrema del Pícaro (habilidad única desbloqueada)",
+                "Arma con encantamiento de penetración de armadura"
+              ],
+              "receptors_affected": [
+                "Constructos con coraza externa gruesa",
+                "Skeleton Warrior con armadura pesada",
+                "Knight enemigo con placas completas"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Escudo activo en posición correcta",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Piel de Acero (buff) — el bypass penetra parcialmente",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de metal puro",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "[EXPERIMENTAL] Potencialmente demasiado fuerte si se apila. Regla: máximo 1 fuente de bypass activa simultánea. El 50% de bypass se aplica ANTES de calcular las resistencias base restantes del receptor, no en composición con ellas. Necesita playtest antes de confirmar el valor 50%.",
+              "implementation_note": "needs_clarification"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "blunt",
+          "subcategory_name": "Contundente",
+          "vectors": [
+            {
+              "id": "physical_external_blunt_light",
+              "name": "Golpe contundente ligero",
+              "description": "Impacto de baja masa o velocidad. Daño bajo. Puede causar status_stagger: receptor pierde 25% DEX en su siguiente turno. Muy efectivo contra hueso desnudo.",
+              "generators": [
+                "Puño del Errante (ataque básico sin carga)",
+                "Pomo de espada del Knight",
+                "Barril vacío rodando a baja velocidad"
+              ],
+              "receptors_affected": [
+                "Hueso desnudo (Esqueleto sin armadura)",
+                "Carne",
+                "Madera ligera"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Slime gelatina (absorbe totalmente)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Armadura acolchada",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Constructo de metal o piedra",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Esqueleto (hueso seco)",
+                  "level": "vulnerable"
+                }
+              ],
+              "design_notes": "El Errante escala este vector con FUE pero su habilidad estrella es blunt_heavy. blunt_light es su ataque básico de baja inversión. Esqueleto vulnerable: el hueso seco se quiebra con impactos contundentes aunque sean ligeros, simulando la fragilidad estructural del hueso sin músculo.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_blunt_heavy",
+              "name": "Golpe contundente pesado",
+              "description": "Impacto de alta masa. Daño alto. Causa status_stagger garantizado. Fracturas en criaturas óseas. Puede romper objetos del entorno como barriles, mesas y estatuas pequeñas.",
+              "generators": [
+                "Puño del Errante (modo rage, carga completa)",
+                "Mazo de Skeleton Warrior (variante armada futura)",
+                "Barril rodando a velocidad máxima",
+                "Golem golpeando"
+              ],
+              "receptors_affected": [
+                "Esqueletos (vulnerable++)",
+                "Constructos de madera (vulnerable)",
+                "Carne",
+                "Objetos del entorno rompibles"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Slime gelatina (absorbe parte)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Roca o metal macizo",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Armadura de placas (mitiga stagger, no el daño bruto)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Esqueleto (hueso)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Constructo de madera",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "Vector principal del Errante. Sinergia con status_rage: a menor HP del Errante, mayor multiplicador de daño en este vector específico. Rompe objetos de entorno en trayectoria: si un barril está en el camino y recibe blunt_heavy, se activa su interacción de objeto roto.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_blunt_slam",
+              "name": "Slam contundente",
+              "description": "Impacto vertical desde arriba por salto o caída de objeto. Daño combinado de masa y gravedad. Causa status_knockdown: receptor queda en suelo y pierde su siguiente acción.",
+              "generators": [
+                "Salto del Errante (habilidad Slam)",
+                "Estatua volcada que cae encima de entidad",
+                "Candelabro de pie volcado",
+                "Golem saltando (jefe)"
+              ],
+              "receptors_affected": [
+                "Cualquier entidad bajo el impacto",
+                "Suelo (puede crear grieta si la presión es suficiente)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Cobertura sólida encima del receptor como arco de piedra",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "Sinergia con Cat.15 movimiento_forzado_vertical: lanzar enemigo hacia arriba con un golpe + slam de vuelta al suelo = doble impacto en el mismo combo. status_knockdown: receptor en suelo recibe +25% daño en los ataques siguientes hasta que se levante gastando 1 acción.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_blunt_shockwave",
+              "name": "Onda de choque contundente",
+              "description": "Impacto en suelo o pared que propaga onda radial de presión. Daño contundente decreciente por distancia. Puede hacer caer objetos inestables en paredes o soportes cercanos.",
+              "generators": [
+                "Errante golpea suelo (habilidad Ground Pound)",
+                "Golem pisa con fuerza máxima",
+                "Explosión subterránea de componente física"
+              ],
+              "receptors_affected": [
+                "Entidades en radio sin cobertura vertical",
+                "Objetos inestables como antorchas de pared y candelabros",
+                "Terreno frágil con grietas preexistentes"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Resistencia física alta genérica",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Constructo de metal anclado al suelo",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Cadena emergente prototípica del diseño de Mettlebound: onda de choque cerca de antorcha de pared → antorcha cae al suelo → si hay charco de aceite → incendio. Este tipo de cadena no requiere hardcodeo: cada objeto reacciona a los vectores que recibe según sus propiedades declaradas.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "crush",
+          "subcategory_name": "Aplastante",
+          "vectors": [
+            {
+              "id": "physical_external_crush_object",
+              "name": "Aplastamiento por objeto",
+              "description": "Objeto de gran masa cae o rueda encima del receptor. Daño por peso. Puede causar status_pinned: receptor inmovilizado hasta que el objeto se retire o destruya.",
+              "generators": [
+                "Estatua volcada por jugador o enemigo",
+                "Barril rodando cuesta abajo por rampa",
+                "Pilar derrumbado",
+                "Candelabro grande que cae"
+              ],
+              "receptors_affected": [
+                "Cualquier entidad bajo la trayectoria",
+                "Suelo (puede fracturarse si el peso es extremo)",
+                "Trampa de suelo (puede activarla o destruirla según tipo)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal (resiste daño, recibe el pin)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina (aplastado puede dividirse)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Estatua sobre enemigo básico = kill instantánea sin loot. Trade-off táctico deliberado. Slimes aplastados pueden generar 2 Slimes menores si el sistema de división está activo en ese punto del desarrollo. [POSIBLE OVERLAP CON crush_trap] — diferencia clave: crush_object es objeto ambiental pasivo; crush_trap es mecanismo activo diseñado con ese propósito.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_crush_trap",
+              "name": "Aplastamiento por trampa",
+              "description": "Mecanismo diseñado para aplastar con fuerza concentrada en un punto. Mayor daño que crush_object por ser mecanismo activo. Puede resetearse. Activado por presión o palanca.",
+              "generators": [
+                "Trampa de prensa con pressure plate",
+                "Techo de sección que cae al activar palanca",
+                "Plataformas compresoras mecánicas"
+              ],
+              "receptors_affected": [
+                "Entidades que activan la trampa",
+                "Objetos colocados deliberadamente en la zona de aplastamiento"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Armadura de placas (reduce pero no bloquea)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El jugador puede activar trampas deliberadamente usando palancas o empujando enemigos hacia la zona con Cat.15. La IA enemiga debe tener awareness de trampas en su rango de visión: puede evitarlas o intentar redirigir al jugador hacia ellas. Mecánica de doble uso tácticamente rica.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_crush_stomp",
+              "name": "Pisotón",
+              "description": "Extremidad de gran masa impacta sobre entidad de tamaño menor. Variante de slam ejecutada por criatura activa. Daño extremo cuando hay gran diferencia de tamaño.",
+              "generators": [
+                "Golem aplasta al jugador",
+                "Boss de gran tamaño (futuro)",
+                "Criatura gigante futura"
+              ],
+              "receptors_affected": [
+                "Entidades de tamaño notablemente menor",
+                "Suelo (grieta posible)",
+                "Trampas de suelo (activa o destruye según tipo)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Armadura de placas (reduce daño, no el pin)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal de tamaño similar",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "Reservado para criaturas grandes: Golems y futuros bosses. El jugador nunca genera stomp salvo items o habilidades de tier muy alto. El ratio daño por tamaño relativo necesita definirse: criatura 2x tamaño = x1.5 daño, 3x tamaño = x2.5 daño.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "physical_external_crush_momentum",
+              "name": "Aplastamiento por momentum",
+              "description": "Embestida o carga que aplasta al receptor contra superficie fija. Daño igual a masa por velocidad. Bonus significativo si hay pared o pilar detrás del receptor.",
+              "generators": [
+                "Carga del Errante (habilidad Bull Rush)",
+                "Golem en carga recta",
+                "Empuje extremo de Cat.15 con muro detrás del receptor"
+              ],
+              "receptors_affected": [
+                "Entidades empujadas contra obstáculo sólido",
+                "Pared frágil detrás del receptor (puede romperla)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Espacio abierto detrás del receptor (sin superficie que amplifica)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Anclaje activo (buff anchoring)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de metal contra pared de piedra",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "Si el receptor es empujado contra pared frágil: se activa physical_structural_wall_break de Cat.3 simultáneamente. Si la pared cede, no hay bonus crush pero se abre una nueva zona. Cadena emergente de Errante: carga + rompe pared + descubre sala oculta, todo con una sola acción.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "lacerate",
+          "subcategory_name": "Lacerante",
+          "vectors": [
+            {
+              "id": "physical_external_lacerate_scratch",
+              "name": "Arañazo",
+              "description": "Laceración superficial múltiple. Daño muy bajo. Acumula status_bleed_minor más lentamente que slash. Deja marcas de desgaste en armadura blanda con acumulación.",
+              "generators": [
+                "Zarpa de Goblin",
+                "Espectro con garras (componente físico leve)",
+                "Raíces vivas (interactuable futuro)",
+                "Fragmentos de cristal roto en suelo"
+              ],
+              "receptors_affected": [
+                "Cuero",
+                "Tela",
+                "Carne expuesta",
+                "Madera"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de metal cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Armadura de cuero grueso",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de piedra o metal",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "Diferencia con slash_light: scratch es más superficial, menor daño puntual pero mayor acumulación de degradación de armadura blanda. Mecánica: 3 stacks sobre cuero ligero → cuero actúa como sin armadura hasta reparación en hub o con ítem. Necesita definir si la degradación persiste entre combates o solo en el combate activo.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "physical_external_lacerate_tear",
+              "name": "Desgarro profundo",
+              "description": "Laceración de alta potencia que abre heridas grandes. Causa status_bleed_major directo. Puede degradar armadura en 1 tier por stack: cuero grueso pasa a actuar como cuero ligero.",
+              "generators": [
+                "Garras de bestia grande (futuro)",
+                "Cadena con púas de trampa",
+                "Skeleton Rogue (habilidad especial de desgarro)",
+                "Herramienta de tortura como interactuable"
+              ],
+              "receptors_affected": [
+                "Carne",
+                "Cuero",
+                "Tela",
+                "Constructos de madera (se astillan)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de metal",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Piel de Acero (buff) — bloquea bleed, no el daño base",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de madera",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "La degradación de armadura es presión táctica: 3 stacks de tear en cuero → cuero actúa sin armadura ese combate. El status_bleed_major es el foco de daño real. Necesita definir si la degradación de armadura es solo por combate o si tiene persistencia entre combates.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "physical_external_lacerate_barb",
+              "name": "Desgarro por anzuelo",
+              "description": "Daño inicial bajo en la inserción. Crea status_hooked: cada movimiento voluntario del receptor genera daño lacerante adicional. Daño alto si el anzuelo se retira por la fuerza.",
+              "generators": [
+                "Trampa de anzuelos en suelo",
+                "Cadena enganchante de Skeleton Warrior especial",
+                "Flecha con punta de retroceso (ítem futuro)"
+              ],
+              "receptors_affected": [
+                "Carne",
+                "Cuero",
+                "Madera blanda"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas (bloquea la inserción inicial)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo (sin dolor: sufre pin pero no daño por movimiento)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Esqueleto (sin dolor: igual que constructo)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo: no puede engancharse)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "status_hooked es dilema táctico: quedarse quieto evita el daño pero pierde movilidad, moverse sufre el desgarro. Interacción con Cat.15: si el receptor enganchado recibe movimiento_forzado, el daño de desgarro se activa automáticamente sin que el receptor pueda evitarlo.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_lacerate_whip",
+              "name": "Latigazo",
+              "description": "Impacto flexible de alta velocidad. Alcanza detrás de escudos e ignora 50% del block activo. Causa status_stagger y lacerate_scratch simultáneamente.",
+              "generators": [
+                "Látigo de cuero (ítem futuro)",
+                "Cadena flexible como arma",
+                "Tentáculo de criatura abisal (futuro)",
+                "Raíz viva usada como arma"
+              ],
+              "receptors_affected": [
+                "Entidades con escudo activo (penetra parcialmente)",
+                "Extremidades expuestas",
+                "Carne"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura completa envolvente",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Escudo activo (solo 50% efectivo)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Piel de Acero (buff) — resiste lacerate, no el stagger",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "El bypass de escudo lo hace tácticamente único: contrarresta builds de Knight o tank puro que confíen en block total. No debe ser ataque básico de enemigo común. Mejor en enemigos de tier medio-alto o ítems de rareza alta.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "friction",
+          "subcategory_name": "Fricción",
+          "vectors": [
+            {
+              "id": "physical_external_friction_drag",
+              "name": "Arrastre por superficie",
+              "description": "Fricción sostenida al ser empujado o caer sobre superficie abrasiva. Daño bajo por turno mientras dura el arrastre. Puede degradar armadura blanda con exposición prolongada.",
+              "generators": [
+                "Empujón contra pared rugosa de piedra de Cat.15",
+                "Caída por escaleras de piedra",
+                "Trampa de arrastre mecánico"
+              ],
+              "receptors_affected": [
+                "Carne expuesta",
+                "Cuero",
+                "Tela"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Piel de Piedra (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal o piedra",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Cuero grueso",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "[POSIBLE OVERLAP CON lacerate_scratch] Diferencia clave: friction_drag es daño sostenido durante el movimiento físico del arrastre y termina cuando el movimiento termina. lacerate_scratch es puntual e instantáneo. Son distintos en duración y origen aunque el efecto sea similar.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_friction_grind",
+              "name": "Molienda / trituración",
+              "description": "Fricción extrema por mecanismo rotatorio o dentado. Daño muy alto sostenido. Casi imposible de resistir sin inmunidad explícita. Trampa ambiental de alto riesgo letal.",
+              "generators": [
+                "Trampa de engranajes",
+                "Molino maldito como interactuable ambiental",
+                "Mandíbulas externas extremas de monstruo (ver Cat.2 para versión interna)"
+              ],
+              "receptors_affected": [
+                "Cualquier material orgánico",
+                "Madera",
+                "Constructos ligeros"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal puro",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Armadura de placas (reduce duración, no inmune)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Piel de Acero + armadura de placas combinados",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Trampa ambiental de alto riesgo, no arma de combate estándar. Caer en engranajes es probable muerte salvo resistencias muy específicas. Requiere aviso visual y auditivo claro antes del punto de no retorno. La IA enemiga no usa este vector activamente: el entorno lo genera, no las criaturas.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_friction_rope_burn",
+              "name": "Quemadura por fricción",
+              "description": "Calor generado por rozamiento rápido de cuerda o cadena sobre piel. Daño bajo físico más activación de status_heat_sting, un calor mecánico distinto de la quemadura elemental.",
+              "generators": [
+                "Ligadura que se aprieta y arrastra",
+                "Descenso rápido por cuerda sin protección",
+                "Trampa de lazo que se activa con tensión"
+              ],
+              "receptors_affected": [
+                "Carne expuesta",
+                "Cuero fino"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura completa de cualquier tier",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo sin piel orgánica",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin piel)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "status_heat_sting es calor mecánico por fricción. Diferencia crítica: NO activa resistencias de fuego elemental de Cat.4. Solo afecta criaturas con piel orgánica real. Esto importa para que buffs como Resistencia al Fuego no bloqueen este estado, porque su origen no es elemental.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "compound",
+          "subcategory_name": "Mixto / Compuesto",
+          "vectors": [
+            {
+              "id": "physical_external_bite",
+              "name": "Mordedura",
+              "description": "Combinación simultánea de pierce_light y lacerate_tear ejecutada por mandíbula o dientes. Resistencias se aplican a ambos sub-vectores por separado. Se aplica el mayor daño resultante.",
+              "generators": [
+                "Criatura con mandíbulas como bestia o golem de hueso",
+                "Planta carnívora maldita (futuro)",
+                "Trampa tipo bear trap con dientes"
+              ],
+              "receptors_affected": [
+                "Carne",
+                "Cuero",
+                "Armadura media"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas (protege bien contra ambos sub-vectores)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Regla de resolución: calcular daño de pierce_light y lacerate_tear por separado con las resistencias del receptor, usar el mayor resultado. Esto hace la mordedura polivalente: si el receptor resiste el pierce pero no el tear, el tear pasa igualmente. Contrarresta defensas especializadas en un solo sub-vector.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_shrapnel",
+              "name": "Metralla / esquirlas",
+              "description": "Múltiples fragmentos pequeños de alta velocidad en cono o radio. Cada fragmento es pierce_light de bajo daño individual pero se lanzan N simultáneos. Difícil de bloquear completamente sin cobertura total.",
+              "generators": [
+                "Barril explosivo al romperse",
+                "Estatua de piedra que explota",
+                "Trampa de metralla de presión",
+                "Cristal mágico que estalla"
+              ],
+              "receptors_affected": [
+                "Cualquier entidad en zona de cono o radio sin cobertura total"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Escudo activo (bloquea frontal, no lateral ni trasero)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Armadura de placas (reduce N impactos efectivos)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Cobertura total detrás de objeto sólido",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "La mecánica de cobertura es central: inspeccionar entorno y usar cobertura detrás de mesa es respuesta táctica válida ante barril explosivo. La mesa absorbe la metralla y se destruye si es madera ligera. Implementación directa del pilar 'todo es interactuable'.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_throw_impact",
+              "name": "Impacto por objeto lanzado",
+              "description": "Objeto del entorno lanzado como proyectil. Daño base proporcional a la masa del objeto. El sub-vector se hereda del objeto: romo da blunt_heavy, cortante da slash_heavy.",
+              "generators": [
+                "Jugador lanza barril con acción de entorno",
+                "Goblin lanza piedra",
+                "Errante (habilidad lanzar lo que haya)",
+                "Skeleton Warrior lanza escudo"
+              ],
+              "receptors_affected": [
+                "Entidad objetivo",
+                "Entidades detrás si el objeto es muy pesado (penetración)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Resistencias según sub-vector heredado del objeto",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Escudo activo (puede desviar objetos de masa media)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro (si el objeto es puramente físico)",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "El objeto tiene propiedades declaradas en su definición. throw_impact hereda el vector del objeto lanzado automáticamente, sin hardcodear casos. Si el barril lanzado contiene aceite, al impactar también genera un charco de aceite en el punto de impacto. La propiedad de contenido del objeto viaja con él.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "physical_external_stab_flurry",
+              "name": "Lluvia de puñaladas",
+              "description": "Serie rápida de perforaciones ligeras en el mismo turno. Daño total igual a N multiplicado por pierce_light. Cada golpe puede provocar sangrado acumulado. A partir de cierto umbral de velocidad ignora el block de escudo.",
+              "generators": [
+                "Pícaro (habilidad Flurry)",
+                "Skeleton Rogue (habilidad dual)",
+                "Ítem que otorga multi-hit en ataque"
+              ],
+              "receptors_affected": [
+                "Carne",
+                "Cuero sin refuerzo metálico"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas (muy efectiva: mitiga cada golpe individualmente)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Piel de Acero (buff) — bloquea bleeds, no el daño base",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de metal",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "Habilidad signature del Pícaro. Diseñada para enemigos sin armadura pesada. Knight con placas es hard counter natural al Pícaro básico: el Pícaro necesita pierce_armor_bypass o veneno para superar ese counter. Equilibrio de piedra-papel-tijera entre clases intencional y comunicable al jugador.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_external_explosion_wave",
+              "name": "Onda de presión física",
+              "description": "Componente físico de una explosión: onda de presión que empuja y aplasta por concusión. Se resuelve como blunt_heavy más movimiento_forzado_horizontal simultáneos. No es el componente elemental.",
+              "generators": [
+                "Barril explosivo al detonar (componente físico; el fuego es Cat.4)",
+                "Trampa de runa de concusión",
+                "Habilidad de Mago en variante física pura",
+                "Barril con agua sometido a presión extrema"
+              ],
+              "receptors_affected": [
+                "Entidades en radio",
+                "Objetos inestables cercanos",
+                "Puertas (puede forzar apertura)",
+                "Paredes frágiles"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Levitación (buff) — reduce knockback, no el daño",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Armadura de placas (mitiga la concusión)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Slime gelatina (absorben la presión física)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Anclaje activo (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "CLAVE de diseño: barril explosivo genera DOS vectores simultáneos: este (physical_external_explosion_wave) más elemental_fire_combustion_direct de Cat.4. Las resistencias se calculan por separado. Un Slime que absorbe fuego puede ser dañado por la onda física. Un Espectro resistente al físico puede ser quemado por el fuego. Cada entidad debe pensar en ambos vectores.",
+              "implementation_note": "standard"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_id": "physical_internal",
+      "category_name": "Daño físico interno",
+      "category_definition": "Daño causado por fuerzas físicas que actúan DENTRO del cuerpo o estructura del receptor, ya sea porque el vector se origina en el interior o porque penetra completamente las capas externas. NO es mitigado por armadura externa ni por buffs que protejan la superficie como Piel de Acero. Interactúa directamente con órganos, huesos, vasos, vísceras y mecanismos internos. Las criaturas sin estructura interna orgánica como Espectros son inmunes. Las criaturas sin órganos blandos como Esqueletos o Constructos tienen inmunidades parciales específicas.",
+      "subcategories": [
+        {
+          "subcategory_id": "internal_explosion",
+          "subcategory_name": "Explosión interna",
+          "vectors": [
+            {
+              "id": "physical_internal_explosion_swallowed",
+              "name": "Explosión por objeto ingerido",
+              "description": "Objeto explosivo detonado dentro del sistema digestivo o cavidad interna del receptor tras ser ingerido o forzado a entrar por vía oral u otra apertura. Daño devastador desde dentro. Ignora armadura y Piel de Acero completamente.",
+              "generators": [
+                "Jugador fuerza a enemigo a tragar bomba mediante interacción de entorno + movimiento forzado",
+                "Habilidad especial del Pícaro (ítem o habilidad de tier alto: trampa de deglución)",
+                "Ítem consumible trampa disfrazado de poción (colocado en suelo para que enemigo lo coja)"
+              ],
+              "receptors_affected": [
+                "Cualquier criatura con cavidad interna orgánica",
+                "Constructos huecos con cavidad interna accesible"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Piel de Acero (buff) — la piel es exterior, no protege el interior",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Armadura de placas completa",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Esqueleto (cavidad torácica sin vísceras, absorbe menos)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de metal sólido sin cavidad interna",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin cavidad definida, distribuye la onda)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro (sin cuerpo físico)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Este es el ejemplo canónico del creador: 'Piel de Acero da inmunidad al físico externo pero no a que te explote una bomba desde dentro'. Es el vector que justifica la existencia completa de la categoría physical_internal. Requiere una cadena de acciones para ejecutarse: no es un ataque directo sino una interacción de entorno de alto nivel. Recompensa al jugador creativo con daño letal garantizado. Sin loot si el enemigo muere así: los restos quedan inutilizables.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "physical_internal_explosion_implanted",
+              "name": "Explosión por carga implantada",
+              "description": "Carga explosiva mágica o mecánica insertada dentro del cuerpo del receptor mediante habilidad o trampa. Detona en el siguiente turno o bajo condición. Ignora toda protección exterior.",
+              "generators": [
+                "Habilidad de Mago de tier alto (Bomba Interna, hechizo de ilusión que introduce energía dentro)",
+                "Trampa de runa implantada mediante glifo de contacto que penetra",
+                "Ítem legendario de Pícaro (aguja de detonación retardada)"
+              ],
+              "receptors_affected": [
+                "Cualquier criatura con cuerpo físico orgánico o semisólido",
+                "Constructos con núcleo de energía accesible"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Armadura de cualquier tipo",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Esqueleto (sin vísceras, daño reducido)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de metal macizo sin núcleo accesible",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (distribuye la onda interna)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia a magia (si la carga tiene origen mágico)",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "[EXPERIMENTAL] La detonación retardada crea tensión táctica: el receptor puede intentar curarse del estado antes de que detone. Necesita definir: ¿puede el receptor hacer algo para extraer la carga o anularla? ¿Cómo se comunica visualmente al jugador que tiene una carga implantada activa?",
+              "implementation_note": "needs_clarification"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "foreign_object",
+          "subcategory_name": "Cuerpo extraño",
+          "vectors": [
+            {
+              "id": "physical_internal_foreign_object",
+              "name": "Cuerpo extraño estático",
+              "description": "Objeto que penetra completamente las capas externas y queda alojado dentro. Daño inicial de penetración más daño sostenido por presencia. Cada turno que permanece puede causar hemorragia interna menor.",
+              "generators": [
+                "Virote de ballesta de la Cazadora que penetra completamente (critico a distancia corta)",
+                "Esquirla de shrapnel que se aloja en tejido",
+                "Fragmento de arma rota que queda dentro tras impacto extremo"
+              ],
+              "receptors_affected": [
+                "Carne orgánica sin armadura en zona de impacto",
+                "Receptores con brecha en armadura por lacerate_tear previo"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Piel de Acero (buff) — la piel detiene la penetración inicial",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Armadura de placas sin brecha",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (el objeto queda entre huesos, daño sostenido mínimo)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina (engloba el objeto, sin daño sostenido)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo (objeto entre piezas, no en tejido orgánico)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Este vector depende del contexto previo: solo se genera si la capa externa fue superada. La Cazadora con pierce_external_ranged crítico puede generarlo. Un receptor con lacerate_tear previo en armadura tiene brecha que permite el alojamiento. Interacción con extracción: retirar el objeto cuesta 1 acción pero genera physical_internal_hemorrhage_minor inmediato.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "physical_internal_foreign_parasite",
+              "name": "Parásito físico interno",
+              "description": "Criatura o entidad biológica pequeña que se instala en el interior del receptor y causa daño activo sostenido cada turno. Puede crecer o multiplicarse si no se trata.",
+              "generators": [
+                "Criatura de tipo insecto gigante que deposita larvas mediante mordedura (futuro Sprint 5+)",
+                "Planta maldita que inserta esporas mediante contacto (futuro)",
+                "Trampa de urna con parásito liberado al romperla"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con calor corporal y tejido blando",
+                "Constructos de madera con cavidades (parásito de tipo gusano de madera)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal (sin tejido orgánico)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin tejido blando para el parásito)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (el parásito no puede asentarse en gelatina)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia a veneno orgánico (mitiga el daño del parásito)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Piel de Acero (buff) — bloquea la penetración inicial del parásito",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Pensado para fases post-MVP con insectos gigantes. Se declara ahora para que el sistema lo soporte. El parásito puede generar status_debilitated (reduce stats) además del daño sostenido. Curación: pociones específicas anti-parásito, habilidad de Mago de purificación, o eliminar el estado en hub.",
+              "implementation_note": "aspirational"
+            },
+            {
+              "id": "physical_internal_foreign_expansion",
+              "name": "Expansión de objeto interno",
+              "description": "Objeto que, una vez dentro del receptor, se expande activamente: resorte, semilla que germina, sustancia que se solidifica. Daño por presión interna creciente. Puede causar status_ruptured si no se trata.",
+              "generators": [
+                "Trampa de aguja con payload expansivo (ítem de tier muy alto)",
+                "Hechizo de ilusión avanzado que materializa objeto dentro del objetivo",
+                "Semilla maldita depositada por criatura vegetal (futuro)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con cavidades internas",
+                "Constructos huecos de mayor tamaño"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Piel de Acero (buff) — bloquea la inserción inicial",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin cavidad rígida, la expansión no genera presión)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal macizo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (cavidad rígida: la expansión sí daña)",
+                  "level": "vulnerable"
+                }
+              ],
+              "design_notes": "[EXPERIMENTAL] De los vectores más complejos del catálogo en términos de implementación. status_ruptured sería un estado de alta gravedad: daño masivo diferido cuando la expansión supera la capacidad interna. Requiere prototipo antes de comprometerse con él. Marcado aspiracional para fases avanzadas.",
+              "implementation_note": "aspirational"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "visceral_structural",
+          "subcategory_name": "Colapso visceral y estructural interno",
+          "vectors": [
+            {
+              "id": "physical_internal_organ_crush",
+              "name": "Aplastamiento visceral",
+              "description": "Presión extrema externa que se transmite a través de la armadura o cuerpo sólido y aplasta órganos internos sin romper la capa externa. Daño alto diferido. La armadura no ayuda: la transmite.",
+              "generators": [
+                "physical_external_crush_stomp extremo de criatura muy grande",
+                "Aplastamiento por objeto de masa extrema como estatua de piedra gigante",
+                "Onda de choque de alta intensidad transmitida a través de armadura de placas"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con órganos internos blandos",
+                "Receptores con alta armadura pero sin absorción interna"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas (transmite la presión sin mitigarla)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Piel de Acero (buff) — igual que armadura: transmite la presión",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Esqueleto (sin órganos blandos que aplastar)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal sólido (sin vísceras)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (distribuye la presión uniformemente)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "buff_visceral_reinforcement (futuro)",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "Mecánica contraintuitiva y memorable: el Knight con placas completas no está protegido contra un pisotón de Golem. La armadura actúa como conductor de presión. Esto refuerza que armadura pesada tiene hard counters tácticamente justificados. Crea dilema de build: más armadura no siempre es mejor.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_internal_bone_fracture",
+              "name": "Fractura ósea interna",
+              "description": "Rotura de hueso transmitida desde el exterior hacia el interior o generada internamente. El hueso roto puede generar esquirlas que causan physical_internal_hemorrhage_minor automáticamente.",
+              "generators": [
+                "physical_external_blunt_heavy extremo transmitido a través de armadura ligera",
+                "physical_external_crush_stomp sobre extremidad",
+                "Hechizo de Mago de tipo concusión dirigido (variant interna)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con sistema óseo",
+                "Constructos de piedra o cerámica (fractura estructural equivalente)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (ya es hueso seco: vulnerable a fractura pero sin hemorragia secundaria)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Slime gelatina (sin huesos)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal (sin huesos, pero sí equivalente estructural)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Armadura de placas",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "buff_bone_hardening (futuro)",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "La fractura genera status_fractured_limb si afecta a extremidad: -50% DEX o -50% STR según extremidad afectada. Las esquirlas secundarias de hueso roto generan physical_internal_hemorrhage_minor automáticamente en criaturas orgánicas. Esqueleto tiene paradoja: vulnerable a la fractura del propio hueso pero sin la hemorragia secundaria por falta de tejido vascular.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "physical_internal_structural_collapse",
+              "name": "Colapso estructural interno",
+              "description": "Mecanismos, engranajes o núcleos internos de un constructo se destruyen por impacto transmitido o manipulación directa. Equivalente a organ_crush para criaturas artificiales.",
+              "generators": [
+                "physical_external_blunt_heavy extremo sobre Golem (vibración interna)",
+                "Habilidad especial del Mago dirigida a núcleo de energía del constructo",
+                "Carga explosiva en ranura de mantenimiento del constructo (equivalente a explosion_swallowed)"
+              ],
+              "receptors_affected": [
+                "Constructos de cualquier tipo con mecanismo interno activo",
+                "Objetos mecánicos complejos del entorno como trampas de engranajes"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal macizo sin mecanismo interno (bloque sólido)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Criaturas orgánicas (no aplica: sin mecanismo interno artificial)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de madera (mecanismo más frágil: más vulnerable)",
+                  "level": "vulnerable"
+                }
+              ],
+              "design_notes": "Este vector cierra la simetría de la categoría: organ_crush es para orgánicos, structural_collapse es para artificiales. Permite que el Mago tenga una respuesta especializada contra Golems que ignore su resistencia física exterior. El núcleo de energía de un Golem es su punto débil interno declarado.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "hemorrhage",
+          "subcategory_name": "Hemorragia interna",
+          "vectors": [
+            {
+              "id": "physical_internal_hemorrhage_minor",
+              "name": "Hemorragia interna leve",
+              "description": "Sangrado interno de baja intensidad. Daño sostenido bajo por turno. Sin sangrado visible exterior. Acumulable: 3 stacks activos simultáneos escalan a hemorrhage_major automáticamente.",
+              "generators": [
+                "physical_internal_foreign_object (daño sostenido por presencia)",
+                "physical_internal_bone_fracture (esquirlas secundarias)",
+                "Golpe crítico de physical_external_blunt_heavy que supera la amortiguación interna",
+                "status_bleed_minor muy avanzado que se internaliza"
+              ],
+              "receptors_affected": [
+                "Cualquier criatura orgánica con sistema vascular"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (sin sistema vascular activo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin sistema vascular)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Armadura de cualquier tipo",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Regeneración activa (buff) — compensa el daño sostenido",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "La acumulación a hemorrhage_major en 3 stacks crea presión táctica real: el jugador necesita curar estados internos activamente, no solo mitigar el daño externo. La regeneración puede compensar pero no cancelar: si regeneración = daño de hemorrhage_minor, el receptor no muere pero sigue gastando recursos.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_internal_hemorrhage_major",
+              "name": "Hemorragia interna masiva",
+              "description": "Sangrado interno de alta intensidad. Daño sostenido alto por turno. Aplica status_weakened: -25% a todos los stats mientras esté activo. Potencialmente letal si no se trata en 4-5 turnos.",
+              "generators": [
+                "3 stacks simultáneos de physical_internal_hemorrhage_minor",
+                "physical_internal_vascular_rupture directo",
+                "physical_internal_explosion_swallowed en criatura orgánica",
+                "Habilidad especial de enemigo de tier alto"
+              ],
+              "receptors_affected": [
+                "Cualquier criatura orgánica con sistema vascular"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Armadura de cualquier tipo",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Regeneración activa potente (buff) — reduce pero no elimina",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Poción de coagulación (ítem consumible)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Estado de alta urgencia. status_weakened combinado con el daño sostenido hace que el receptor entre en espiral de deterioro: menos stats → peor defensa → más daño recibido. La Poción de coagulación cancela el estado completamente pero no restaura HP ya perdido. Diseñado para que el jugador sienta presión real de gestión de estado.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_internal_vascular_rupture",
+              "name": "Rotura vascular directa",
+              "description": "Destrucción de vaso sanguíneo mayor de forma puntual y directa. Daño puntual alto inmediato más activación automática de hemorrhage_major. Vector de resultado devastador.",
+              "generators": [
+                "Habilidad especial de Skeleton Rogue dirigida a punto vital",
+                "Golpe crítico de pierce_heavy con ubicación en zona vascular",
+                "Hechizo del Mago de tipo concusión interna dirigida"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con sistema vascular expuesto o con brecha en armadura"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (sin sistema vascular activo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Armadura de placas completa sin brecha",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Piel de Acero (buff) — protege el punto de entrada",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "buff_hardened_vasculature (futuro raro)",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "El único vector de physical_internal donde Piel de Acero ayuda parcialmente: protege el punto de entrada pero si hay una brecha previa de lacerate_tear, Piel de Acero no cubre la brecha. Resultado: vascular_rupture recompensa la preparación táctica (tear previo para abrir la brecha, luego ruptura).",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "internal_pressure",
+          "subcategory_name": "Presión interna",
+          "vectors": [
+            {
+              "id": "physical_internal_pressure_implosion",
+              "name": "Implosión / colapso por presión interna",
+              "description": "Vacío o presión negativa generada internamente que colapsa el cuerpo hacia dentro. Distinto de la explosión: en vez de expandir, contrae. Daño por compresión brutal de cavidades internas.",
+              "generators": [
+                "Hechizo del Mago de vacío interno (variante de Cat.9b adaptada a uso interno)",
+                "Trampa de runa de succión que actúa desde dentro si el receptor la activa con el cuerpo encima",
+                "Detonación de carga de anti-presión implantada (variante de explosion_implanted)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con cavidades llenas de fluido o gas",
+                "Constructos huecos con cavidades de presión"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Slime gelatina (sin cavidades de presión diferenciada)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (cavidades con poco fluido, menor colapso)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de metal macizo sin cavidades",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Piel de Acero (buff)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Armadura de cualquier tipo",
+                  "level": "normal"
+                },
+                {
+                  "trait": "buff_pressure_equalization (muy raro, futuro)",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "[EXPERIMENTAL] El más exótico de la categoría. Se justifica por simetría con Cat.9b (daño de vacío/implosión externo): si existe implosión externa, existe la versión interna. Puede ser excesivamente complejo para el alcance actual. Marcado como aspiracional: se declara ahora para que el sistema lo soporte sin necesidad de implementar el generador inmediatamente.",
+              "implementation_note": "aspirational"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_id": "physical_structural",
+      "category_name": "Daño físico estructural",
+      "category_definition": "Vectores que afectan específicamente la integridad de estructuras arquitectónicas, objetos del entorno y componentes físicos de constructos. A diferencia de physical_external, el objetivo primario no es una criatura sino un elemento del escenario o la arquitectura mecánica de una entidad artificial. El daño estructural modifica la geometría táctica del combate: derrumbar un pilar cambia las líneas de visión, abrir una brecha en una pared crea nuevos accesos, romper un objeto elimina cobertura. Las criaturas orgánicas son en su mayoría inmunes a recibir estos vectores como daño directo pero sí sufren las consecuencias ambientales de los efectos generados.",
+      "subcategories": [
+        {
+          "subcategory_id": "pillars",
+          "subcategory_name": "Pilares",
+          "vectors": [
+            {
+              "id": "physical_structural_pillar_crack",
+              "name": "Agrietado de pilar",
+              "description": "Daño parcial a un pilar que reduce su integridad estructural sin derribarlo. Aplica status_unstable al pilar: cualquier daño físico adicional sobre él o en su base escala a pillar_collapse automáticamente. Puede revelar inscripciones o compartimentos ocultos en la grieta.",
+              "generators": [
+                "physical_external_blunt_heavy aplicado al pilar",
+                "physical_external_explosion_wave en radio del pilar",
+                "physical_external_crush_momentum con el pilar como superficie de impacto",
+                "Pico o herramienta de demolición (ítem futuro)"
+              ],
+              "receptors_affected": [
+                "Pilar de piedra (receptor primario)",
+                "Pilar de madera (más frágil, colapsa más rápido)",
+                "Pilar de metal reforzado (muy resistente)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Piedra sólida sin daño previo",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Madera sin refuerzo",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Metal reforzado",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Runa de refuerzo estructural activa",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Piedra ya dañada o envejecida (estado dungeon avanzado)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Piedra maldita (reforzada por la mazmorra)",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "El estado status_unstable en el pilar es un marcador ambiental visible para el jugador: una grieta visible y partículas de polvo. La IA enemiga con suficiente percepción debe ser capaz de leer este estado y evitar posicionarse bajo pilares inestables. Puede revelar compartimentos ocultos: pilares huecos con loot o acceso secreto.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_structural_pillar_collapse",
+              "name": "Derrumbe de pilar",
+              "description": "Destrucción total de un pilar. Genera debris físico en radio que aplica physical_external_crush_object a entidades cercanas. Modifica permanentemente la geometría de la sala: desaparece la cobertura, puede cambiar líneas de visión y crear zona de escombros transitables con penalización de movimiento.",
+              "generators": [
+                "physical_structural_pillar_crack previo más cualquier daño físico adicional",
+                "physical_external_blunt_heavy extremo en pilar ya dañado",
+                "physical_internal_explosion_swallowed en constructo apoyado contra el pilar",
+                "Habilidad del Errante (Bull Rush contra pilar inestable)"
+              ],
+              "receptors_affected": [
+                "Entidades en radio de caída de debris (daño indirecto como physical_external_crush_object)",
+                "Entidades bajo la línea de caída del pilar (daño directo letal)",
+                "Trampas de suelo en zona de escombros (pueden activarse o quedar enterradas)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Piedra sólida sin agrietar previamente",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Pilar con status_unstable activo",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Pilar de madera sin refuerzo",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Runa de refuerzo estructural activa",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El derrumbe es permanente en la sesión de juego: la sala queda modificada para ese run. La zona de escombros aplica penalización de movimiento (-1 casilla por turno) a quien la atraviese. Las Sombras ignoran la penalización de escombros. El Knight puede usar los escombros como cobertura baja. Interacción de entorno de alto impacto tácticamente.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "walls",
+          "subcategory_name": "Paredes",
+          "vectors": [
+            {
+              "id": "physical_structural_wall_crack",
+              "name": "Agrietado de pared",
+              "description": "Daño parcial a una pared que reduce su integridad sin abrirla. Aplica status_unstable a la sección. Puede crear punto de escucha entre salas: el jugador puede intentar detectar enemigos al otro lado. Puede revelar inscripciones, runas o grietas con loot.",
+              "generators": [
+                "physical_external_blunt_heavy aplicado a la pared",
+                "physical_external_explosion_wave en radio de la pared",
+                "physical_external_crush_momentum con pared como superficie",
+                "Hechizo sísmico del Mago (Cat.9a)"
+              ],
+              "receptors_affected": [
+                "Pared de piedra (receptor primario)",
+                "Pared de madera (muy frágil)",
+                "Pared frágil marcada (diseñada para ser rompible, ver wall_frail_break)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Pared de piedra sólida sin daño previo",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Pared de madera",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Pared de metal reforzado",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Pared maldita reforzada por la mazmorra",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Runa de sellado activa en la pared",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Pared ya dañada o envejecida",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "La mecánica de escucha es una adición táctica de bajo coste de implementación: si hay grieta en la pared, el jugador puede usar 1 acción para intentar detectar presencia al otro lado (tirada de STE vs nivel de ruido del otro lado). Aporta información sin garantizarla. Versión mínima de exploración táctica antes de entrar a una sala.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "physical_structural_wall_breach",
+              "name": "Brecha en pared",
+              "description": "Apertura transitable en una pared, creando nuevo acceso entre zonas. Modifica permanentemente la geometría de la sala. Los escombros generados forman cobertura baja. La brecha tiene anchura definida que afecta a qué puede pasar por ella.",
+              "generators": [
+                "physical_structural_wall_crack más impacto físico adicional de alta magnitud",
+                "physical_external_crush_momentum extremo del Errante contra pared frágil",
+                "physical_external_explosion_wave de alto radio cerca de pared",
+                "Habilidad de Mago de demolición (Cat.9a sísmico extremo)"
+              ],
+              "receptors_affected": [
+                "Pared con status_unstable activo (mucho más vulnerable)",
+                "Pared frágil marcada en el diseño de la sala",
+                "Entidades al otro lado si estaban adosadas a la pared (daño por escombros)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Pared de piedra sin daño previo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Pared con status_unstable activo",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Pared frágil marcada (diseñada para esto)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Pared de madera sin refuerzo",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Pared maldita reforzada por la mazmorra",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Runa de sellado activa",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La anchura de la brecha importa tácticamente: una brecha estrecha permite pasar al jugador pero no a un Golem. El Errante cargando contra pared frágil como habilidad emergente es el ejemplo canónico: descubre sala oculta + daña lo que haya al otro lado con los escombros. Paredes malditas reforzadas por la mazmorra son inmunes: no todo es rompible, el diseño de nivel puede usar esto como barrera hard.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_structural_wall_frail_break",
+              "name": "Rotura de pared frágil",
+              "description": "Destrucción completa de una sección de pared marcada explícitamente como frágil en el diseño de nivel. Menor umbral de daño requerido. Generalmente revela sala, pasaje oculto o nicho con objeto.",
+              "generators": [
+                "Cualquier vector physical_external de magnitud media o superior aplicado directamente",
+                "physical_external_blunt_heavy básico es suficiente",
+                "Habilidad del Knight de escudo bash en la pared (acción de entorno contextual)",
+                "Habilidad del Errante de carga básica"
+              ],
+              "receptors_affected": [
+                "Sección de pared marcada como frágil en el nivel (único receptor válido)",
+                "Entidades adosadas al otro lado si las hubiere"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Pared frágil marcada (receptor específico de este vector)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Pared normal no marcada como frágil (este vector no aplica)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "Este vector existe para dar claridad de diseño de nivel: el level designer marca explícitamente qué paredes son rompibles sin necesidad de escalar el daño. Diferencia con wall_breach: wall_breach requiere mucho daño en cualquier pared; wall_frail_break requiere poco daño pero solo en paredes diseñadas para ello. El jugador debe buscar paredes frágiles activamente: grietas visuales, sonido hueco al golpear, indicador sutil de textura diferente.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "floor",
+          "subcategory_name": "Suelo",
+          "vectors": [
+            {
+              "id": "physical_structural_floor_crack",
+              "name": "Agrietado de suelo",
+              "description": "Daño parcial al suelo que crea zona inestable marcada. Entidades sobre ella al inicio de turno tienen probabilidad de caer si se aplica daño físico adicional en la zona. Puede revelar grieta existente o ampliar la que ya hay. No traspasable.",
+              "generators": [
+                "physical_external_blunt_slam extremo sobre suelo",
+                "physical_external_blunt_shockwave de alta magnitud",
+                "Golem pisando con fuerza extrema",
+                "Hechizo sísmico del Mago aplicado al suelo"
+              ],
+              "receptors_affected": [
+                "Suelo de piedra (receptor primario)",
+                "Suelo de madera (muy vulnerable)",
+                "Entidades sobre la zona agrietada (marcan su posición como inestable)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Suelo de piedra sólida sin daño previo",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Suelo de madera",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Suelo de metal reforzado",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Suelo sobre grieta ambiental existente (ya diseñada)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Suelo maldito reforzado",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "Las grietas de suelo son bidireccionales con las grietas preexistentes del catálogo de interactuables (Grieta en suelo del catálogo base). Un floor_crack puede expandirse para convertir una grieta estrecha en una grieta transitable mortalmente. La IA enemiga con alta INT debe evitar posicionarse sobre zonas marcadas como inestables.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_structural_floor_collapse",
+              "name": "Hundimiento de suelo",
+              "description": "Destrucción de sección de suelo creando agujero o precipicio. Entidades en la zona caen al nivel inferior si existe, o quedan en caída libre con daño de caída. Modifica la geometría de la sala permanentemente.",
+              "generators": [
+                "physical_structural_floor_crack más impacto físico adicional extremo sobre la zona agrietada",
+                "physical_external_crush_stomp de Golem sobre suelo frágil",
+                "Grieta preexistente que recibe physical_external_explosion_wave en su base",
+                "Empujar enemigo a grieta preexistente (acción de entorno, Cat.15)"
+              ],
+              "receptors_affected": [
+                "Suelo con status_unstable activo (requiere estado previo salvo suelo frágil marcado)",
+                "Suelo frágil marcado en diseño de nivel",
+                "Entidades sobre la zona en el momento del hundimiento (caída al nivel inferior)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Suelo de piedra sin daño previo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Suelo con status_unstable activo",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Suelo frágil marcado en diseño",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Suelo sobre vacío preexistente (muy frágil por naturaleza)",
+                  "level": "vulnerable"
+                }
+              ],
+              "design_notes": "Las entidades que caen reciben physical_external_crush_object por el impacto de caída al aterrizar. Entidades con buff_levitation no caen: flotan sobre el agujero. Sombras y Espectros ignoran el hundimiento: atraviesan el agujero sin caer. El agujero creado puede usarse como trampa táctica para empujar enemigos en turnos siguientes: interacción con Cat.15.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "objects",
+          "subcategory_name": "Objetos del entorno",
+          "vectors": [
+            {
+              "id": "physical_structural_object_break",
+              "name": "Rotura de objeto del entorno",
+              "description": "Destrucción de un objeto del entorno como mesa, silla, barril vacío, candelabro, estantería. El objeto queda destruido y puede generar debris útil o peligroso según su naturaleza. Elimina la cobertura o interactuable asociado.",
+              "generators": [
+                "physical_external_blunt_heavy sobre cualquier objeto de madera o cerámica",
+                "physical_external_slash_heavy sobre objeto de madera",
+                "physical_external_explosion_wave en radio del objeto",
+                "physical_external_throw_impact con objeto pesado como proyectil"
+              ],
+              "receptors_affected": [
+                "Mesa de madera (se rompe en tablones: cobertura destruida, debris utilizable)",
+                "Silla de madera (debris menor, sin uso táctico relevante)",
+                "Barril vacío (debris de tablones de madera)",
+                "Candelabro de pie (cae: posible ignición si hay aceite cerca)",
+                "Estantería con libros (libros caen: posible interactuable lore)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Objeto de madera sin refuerzo",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Objeto de piedra decorativo",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Objeto de metal (baúl metálico, soporte de metal)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Objeto con runa de protección activa",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Objeto maldito indestructible (decisión de diseño de nivel)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La destrucción de una mesa elimina su utilidad como cobertura táctica para turnos siguientes. Un jugador que usa la mesa como cobertura contra proyectiles debe saber que la mesa puede ser destruida activamente por el enemigo. El pilar del sistema: 'todo lo que puede ser interactuable, lo es' incluye ser destruible. Los libros de estantería al caer pueden ser interactuables de lore: el sistema debe marcarlo en las propiedades del objeto.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_structural_door_force",
+              "name": "Derribo de puerta",
+              "description": "Forzar o derribar una puerta por medios físicos. Una puerta derribada queda abierta permanentemente y el propio tablero puede usarse como projectil lanzable. Distinto de abrir una puerta con llave o habilidad.",
+              "generators": [
+                "physical_external_crush_momentum del Errante (Bull Rush contra puerta)",
+                "physical_external_blunt_heavy repetido sobre la puerta (2 aplicaciones)",
+                "physical_external_explosion_wave de alta magnitud en radio de la puerta",
+                "Habilidad del Knight (escudo bash extremo contra puerta reforzada)"
+              ],
+              "receptors_affected": [
+                "Puerta de madera sin refuerzo (1 hit de blunt_heavy)",
+                "Puerta de madera reforzada con metal (2 hits o 1 hit extremo)",
+                "Puerta de metal (requiere impacto extremo o explosión: difícil sin habilidad específica)",
+                "Puerta sellada por runa (inmune a métodos físicos)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Puerta de madera sin refuerzo",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Puerta de madera con refuerzo metálico",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Puerta de metal macizo",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Puerta sellada por runa activa",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Puerta maldita (la mazmorra la mantiene cerrada)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El tablero de la puerta derribada es un objeto lanzable mediante physical_external_throw_impact. Ruido: forzar una puerta genera ruido significativo que puede activar IA de enemigos en la sala contigua (interacción con Cat.29 vectores de sonido). La IA enemiga puede intentar forzar puertas cerradas para alcanzar al jugador: no solo el jugador tiene acceso a este vector.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "physical_structural_lock_break",
+              "name": "Rotura de cerradura",
+              "description": "Destrucción mecánica de la cerradura de un cofre, puerta o contenedor bloqueado. Requiere menor magnitud que door_force pero solo afecta al mecanismo de bloqueo, no a la puerta o cofre completo. Puede dañar el contenido del cofre si el impacto es excesivo.",
+              "generators": [
+                "Golpe preciso de physical_external_blunt_light sobre el mecanismo de cerradura (posición específica)",
+                "Daga del Pícaro insertada y forzada (habilidad de apertura sin llave)",
+                "physical_external_pierce_light aplicado específicamente al ojo de la cerradura",
+                "Herramienta de ganzúa de alta calidad (ítem futuro)"
+              ],
+              "receptors_affected": [
+                "Cerradura de cofre (receptor primario)",
+                "Cerradura de puerta (alternativa a door_force, más silenciosa)",
+                "Cadena con candado que bloquea objeto"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Cerradura de hierro básica",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Cerradura de acero reforzada",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Cerradura mágica (requiere llave específica o hechizo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Cerradura con runa de sellado",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Cadena de eslabones de hierro",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "Diferencia táctica con door_force: lock_break es silencioso si se ejecuta con habilidad del Pícaro (no genera vector de ruido de Cat.29). door_force siempre es ruidoso. Esto da al Pícaro un uso de sigilo que el Errante no tiene. Romper la cerradura con fuerza bruta puede dañar el contenido del cofre: porcentaje de ítems del loot con status_damaged si el impacto es excesivo.",
+              "implementation_note": "needs_clarification"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "construct_structural",
+          "subcategory_name": "Daño estructural a constructos",
+          "vectors": [
+            {
+              "id": "physical_structural_construct_joint",
+              "name": "Daño en articulación de constructo",
+              "description": "Ataque dirigido a la juntura o articulación de una extremidad del constructo. Reduce la capacidad de movimiento de esa extremidad. Aplica status_joint_damaged: -50% DEX y penalización de rango de ataque hasta reparación o destrucción de la extremidad.",
+              "generators": [
+                "Ataque preciso del Pícaro (habilidad de targeting de punto débil)",
+                "Ataque preciso de la Cazadora (punto débil visual en articulación expuesta)",
+                "physical_external_slash_cleave dirigido a la juntura de extremidad",
+                "Hechizo del Mago de tipo concusión interna (Cat.2 physical_internal_structural_collapse leve)"
+              ],
+              "receptors_affected": [
+                "Golem de piedra (articulaciones de piedra: resistentes pero dañables)",
+                "Golem de madera (articulaciones de madera: más vulnerables)",
+                "Golem de metal (articulaciones de metal: muy resistentes)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Golem de metal (juntura de metal reforzado)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Golem de piedra (juntura de piedra)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Golem de madera (juntura de madera)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Constructo sin articulaciones definidas (bloque sólido)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Runa de refuerzo de articulación activa",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "Este vector justifica que el jugador piense tácticamente en el constructo como sistema de partes, no como un bloque de HP. status_joint_damaged tiene representación visual: el Golem cojea, su brazo no sube del todo, sus movimientos son asimétricos. Da retroalimentación visual de daño estructural real. La Cazadora tiene ventaja aquí: puede ver la articulación a distancia y apuntarla.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "physical_structural_construct_limb",
+              "name": "Inutilización de extremidad de constructo",
+              "description": "Destrucción o separación completa de una extremidad del constructo. La extremidad queda inoperativa o separada. Puede convertirse en debris utilizable. El constructo pierde el ataque o capacidad asociada a esa extremidad.",
+              "generators": [
+                "physical_structural_construct_joint previo más daño adicional en la misma articulación",
+                "physical_external_slash_heavy extremo en extremidad de constructo de madera",
+                "physical_external_explosion_wave con el constructo en radio cercano",
+                "Habilidad de Errante (arranca extremidad con fuerza bruta extrema en constructo de madera)"
+              ],
+              "receptors_affected": [
+                "Extremidad de Golem de madera (la más vulnerable a separación)",
+                "Extremidad de Golem de piedra (requiere daño extremo o estado previo)",
+                "Extremidad de Golem de metal (casi imposible sin impacto extremo específico)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Extremidad de Golem de metal",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Extremidad de Golem de piedra",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Extremidad de Golem de madera",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Extremidad con status_joint_damaged activo",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Extremidad reforzada por runa activa",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "La extremidad separada puede lanzarse como proyectil mediante physical_external_throw_impact si el jugador tiene suficiente STR (habilidad del Errante o acción de entorno contextual: 'Coger brazo roto del Golem'). El Golem sin brazo pierde el rango de ataque de ese brazo pero puede adaptarse: la IA debe tener comportamiento de compensación (gira para usar el brazo funcional, usa carga de cuerpo, etc.).",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "physical_structural_construct_core",
+              "name": "Golpe al núcleo del constructo",
+              "description": "Ataque que alcanza el núcleo de energía, runa central o mecanismo vital del constructo. Daño masivo directo independiente de la armadura exterior. Requiere encontrar o exponer el punto de acceso al núcleo.",
+              "generators": [
+                "Habilidad del Mago (Disruption, accede al núcleo mágico del constructo directamente)",
+                "Ataque dirigido al núcleo expuesto tras physical_structural_construct_limb previa que lo deja accesible",
+                "Ítem legendario de daño anticonstructo (futuro)",
+                "Acción de entorno: activar runa opuesta a la del núcleo del constructo (interacción de glifo)"
+              ],
+              "receptors_affected": [
+                "Núcleo de Golem de piedra (runa interna expuesta)",
+                "Núcleo de Golem de madera (corazón de árbol maldito visible)",
+                "Núcleo de Golem de metal (cristal de energía central)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Núcleo protegido por armadura exterior intacta (no accesible)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Núcleo expuesto tras daño estructural previo",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Núcleo con escudo mágico activo",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Núcleo de Golem con runa de regeneración activa",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "El núcleo solo es accesible bajo condiciones: la armadura exterior debe tener una brecha creada por combate previo, o el jugador debe conocer un método alternativo como activar la runa opuesta. Esto convierte el combate contra Golems en un puzzle de múltiples fases: fase 1 crear brecha, fase 2 acceder al núcleo, fase 3 destruirlo. Es el vector que justifica que los Golems sean boss material de facto en Sprint 4 aunque sean enemigos normales.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "physical_structural_chain_reaction",
+              "name": "Reacción en cadena estructural",
+              "description": "Vector meta que representa el efecto en cascada cuando la destrucción de un elemento estructural desencadena la de elementos vecinos por carga o dependencia mecánica. No se genera directamente: emerge de la combinación de otros vectores estructurales sobre elementos interdependientes.",
+              "generators": [
+                "physical_structural_pillar_collapse de un pilar que soporta un arco que soporta otro pilar",
+                "physical_structural_floor_collapse que desestabiliza la pared que soportaba",
+                "physical_structural_wall_breach que elimina el soporte lateral de la bóveda"
+              ],
+              "receptors_affected": [
+                "Elementos estructurales dependientes del elemento destruido (arcos, bóvedas, vigas)",
+                "Entidades en zona de colapso secundario",
+                "Objetos sobre estructuras que colapsan"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Estructura independiente sin dependencia del elemento destruido",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Estructura reforzada por runa de estabilidad independiente",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Estructura ya dañada en zonas de transmisión de carga",
+                  "level": "vulnerable"
+                }
+              ],
+              "design_notes": "Este vector no tiene un generador directo: el sistema debe calcularlo automáticamente cuando un elemento estructural con dependencias definidas es destruido. El level designer marca explícitamente qué elementos soportan a qué otros. Es la materialización del emergentismo de Noita/Dwarf Fortress en Mettlebound: el jugador derrumba un pilar y no sabe exactamente qué más va a caer, porque el sistema lo resuelve por dependencias. Requiere que el sistema de nivel tenga un grafo de dependencias estructurales.",
+              "implementation_note": "aspirational"
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "combinations": [],
   "race_resistances": {},
   "unique_buffs": [],

@@ -39,8 +39,10 @@ en chat web. Estructura prevista: 30+ categorias)
 
 ## Estado actual
 
-| Categoria | Estado |
-|---|---|
-| (vacio) | Pendiente de poblar |
+| # | Nombre | category_id | Vectores | Estado |
+|---|---|---|---|---|
+| 1 | Daño físico externo | physical_external | 28 | ✅ Poblado |
+| 2 | Daño físico interno | physical_internal | 12 | ✅ Poblado |
+| 3 | Daño físico estructural | physical_structural | 14 | ✅ Poblado |
 
 (Esta tabla se actualizara conforme entren las categorias)
