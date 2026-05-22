@@ -53,5 +53,27 @@ en chat web. Estructura prevista: 30+ categorias)
 | 9b | Daño elemental — Aire / Vacío / Sónico letal | elemental_air | 6 | ✅ Poblado |
 | 9c | Daño elemental — Agua / Presión | elemental_water | 4 | ✅ Poblado |
 | 9d | Daño elemental — Luz / Oscuridad puras | elemental_light_dark | 6 | ✅ Poblado |
+| 10 | Daño exótico — Psíquico / Mental | exotic_psychic | 14 | ✅ Poblado |
+| 11 | Daño exótico — Sagrado / Oscuro | exotic_sacred_dark | 12 | ✅ Poblado |
+| 12 | Daño exótico — Temporal / Dimensional | exotic_temporal_dimensional | 10 | ✅ Poblado |
+| 13 | Daño exótico — Gravitacional | exotic_gravity | 8 | ✅ Poblado |
+| 14 | Daño sostenido / Estados de daño | sustained_damage | 15 | ✅ Poblado |
+| 15 | Movimiento forzado | forced_movement | 19 | ✅ Poblado |
+| 16 | Modificación de iluminación | light_modification | 18 | ✅ Poblado |
+| 17 | Modificación de terreno | terrain_modification | 18 | ✅ Poblado |
+| 18 | Estados físicos negativos | physical_negative_states | 18 | ✅ Poblado |
+| 19 | Estados físicos positivos | physical_positive_states | 10 | ✅ Poblado |
+| 20 | Estados mentales negativos | mental_negative_states | 18 | ✅ Poblado |
+| 21 | Estados mentales positivos | mental_positive_states | 8 | ✅ Poblado |
+| 22 | Modificación de stats (temporal) | stat_modification_temporary | 20 | ✅ Poblado |
+| 23 | Modificación de stats (permanente / run) | stat_modification_permanent_run | 10 | ✅ Poblado |
+| 24 | Vectores de sigilo / Detección | stealth_detection | 16 | ✅ Poblado |
+| 25 | Vectores de curación y soporte | healing_support | 16 | ✅ Poblado |
+| 26 | Vectores de control mental / Influencia | mental_influence | 12 | ✅ Poblado |
+| 27 | Vectores químicos / Fluidos combinables | chemical_fluids | 16 | ✅ Poblado |
+| 28 | Vectores meta-físicos | metaphysical | 10 | ✅ Poblado |
+| 29 | Vectores de sonido / Vibración (no letal) | sound_non_lethal | 10 | ✅ Poblado |
+| 30 | Vectores de temperatura ambiental | ambient_temperature | 8 | ✅ Poblado |
+| 31 | Vectores metabólicos / Nutricionales | metabolic_nutritional | 8 | ✅ Poblado |
 
 (Esta tabla se actualizara conforme entren las categorias)
