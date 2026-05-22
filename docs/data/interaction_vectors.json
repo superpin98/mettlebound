@@ -5591,6 +5591,1307 @@
           ]
         }
       ]
+    },
+    {
+      "category_id": "elemental_earth",
+      "category_name": "Daño elemental — Tierra / Sísmico",
+      "category_definition": "Vectores de daño originados en la energía de la tierra: impactos sísmicos, ondas que viajan por el suelo, temblores de zona y derrumbes inducidos por vibración. El daño directo a criaturas es secundario: el propósito principal de los vectores de tierra es modificar el entorno de forma destructiva e irreversible. Un hechizo sísmico no mata directamente a los Goblins, pero derrumba el pilar que los aplasta. La tierra actúa a través de consecuencias en cadena. Importante: estos vectores se propagan por contacto con la tierra. Criaturas que no estén en contacto con el suelo como Sombras, entidades con levitación activa o Slimes que floten en su propio líquido son inmunes a los efectos de desestabilización aunque no al derrumbe que resulta.",
+      "subcategories": [
+        {
+          "subcategory_id": "seismic_impact",
+          "subcategory_name": "Impacto sísmico",
+          "vectors": [
+            {
+              "id": "elemental_earth_impact_ground",
+              "name": "Impacto sísmico puntual",
+              "description": "Energía elemental de tierra concentrada en un punto del suelo. Daño moderado directo a la entidad sobre ese punto. Genera una grieta o cráter en el suelo. Las entidades en contacto con el suelo en un radio de 1-2 casillas pierden el equilibrio: aplica status_staggered. Activa physical_structural_floor_crack en la zona de impacto.",
+              "generators": [
+                "Hechizo del Mago (Earth Strike, Stone Fist: concentra energía de tierra en punto)",
+                "Trampa de runa de tierra en suelo (activa al pisarla: epicentro bajo los pies del receptor)",
+                "Criatura de tierra de gran masa que golpea el suelo con fuerza elemental (futuro)"
+              ],
+              "receptors_affected": [
+                "Entidad directamente sobre el punto de impacto (daño directo)",
+                "Entidades en radio de 1-2 casillas en contacto con el suelo (status_staggered)",
+                "Suelo en el epicentro (activa physical_structural_floor_crack)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro (flota sin contacto con el suelo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal anclado al suelo (resiste el stagger, no el daño)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de piedra (resuena con la energía de tierra: más vulnerable)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Esqueleto (sin masa para perder equilibrio: resiste el stagger)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina (masa baja: el stagger lo desplaza)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Goblin (ligero y en contacto con el suelo: muy susceptible al stagger)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia a tierra (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad a tierra (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La activación de physical_structural_floor_crack como efecto secundario conecta este vector directamente con Cat.3. El Mago puede usar earth_impact_ground no para dañar a un enemigo sino para crear una grieta estratégica: si hay una grieta preexistente cerca, el impacto puede expandirla hasta floor_collapse. También puede usarse para crear el epicentro de un derrumbe planificado en sala con pilares débiles. El daño a criaturas es moderado y no es el foco: el foco es la modificación permanente del terreno.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_earth_seismic_wave",
+              "name": "Onda sísmica",
+              "description": "Onda de energía elemental de tierra que viaja a través del suelo desde un epicentro hacia el exterior. Daño decreciente por distancia. Las criaturas en contacto con el suelo reciben status_knockdown si están dentro del radio interno. La onda puede activar trampas de suelo en su camino y derrumbar pilares ya inestables.",
+              "generators": [
+                "Hechizo del Mago (Seismic Wave, Earthshock: onda radial de tierra)",
+                "elemental_earth_impact_ground de alta magnitud que genera onda secundaria",
+                "Derrumbe de estructura de gran masa que propaga vibración al suelo",
+                "Criatura de tierra de tamaño enorme que golpea el suelo (futuro boss)"
+              ],
+              "receptors_affected": [
+                "Todas las entidades en contacto con el suelo dentro del radio (daño + posible knockdown)",
+                "Trampas de suelo en el camino de la onda (activación involuntaria)",
+                "Pilares con status_unstable en el radio (pueden colapsar por la vibración)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal anclado (resist el knockdown, recibe el daño)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Constructo de piedra (la onda resuena en su material)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Esqueleto (sin masa suficiente para el knockdown pero sí recibe daño)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina (la onda lo desplaza pero sin knockdown duro)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Knight con armadura pesada (la masa lo ancla: resist knockdown)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Resistencia a tierra (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad a tierra (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La activación involuntaria de trampas de suelo es el efecto emergente más valioso de este vector. El Mago lanza Seismic Wave y la onda activa tres trampas de presión en la sala que no había visto: los propios mecanismos del dungeon se vuelven contra sus guardianes. La onda no atraviesa paredes: su radio se calcula desde el epicentro bloqueado por geometría sólida. Esto significa que el Mago puede disparar la onda desde una esquina y que la onda alcance pasillos pero no la sala al lado, controlando el área de efecto con posicionamiento.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "tremor_area",
+          "subcategory_name": "Temblor de zona",
+          "vectors": [
+            {
+              "id": "elemental_earth_tremor",
+              "name": "Temblor de zona amplia",
+              "description": "Vibración sostenida de baja-media intensidad que afecta a toda una sala o zona extensa. Sin epicentro puntual: toda la zona tiembla simultáneamente. Daño muy bajo por turno a criaturas en contacto con el suelo pero el efecto principal es táctico: precision reducida y DEX penalizada para todos mientras dure el temblor.",
+              "generators": [
+                "Hechizo del Mago de tierra de área (Tremor: variante de zona larga duración)",
+                "Trampa de sala de tierra activa (sistema de runas en las paredes que hacen vibrar el suelo)",
+                "Derrumbe masivo en sala adyacente que se transmite por la estructura del dungeon",
+                "Efecto de boss de tierra de fase múltiple (futuro)"
+              ],
+              "receptors_affected": [
+                "Todas las entidades en contacto con el suelo en la sala (daño bajo + penalización táctica)",
+                "Objetos del entorno inestables (caen o se desplazan con la vibración)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal anclado (immune al daño táctico de temblor)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de piedra (resuena: más vulnerable al temblor prolongado)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Esqueleto (sin equilibrio que perder: immune a penalización de DEX)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Goblin (en grupo: todos penalizados, el grupo se desorganiza)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Resistencia a tierra (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad a tierra (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El temblor de zona es más una herramienta de control que de daño: la penalización de accuracy del 20% a todos durante su duración (3-4 turnos) beneficia al jugador que puede planificar mientras el enemigo falla sus ataques. Los Goblins en grupo pierden su coordinación táctica: la IA cooperativa de Goblins se ve afectada por la reducción de DEX ya que su sinergia de grupo depende de la velocidad y coordinación. El Constructo de metal, immune al temblor táctico, se convierte en el enemigo más peligroso en sala de temblor: es el único que mantiene plena efectividad.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "elemental_earth_rockfall",
+              "name": "Caída de rocas inducida",
+              "description": "Vibración sísmica que desprende rocas, escombros o fragmentos del techo y paredes. Los proyectiles de roca caen en zonas aleatorias dentro del área de temblor. Cada roca genera physical_external_crush_object al impactar. La caída es parcialmente aleatoria pero el jugador puede predecir zonas más probables por la presencia de grietas en el techo.",
+              "generators": [
+                "elemental_earth_tremor sostenido en sala con techo de piedra sin soporte suficiente",
+                "elemental_earth_seismic_wave de alta magnitud bajo techo de baja altura",
+                "elemental_earth_collapse_induced que desprende fragmentos del techo en vez de derrumbar todo"
+              ],
+              "receptors_affected": [
+                "Entidades en zonas de caída de rocas (daño por crush_object de cada roca individual)",
+                "Objetos del entorno bajo las zonas de caída",
+                "Trampas de suelo que pueden ser destruidas o activadas por las rocas"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Levitación (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de metal (resiste las rocas pero sí recibe el impacto)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de madera (las rocas lo destruyen si es lo suficientemente grande)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Esqueleto (frágil al impacto contundente)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Slime gelatina (absorbe el impacto de roca pequeña)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Cobertura sólida sobre el receptor (arco de piedra, columna)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia a tierra (buff)",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "La aleatoriedad parcial de la caída de rocas es tácticamente interesante: el jugador aprende que los pilares y arcos de piedra son zonas seguras durante un rockfall, mientras que el centro de la sala abierta es zona de riesgo. Esto invierte la lógica habitual de posicionamiento: en combate normal el jugador quiere espacio abierto; durante un rockfall quiere cobertura arriba. Las rocas que caen al suelo permanecen como debris: modifican el terreno permanentemente y pueden ser lanzadas con throw_impact por el Errante. Cada roca caída es un posible proyectil.",
+              "implementation_note": "needs_research"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "structural_collapse",
+          "subcategory_name": "Derrumbe inducido",
+          "vectors": [
+            {
+              "id": "elemental_earth_collapse_induced",
+              "name": "Derrumbe estructural inducido",
+              "description": "Energía sísmica concentrada que induce el colapso de un elemento estructural específico: pilar, sección de techo, muro. Activa directamente los vectores de Cat.3 physical_structural en el elemento objetivo. El Mago puede usar este vector para derrumbar un pilar sin el coste de atacarlo físicamente múltiples veces.",
+              "generators": [
+                "Hechizo del Mago (Structural Collapse: hechizo dirigido a elemento estructural específico)",
+                "elemental_earth_seismic_wave de alta magnitud centrada bajo un pilar inestable",
+                "elemental_earth_tremor prolongado sobre estructura ya dañada"
+              ],
+              "receptors_affected": [
+                "Pilar con status_unstable activo (colapsa directamente sin daño adicional)",
+                "Pared con status_unstable activo",
+                "Sección de techo sobre zona de temblor prolongado",
+                "Entidades bajo la estructura que colapsa (daño de Cat.3)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Estructura sin status_unstable (requiere magnitud mucho mayor)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Estructura con runa de refuerzo activa",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Estructura maldita de la mazmorra (inmune a colapso desde fuera)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Pilar de metal reforzado sin daño previo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Estructura con status_unstable activo",
+                  "level": "extreme_vulnerable"
+                }
+              ],
+              "design_notes": "Este vector es el puente entre los sistemas elemental y estructural. El combo de dos turnos: turno 1, physical_external_blunt_heavy sobre pilar para aplicar status_unstable (Cat.3 pillar_crack). Turno 2, Mago lanza collapse_induced sobre el pilar con status_unstable → colapso garantizado sin necesidad de un segundo impacto físico. Divide el trabajo: el Errante fisura el pilar, el Mago lo derrumba. El derrumbe resultante activa physical_structural_chain_reaction de Cat.3 si hay dependencias estructurales. Un combo bien ejecutado puede colapsar una sección entera de sala.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_earth_seismic_resonance",
+              "name": "Resonancia sísmica en constructos",
+              "description": "Frecuencia sísmica específica que entra en resonancia con el material de un Constructo de piedra o metal, amplificando el daño internamente. Análogo a cómo el sonido puede romper cristal a la frecuencia correcta. Ignora la resistencia exterior del Constructo para atacar su integridad estructural interna.",
+              "generators": [
+                "Hechizo del Mago de tierra de alta especialización (Resonant Frequency: hechizo anti-constructo)",
+                "elemental_earth_tremor sostenido en presencia de Constructo de piedra (la resonancia es accidental pero real)",
+                "Ítem de nivel alto con propiedad de emisión de frecuencia sísmica específica (futuro)"
+              ],
+              "receptors_affected": [
+                "Constructo de piedra (receptor primario: resuena con energía de tierra)",
+                "Constructo de metal (secundario: la resonancia metálica es diferente pero posible)",
+                "Estructuras de piedra del entorno en la sala (pueden sufrir resonancia junto al constructo)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de piedra (vulnerable por material)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de metal (vulnerable pero menos que piedra)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Constructo de madera (la madera no resuena con energía sísmica)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Criaturas orgánicas (sin masa mineral que resuene)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (el hueso no resuena con energía mineral)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Runa de amortiguación sísmica en el constructo (futura)",
+                  "level": "resist_75"
+                }
+              ],
+              "design_notes": "La resonancia sísmica es el vector anti-Constructo especializado del Mago de tierra. Complementa la paradoja táctica del sistema: el Golem de piedra resiste golpes físicos, resiste fuego, resiste electricidad (aislante), resiste veneno e incluso resiste el frío. Pero su propio material le hace vulnerable a la energía sísmica específica de tierra. El Mago de tierra tiene la clave para los Golems de piedra igual que el Mago de electricidad tiene la clave para los Golems de metal. Esto hace que la elección de especialización del Mago sea tácticamente relevante según el tipo de dungeon.",
+              "implementation_note": "needs_research"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_id": "elemental_air",
+      "category_name": "Daño elemental — Aire / Vacío / Sónico letal",
+      "category_definition": "Vectores de daño originados en fuerzas de aire, presión diferencial y ondas sónicas de alta intensidad. Tres mecanismos distintos bajo la misma categoría por su naturaleza común de operar a través del medio aéreo. El aire cortante y el vórtice son fuerzas de movimiento extremo que desgarran. El vacío y la implosión son la ausencia de presión convertida en arma: colapsan hacia dentro en vez de expandirse. El sónico letal es vibración de altísima intensidad que daña tejidos, revienta vasos y rompe materiales frágiles. Ninguno de estos vectores requiere contacto físico: todos actúan a distancia a través del medio. Interacciones cruzadas con otros sistemas: el aire puede avivar o extinguir fuego según su intensidad (Cat.4), puede dispersar nubes de gas o veneno (Cat.8) y puede apagar antorchas modificando la iluminación táctica (Cat.16).",
+      "subcategories": [
+        {
+          "subcategory_id": "air_wind",
+          "subcategory_name": "Aire y viento",
+          "vectors": [
+            {
+              "id": "elemental_air_blade",
+              "name": "Cuchilla de aire",
+              "description": "Ráfaga de viento comprimido de altísima velocidad que actúa como hoja cortante. Daño moderado-alto de tipo cortante sin contacto físico. Ignora armaduras que no sean cerradas herméticamente: el aire se cuela por las hendiduras. Puede alcanzar a entidades detrás de cobertura baja si la cuchilla pasa por encima.",
+              "generators": [
+                "Hechizo del Mago (Air Blade, Wind Slash: proyectil de viento cortante)",
+                "Trampa de fuelle de runa que dispara ráfaga de alta presión al activarse",
+                "Abertura a exterior con viento extremo (zona de nivel especial futura)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas sin armadura hermética",
+                "Telas y materiales de baja densidad (se desgarran con la cuchilla)",
+                "Fuentes de fuego en el camino (puede avivarlas o extinguirlas según magnitud)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas hermética completa (el aire no penetra)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de metal sólido (sin huecos: el viento no lo afecta)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de madera (el viento desgarra las fibras)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Esqueleto (el viento pasa a través: daño mínimo en hueso sin tejido)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina (el viento corta su superficie pero se regenera)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo: el viento no interactúa con su forma)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (sin armadura: exposición completa al corte)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia al aire (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al aire (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El Esqueleto, que resiste bien el físico cortante convencional por falta de tejido blando, también resiste la cuchilla de aire por la misma razón: el viento no tiene a qué cortar. La armadura de placas hermética es la mejor defensa pero tiene el contrapoint de ser vulnerable a electricidad. La interacción con fuego: una cuchilla de aire de baja magnitud aviva una llama persistente (aumenta su radio 1 casilla temporalmente). Una de alta magnitud la extingue. La magnitud del hechizo determina cuál de los dos efectos ocurre sobre el fuego en su camino.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_air_vortex",
+              "name": "Vórtice devastador",
+              "description": "Tornado o torbellino de energía elemental de aire concentrado. Daño sostenido por turno a todo lo dentro de su radio. Aplica movimiento_forzado_horizontal a entidades dentro como efecto secundario: las arrastra hacia el centro o las expulsa hacia el borde según la configuración del vórtice. Puede mover objetos del entorno.",
+              "generators": [
+                "Hechizo del Mago de tier alto (Vortex, Cyclone: hechizo de zona de viento sostenido)",
+                "Trampa de cámara sellada con sistema de rotación de runas activado",
+                "Criatura elemental de aire de gran tamaño (futuro)"
+              ],
+              "receptors_affected": [
+                "Todas las entidades en el radio del vórtice (daño sostenido + movimiento forzado)",
+                "Objetos ligeros del entorno (barriles vacíos, antorchas, mobiliario ligero: se mueven o se destruyen)",
+                "Llamas activas en el radio (se avivan o se extinguen según su intensidad)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal anclado al suelo (immune al movimiento forzado, sí recibe el daño)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de piedra grande (demasiado pesado para ser movido)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Levitación (buff) — paradoja: en el aire es más vulnerable al vórtice que en el suelo",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo: el vórtice no la mueve pero sí le afecta si tiene energía oscura)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Esqueleto (liviano: fácilmente movido por el vórtice)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Slime gelatina (su masa se dispersa en el vórtice: puede dividirse)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Goblin (pequeño y ligero: el vórtice lo lanza contra paredes)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Resistencia al aire (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al aire (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Anclaje activo (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La paradoja de levitación en el vórtice: en el suelo el anclaje de masa ayuda a resistirlo, en el aire no hay nada a lo que aferrarse. Un jugador con buff de levitación dentro de un vórtice es arrastrado más fácilmente. Goblin lanzado por vórtice contra pared genera physical_external_crush_momentum al impactar: el vórtice convierte a los Goblins en proyectiles contra sus propios aliados o contra paredes. Interacción con humo/gas: el vórtice dispersa nubes de gas en 1 turno, neutralizando la amenaza de gas tóxico. Puede usarse específicamente para limpiar salas con gas antes de entrar.",
+              "implementation_note": "needs_research"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "vacuum_void",
+          "subcategory_name": "Vacío e implosión",
+          "vectors": [
+            {
+              "id": "elemental_air_vacuum_local",
+              "name": "Vacío local",
+              "description": "Eliminación súbita del aire en una zona pequeña creando una bolsa de vacío. Daño por presión diferencial: el cuerpo del receptor intenta colapsar hacia el punto de baja presión. Aplica status_suffocating a criaturas con respiración: sin aire en la zona, no pueden inhalar. Los oídos y ojos son los órganos más vulnerables.",
+              "generators": [
+                "Hechizo del Mago (Void Pocket, Local Vacuum: crea bolsa de vacío en punto específico)",
+                "Trampa de runa de succión de aire (activa al entrar en la zona)",
+                "Implosión de contenedor de aire comprimido (barril presurizado: futuro ítem)"
+              ],
+              "receptors_affected": [
+                "Criaturas con sistema respiratorio en la zona (daño + status_suffocating)",
+                "Fuentes de fuego en la zona (el vacío extingue las llamas instantáneamente)",
+                "Nubes de gas o veneno en la zona (el vacío las elimina al succionar el aire)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal hermético (sin necesidad de aire)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de madera (sin respiración)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin sistema respiratorio activo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin pulmones: sin status_suffocating, sí daño por presión)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo: el vacío no la afecta)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (orgánico con pulmones: máxima vulnerabilidad al vacío)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Resistencia al aire (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al aire (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La extinción de llamas por vacío es tácticamente poderosa: el Mago puede apagar el fuego de forma inmediata y silenciosa con vacuum_local sobre una zona de flame_persistent. Esto lo convierte en el único capaz de revertir su propio elemental de fuego si la situación lo requiere. status_suffocating aplica: -1 acción por turno de privación de aire más daño sostenido creciente. Las criaturas sin respiración (Constructos, Esqueletos, Sombras) son inmunes a suffocating pero pueden seguir siendo dañadas por la presión diferencial si son de material blando. El vacío también elimina nubes de veneno inhalado: útil para salvar al propio jugador de una trampa de gas que ha activado.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "elemental_air_void_implosion",
+              "name": "Implosión de vacío",
+              "description": "Colapso violento de un vacío hacia un punto central. En vez de expandir como una explosión, concentra toda la energía y la materia cercana hacia el epicentro. Daño extremo en el punto central, decreciente hacia el exterior. Las entidades son arrastradas hacia el centro antes de sufrir el daño (movimiento_forzado_a_destino).",
+              "generators": [
+                "Hechizo del Mago de tier muy alto (Void Collapse, Implosion: el hechizo más poderoso de aire)",
+                "Detonación inestable de trampa de vacío (vacuum_local que se desestabiliza)",
+                "Ítem de rareza legendaria con propiedad de implosión (futuro)"
+              ],
+              "receptors_affected": [
+                "Todas las entidades en radio de atracción (arrastradas al centro primero)",
+                "Estructuras frágiles en el radio (pueden colapsar por la presión diferencial extrema)",
+                "Objetos del entorno en el radio (atraídos al centro y destruidos)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Anclaje activo (buff) — resist el movimiento forzado pero sí el daño en el punto",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Levitación (buff) — no protege: en el aire es más vulnerable a ser arrastrado",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Constructo de metal de alta masa (resist el arrastre, sí el daño)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo: immune al arrastre físico, vulnerable al vacío energético)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Slime gelatina (arrastrado y concentrado: la implosión puede matarlo instantáneamente)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Esqueleto (arrastrado: sus huesos se astillan en el colapso central)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Resistencia al aire (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al aire (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "[EXPERIMENTAL] La implosión es la versión inversa de physical_external_explosion_wave de Cat.1 y elemental_fire_combustion_flash de Cat.4. Donde la explosión empuja hacia fuera, la implosión tira hacia dentro. El orden de operaciones: 1) todas las entidades en radio son arrastradas al epicentro (movimiento_forzado_a_destino de Cat.15). 2) el daño masivo ocurre en el punto central. 3) las entidades supervivientes son expulsadas hacia afuera (movimiento_forzado_horizontal). Triple efecto en una acción. Reservada para hechizo de tier muy alto del Mago: un recurso raro y devastador, no una herramienta estándar.",
+              "implementation_note": "aspirational"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "sonic_lethal",
+          "subcategory_name": "Sónico letal",
+          "vectors": [
+            {
+              "id": "elemental_sonic_lethal_wave",
+              "name": "Onda sónica letal",
+              "description": "Vibración de altísima intensidad que causa daño físico directo a tejidos orgánicos: revienta capilares, destruye tímpanos, genera hemorragia interna en oídos y ojos. Distinto de la vibración estructural de Cat.29 (no dañina): este vector es específicamente un arma de daño biológico. Ignora armadura física: el sonido penetra el metal.",
+              "generators": [
+                "Hechizo del Mago de tier alto (Sonic Boom, Deafening Wave: explosión sónica letal)",
+                "Instrumento de guerra rúnico (ítem futuro: cuerno de runa que emite frecuencia letal)",
+                "Criatura con capacidad de emisión sónica (futuro: murciélago gigante, bestia de ultrasonido)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con sistema auditivo y vascular (daño interno sin contacto)",
+                "Cristales y materiales frágiles en la zona (pueden romperse por resonancia)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal (el sonido resuena en el metal: daño por vibración)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Constructo de piedra (masa elevada: atenúa el sonido pero no completamente)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de madera (la madera amortigua bien el sonido)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Esqueleto (sin tímpanos ni capilares: immune al daño biológico sónico)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin sistema auditivo: immune al daño biológico; sí a la vibración física)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo: el sonido no interactúa con su forma)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (órganos auditivos sensibles: vulnerable)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Armadura de placas hermética (atenúa el sonido que llega al receptor)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Tapones auditivos mágicos o físicos (reducen el daño auditivo pero no el vascular)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Resistencia sónica (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad sónica (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "La penetración de armadura por el sonido es la propiedad táctica definitoria: el Knight con placas hermética que resiste casi todo recibe el sonido igualmente (aunque atenúado). Aplicado junto a elemental_electric_discharge_direct (que el Knight tampoco resiste bien por sus placas de metal): el Mago tiene dos vectores que ignoran parcialmente la mejor defensa del Knight. El Constructo de metal resuena con el sonido: vulnerable. Esto da al Mago de sonido una herramienta anti-Constructo secundaria además de la sísmica. La onda sónica viaja en línea recta y rebota en paredes sólidas de forma predecible: el Mago puede calcular rebotes.",
+              "implementation_note": "needs_research"
+            },
+            {
+              "id": "elemental_sonic_shatter",
+              "name": "Frecuencia de rotura sónica",
+              "description": "Frecuencia sónica específica ajustada para entrar en resonancia con un material frágil y romperlo desde dentro. Distinto de la onda general: este vector apunta a un receptor específico y concentra la frecuencia en su estructura interna. Puede romper huesos, cristales, cerámica y la estructura de ciertos constructos sin dañar al tejido blando circundante.",
+              "generators": [
+                "Hechizo del Mago de alta precisión (Resonant Shatter: frecuencia dirigida a material específico)",
+                "Instrumento de runa ajustado a frecuencia específica de material (ítem futuro de alta rareza)",
+                "Combinación de sonic_lethal_wave en sala de resonancia natural (cueva con propiedades acústicas)"
+              ],
+              "receptors_affected": [
+                "Hueso seco de Esqueleto (la frecuencia correcta fragmenta el hueso directamente)",
+                "Cristal mágico o decorativo en el entorno (se rompe, generando physical_external_shrapnel)",
+                "Cerámica de trampa o contenedor (se rompe liberando su contenido)",
+                "Constructo de piedra con status_brittle activo por frío previo (el sonic_shatter lo termina)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Esqueleto (el hueso es el receptor ideal de esta frecuencia)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Constructo de piedra (la piedra puede resonar si la frecuencia es correcta)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Constructo de metal (el metal tiene su propia frecuencia de resonancia: depende del tipo)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Constructo de madera (amortigua bien el sonido: difícil de romper así)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Tejido orgánico blando (la frecuencia específica no daña lo que no es su objetivo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin estructura rígida: immune a la rotura por resonancia)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Material con status_brittle activo por frío previo (la resonancia lo termina en 1 hit)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Resistencia sónica (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad sónica (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El combo frío + sónico es el equivalente de tierra para el combo frío + físico: elemental_cold_cryo_brittle fragiliza el Constructo de piedra, elemental_sonic_shatter lo rompe con la frecuencia correcta. Dos vectores distintos de dos elementos distintos que producen el mismo resultado final de destrucción estructural. Los cristales rotos por sonic_shatter generan physical_external_shrapnel en zona: un cristal mágico en la sala puede ser convertido deliberadamente en arma de área apuntándole con esta frecuencia. El Mago de sonido tiene así una herramienta de creación de trampa ambiental: identificar los cristales en la sala y detonarlos en el momento oportuno.",
+              "implementation_note": "needs_research"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_id": "elemental_water",
+      "category_name": "Daño elemental — Agua / Presión",
+      "category_definition": "Vectores de daño originados en la fuerza física del agua: impacto hidráulico de alta presión, olas y corrientes violentas, presión hidrostática por inmersión y ahogamiento forzado. El agua es el elemento con menos vectores de daño directo del catálogo porque su potencia principal es indirecta: extingue fuego, conduce electricidad, diluye ácido, congela con el frío. Esos efectos ya están documentados en sus respectivas categorías como interacciones cruzadas. Lo que queda aquí es el agua como fuerza bruta pura: un chorro a presión industrial, una ola que arrasa, la aplastante presión de inmersión profunda, y la privación de aire por inhalación de agua. Importante: ninguno de estos vectores genera luz ni calor. El agua como elemento es tácticamente neutro en términos de visibilidad pero puede convertir cualquier sala en una trampa letal si se combina con electricidad o frío.",
+      "subcategories": [
+        {
+          "subcategory_id": "hydraulic",
+          "subcategory_name": "Impacto hidráulico",
+          "vectors": [
+            {
+              "id": "elemental_water_hydraulic_impact",
+              "name": "Chorro hidráulico",
+              "description": "Chorro de agua de altísima presión concentrado en un punto. Daño físico-elemental moderado. Empuja al receptor con fuerza significativa (movimiento_forzado_horizontal de Cat.15 como efecto secundario). Puede apagar llamas en su camino. Puede corroer mortero entre piedras con exposición repetida, debilitando estructuras.",
+              "generators": [
+                "Hechizo del Mago (Water Jet, Hydraulic Blast: chorro de agua concentrado)",
+                "Trampa de cañería de runa que dispara chorro al activarse",
+                "Barril de agua bajo presión extrema que revienta en dirección específica",
+                "Mecanismo de dungeon: compuerta que libera presión acumulada"
+              ],
+              "receptors_affected": [
+                "Entidad objetivo directa (daño + empuje)",
+                "Fuentes de fuego en el camino (se apagan al recibir el chorro)",
+                "Mortero de pared de piedra (corrosión estructural lenta con repetición)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal (el chorro no lo daña pero sí lo empuja)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de piedra (resistente al daño, sí al empuje)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de madera (el agua penetra las fibras: daño mayor)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Esqueleto (el chorro puede separar huesos con presión suficiente)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Slime gelatina (el chorro lo divide temporalmente: puede activar split)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo: el agua pasa a través)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (ligero: el empuje lo lanza lejos)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Anclaje activo (buff): immune al empuje, sí al daño",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Resistencia al agua (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al agua (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El chorro hidráulico como extintor de llamas activo da al Mago una herramienta de control: puede apagar el fire_persistent de la sala en 1 acción si el chorro pasa por la zona. También puede usarse para empujar a un enemigo hacia una grieta de suelo o contra una pared, activando crush_momentum como efecto secundario. El Slime que se divide por el chorro genera 2 Slimes menores: usar el chorro sobre un Slime puede ser contraproducente. La corrosión de mortero en paredes de piedra es aspiracional: con repetición podría crear una brecha estructural sin daño físico directo, siendo otro método de apertura silencioso y lento.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_water_wave_slam",
+              "name": "Embate de ola",
+              "description": "Masa de agua en movimiento que golpea a múltiples entidades en un frente amplio. Daño contundente de área más empuje masivo (movimiento_forzado_horizontal de Cat.15 a todas las entidades en el frente). Deja el suelo mojado tras el paso: el terreno queda como charco de agua, habilitando interacciones con electricidad y frío.",
+              "generators": [
+                "Hechizo del Mago de tier alto (Tidal Wave, Wall of Water: ola de área)",
+                "Compuerta de sala de agua que se abre completamente inundando la sala siguiente",
+                "Barril muy grande de agua roto que libera contenido en cascada (magnitud menor)"
+              ],
+              "receptors_affected": [
+                "Todas las entidades en el frente de la ola (daño + empuje simultáneo)",
+                "Objetos ligeros del entorno en el camino (barriles vacíos, mobiliario ligero: arrastrados)",
+                "Suelo de la zona (queda cubierto de agua: charco generado)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal de gran masa (resiste el empuje parcialmente)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de piedra de gran masa",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de madera (la ola lo arrastra)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Esqueleto (ligero: el empuje lo lanza)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Slime gelatina (la ola lo dispersa: split masivo posible)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Sombra / Espectro (etéreo: la ola pasa a través)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (el grupo completo recibe empuje: se dispersan)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Levitación (buff): immune al empuje, sí al daño de impacto del agua",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Anclaje activo (buff): immune al empuje",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Resistencia al agua (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad al agua (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El charco de agua dejado por la ola es un modificador de terreno que activa inmediatamente el potencial eléctrico de la sala: si el Mago lanza wave_slam y a continuación discharge_bolt sobre el charco resultante, toda la zona queda electrificada. Combo de dos hechizos que convierte la sala entera en trampa eléctrica en 2 turnos. El grupo de Goblins dispersado por el empuje pierde su sinergia de IA cooperativa: combaten individualmente en vez de en grupo. El empuje puede lanzar a un enemigo al otro extremo de la sala, creando distancia de seguridad para el jugador que necesita un respiro.",
+              "implementation_note": "standard"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "pressure_drowning",
+          "subcategory_name": "Presión y ahogamiento",
+          "vectors": [
+            {
+              "id": "elemental_water_pressure",
+              "name": "Presión hidrostática",
+              "description": "Presión del agua que aplasta desde todos los lados simultáneamente cuando el receptor está inmerso o cuando se le aplica presión hidrostática directamente. Similar a organ_crush de Cat.2 en que la armadura no ayuda: la presión penetra a través de cualquier capa. Daño interno por compresión.",
+              "generators": [
+                "Inmersión en zona de agua profunda (trampa de sala inundable)",
+                "Hechizo del Mago (Pressure Crush: aplica presión hidrostática artificialmente en punto)",
+                "Zona de dungeon bajo nivel del mar con presión ambiental extrema (futuro: nivel especial)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con cavidades internas llenas de gas o fluido (pulmones, vasos)",
+                "Constructos huecos (la presión colapsa la cavidad interna)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Armadura de placas completa (transmite la presión igual que en organ_crush de Cat.2)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Piel de Acero (buff): transmite la presión, no protege",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Constructo de metal macizo sin cavidades (sin hueco que colapsar)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Constructo de piedra maciza",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (cavidades mínimas de aire: resist parcial)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina (sin cavidades de gas: la presión se distribuye uniformemente)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (cavidades de gas pronunciadas: vulnerable)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "buff_pressure_equalization (futuro raro, ver Cat.12)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al agua (buff)",
+                  "level": "resist_50"
+                }
+              ],
+              "design_notes": "La paradoja de la armadura como conductora de presión ya establecida en Cat.2 (organ_crush) se repite aquí con el mismo razonamiento: la armadura de placas concentra la presión en vez de distribuirla. El Knight bajo presión hidrostática extrema sufre más que el Errante sin armadura. Simetría intencional con Cat.2 physical_internal_organ_crush: ambos vectores atacan las cavidades internas pero por mecanismos distintos: uno es fuerza transmitida, el otro es presión diferencial del agua. El Constructo hueco de madera es el más vulnerable: la presión colapsa su estructura interna si sus paredes no son lo suficientemente gruesas.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "elemental_water_drowning",
+              "name": "Ahogamiento forzado",
+              "description": "Privación de oxígeno por inhalación de agua o inmersión forzada. Daño sostenido creciente por turno de privación. Aplica status_suffocating (igual que vacuum_local de Cat.9b pero por agua en vez de vacío). Sin tratamiento, letal en pocos turnos. El receptor no puede lanzar hechizos verbales bajo el agua.",
+              "generators": [
+                "Inmersión forzada en zona de agua por movimiento_forzado de Cat.15",
+                "Sala que se inunda gradualmente (trampa de sala con mecanismo de inundación)",
+                "Hechizo del Mago (Water Breath Denial: fuerza al receptor a inhalar agua en sus pulmones)",
+                "Slime de agua que envuelve la cabeza del receptor (ataque de sofocación acuática)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas con sistema respiratorio y pulmones",
+                "Criaturas orgánicas forzadas a inhalación de agua por cualquier medio"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de cualquier tipo (sin respiración)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (sin sistema respiratorio activo)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin pulmones)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (pulmones pequeños: se llena de agua muy rápido)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Respiración acuática (buff futuro: gill rune, ítem)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia al agua (buff)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Armadura de placas hermética (retrasa el contacto del agua con la piel pero no los pulmones si hay brecha)",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "El ahogamiento es el estado de agua más letal y el más raramente aplicable en combate estándar de dungeon: requiere inmersión o un mecanismo específico. Su uso principal es en salas de trampa con inundación. El sistema de inundación de sala puede implementarse como: turno 1-3 el agua sube (suelo cubierto, penalización de movimiento), turno 4-6 el agua llega a la cintura (status_drenched activo, electrical amplification), turno 7+ el agua cubre la cabeza (drowning activo). Este escalado de consecuencias crea urgencia táctica sin que el daño sea instantáneo. La restricción de hechizos verbales bajo el agua diferencia al Mago: necesita salir a la superficie para lanzar hechizos que requieren vocalización.",
+              "implementation_note": "aspirational"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category_id": "elemental_light_dark",
+      "category_name": "Daño elemental — Luz / Oscuridad puras",
+      "category_definition": "Vectores de daño originados en luz pura concentrada o en oscuridad activa como fuerza elemental. Distinción crítica con Cat.16: Cat.16 gestiona la MODIFICACIÓN de iluminación ambiental como herramienta táctica (apagar antorchas, cegar entidades, marcar con luz). Esta categoría gestiona la luz y la oscuridad como vectores de daño directo: un rayo de luz pura que quema a las Sombras, una explosión de radiancia sagrada, o la oscuridad activa que drena la vitalidad de lo vivo. La luz pura es la contramedida elemental definitiva contra Sombras y Espectros: su vulnerabilidad extrema a este vector es el fundamento del pilar de iluminación como mecánica jugable. Una Sombra en sala bien iluminada es una Sombra en desventaja táctica constante. La oscuridad pura opera de forma inversa: drena y corrompe lo que no está alineado con ella, pero las Sombras se alimentan de ella y los no-muertos la toleran.",
+      "subcategories": [
+        {
+          "subcategory_id": "pure_light",
+          "subcategory_name": "Luz pura",
+          "vectors": [
+            {
+              "id": "elemental_light_holy_beam",
+              "name": "Rayo de luz pura",
+              "description": "Haz concentrado de luz elemental pura dirigido a un objetivo. Daño moderado-alto a criaturas de oscuridad. Daño bajo a entidades neutrales. Puede revelar entidades con sigilo activo en su camino aunque no sean el objetivo: la luz ilumina todo lo que atraviesa. Activa iluminación ambiental temporal en la zona del impacto.",
+              "generators": [
+                "Hechizo del Mago de luz (Holy Beam, Light Lance: rayo concentrado de luz pura)",
+                "Ítem de rareza alta con propiedad de emisión de luz pura (futuro: cristal de luz sagrada)",
+                "Activación de runa de luz en el entorno (palanca que activa un faro de luz pura)",
+                "Antorcha mágica de alta intensidad usada como proyectil (ítem de nivel medio)"
+              ],
+              "receptors_affected": [
+                "Sombras y Espectros (receptor primario: daño extremo por naturaleza antitética)",
+                "Esqueletos (no-muertos: vulnerables a luz pura aunque menos que Sombras)",
+                "Cualquier entidad con sigilo activo en la línea del haz (revelación como efecto secundario)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Sombra / Espectro (luz pura es su contrapolo elemental)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Esqueleto (no-muerto: vulnerable a luz pura)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Constructo de metal (refleja parcialmente el haz)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de piedra",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Constructo de madera (sin alineación: neutral)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Slime gelatina (neutral a la luz)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Goblin (orgánico neutral: el haz duele pero no por razón elemental)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Resistencia a luz (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad a luz (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Oscuridad intensa activa en la zona (reduce la eficacia del haz)",
+                  "level": "resist_25"
+                },
+                {
+                  "trait": "Entidad alineada con luz (criatura sagrada futura)",
+                  "level": "heal"
+                }
+              ],
+              "design_notes": "El reflejo parcial del Constructo de metal es tácticamente significativo: el haz puede rebotar en una armadura metálica pulida y alcanzar a un receptor secundario no intencionado. Simetría con discharge_bolt que también rebota en metal. La revelación de entidades con sigilo como efecto secundario hace de holy_beam una herramienta de detección además de daño: el Mago puede barrer una zona oscura con el haz para detectar Sombras en sigilo antes de que ataquen. La oscuridad activa en la zona reduce la eficacia del haz: esto crea la interacción directa con dark_corruption y shadow_aura de esta misma categoría. Luz y oscuridad se contrarrestan mutuamente como fuerzas activas.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_light_radiant_burst",
+              "name": "Explosión radiante",
+              "description": "Detonación de luz pura en área desde un punto central. Daño en radio a todas las entidades vulnerables. La sala queda completamente iluminada durante N turnos tras la explosión: elimina toda oscuridad activa y fuerza a las Sombras a moverse en entorno hostil. Efecto lumínico persistente como consecuencia en Cat.16.",
+              "generators": [
+                "Hechizo del Mago de luz de tier alto (Radiant Burst, Dawn Nova: explosión de luz en área)",
+                "Cristal de luz sagrada destruido (al romperse libera toda su energía almacenada)",
+                "Trampa de runa de luz activada (area flash de luz pura al pisar)",
+                "Ítem consumible de rareza alta (Vial de Alba: vial que al romperse genera explosión de luz)"
+              ],
+              "receptors_affected": [
+                "Sombras y Espectros en radio (daño extremo a todas simultáneamente)",
+                "Esqueletos en radio (daño significativo)",
+                "Entidades en sigilo en radio (revelación garantizada de todas)",
+                "Oscuridad activa en la zona (se disipa completamente)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Sombra / Espectro",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Esqueleto",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Constructo de cualquier tipo (neutral a la luz)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Slime gelatina (neutral)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Goblin (la explosión de luz los desorienta: status_blinded_brief)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Resistencia a luz (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad a luz (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Receptor en zona de oscuridad activa muy intensa (resist reducido por la oscuridad)",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "El efecto de iluminación persistente de la sala tras la explosión es el impacto más importante tácticamente: una sala con Sombras que antes era una trampa se convierte en zona segura durante 3-4 turnos. El Mago sacrifica el hechizo de mayor coste para garantizar superioridad táctica en ese intervalo. El Vial de Alba como ítem consumible democratiza el vector: cualquier clase puede usar la explosión radiante aunque el Mago puede generarla con hechizos propios. Las Sombras en grupos son el objetivo ideal: la explosión radiante puede eliminar o inutilizar a múltiples Sombras en un solo hechizo, convirtiendo el combate anti-Sombra de desgaste individual en limpieza eficiente.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_light_blinding_damage",
+              "name": "Flash cegador dañino",
+              "description": "Destello de luz de alta intensidad que daña los órganos visuales además de cegar. Distinto del cegado táctico de Cat.16 que es solo reducción de visibilidad: este vector causa daño físico real en los ojos y aplica status_blinded de larga duración. Puede causar ceguera permanente en criaturas con ojos sensibles si la magnitud es extrema.",
+              "generators": [
+                "Hechizo del Mago (Blinding Flash: variante de luz con foco en daño ocular)",
+                "Espejo mágico que refleja y concentra luz en punto (interactuable del entorno)",
+                "Explosión de cristal de luz que libera energía en flash concentrado hacia el atacante"
+              ],
+              "receptors_affected": [
+                "Criaturas con órganos visuales activos y sensibles",
+                "Sombras (sus formas de energía visual son especialmente vulnerables a la sobreexposición)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de metal o piedra (sin órganos visuales orgánicos)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto sin ojos (orificios vacíos: no hay órgano visual que dañar)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Sombra / Espectro (su percepción visual es energética: vulnerable al exceso de luz)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Goblin (ojos muy sensibles: vulnerable a la ceguera prolongada)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Slime gelatina (sin ojos definidos: immune al daño ocular)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Visión ciega (buff: no depende de ojos para percibir)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Resistencia a luz (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad a luz (buff)",
+                  "level": "immune"
+                }
+              ],
+              "design_notes": "El espejo mágico como generador de blinding_damage convierte un objeto de entorno decorativo en arma: si el jugador consigue posicionar un espejo frente a una fuente de luz intensa y apuntar el reflejo hacia el enemigo, genera el flash sin gastar un hechizo. Implementación del pilar 'todo es interactuable' en el sistema de luz. La ceguera permanente como consecuencia extrema es marcada como needs_clarification: puede ser demasiado severo para el balance del juego. En criaturas con ojos de alta sensibilidad como Goblins, la ceguera permanente podría ser un estado de debilitamiento de run si se aplica al jugador. Requiere definir si los estados permanentes existen en el sistema.",
+              "implementation_note": "needs_clarification"
+            }
+          ]
+        },
+        {
+          "subcategory_id": "pure_darkness",
+          "subcategory_name": "Oscuridad pura",
+          "vectors": [
+            {
+              "id": "elemental_dark_void_drain",
+              "name": "Drenaje de vacío oscuro",
+              "description": "La oscuridad activa absorbe la vitalidad o energía de entidades vivas en su zona. Daño bajo por turno pero se aplica simultáneamente como curación parcial para entidades alineadas con la oscuridad en la misma zona. Lo que drena de unos alimenta a otros. Aplica status_drained: reduce HP máximo temporalmente.",
+              "generators": [
+                "Sombra o Espectro que ejecuta su ataque pasivo en zona de oscuridad que controla",
+                "Zona de oscuridad profunda maldita en diseño de nivel (sala de penumbra permanente)",
+                "Hechizo del Mago de oscuridad (Dark Drain: variante necrótica de drenaje, si el Mago tiene acceso)",
+                "Runa de drenaje oscuro en suelo activa al pisarla"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas vivas en la zona de oscuridad activa",
+                "Entidades no alineadas con la oscuridad que permanecen en zona oscura maldita"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Sombra / Espectro (se alimenta del drenaje: se cura en vez de ser dañada)",
+                  "level": "heal"
+                },
+                {
+                  "trait": "Esqueleto (no-muerto: partial resistance al drenaje vital)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de cualquier tipo (sin vitalidad que drenar)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (vitalidad distribuida: el drenaje es menos efectivo)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Goblin (orgánico: vitalidad concentrada y drenable)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Fuente de luz activa en zona (la luz compite con la oscuridad: reduce el drenaje)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Resistencia a oscuridad (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad a oscuridad (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Alineación con oscuridad (buff o rasgo)",
+                  "level": "heal"
+                }
+              ],
+              "design_notes": "La mecánica de drenaje como curación para Sombras en la misma zona es la interacción más estratégica de este vector: una Sombra en sala oscura que activa void_drain simultáneamente daña al jugador y se recupera. Tener una fuente de luz activa en la zona compite directamente con la oscuridad del drenaje, reduciendo su eficacia. Esto implementa tácticamente el pilar de iluminación: la antorcha del jugador no solo ilumina, también debilita activamente el void_drain de las Sombras. status_drained reduce el HP máximo temporalmente en un porcentaje del total drenado: el jugador puede tener menos HP máximo que al inicio del combate si no gestiona su exposición a zonas de oscuridad.",
+              "implementation_note": "standard"
+            },
+            {
+              "id": "elemental_dark_corruption",
+              "name": "Corrupción de oscuridad",
+              "description": "Oscuridad activa que penetra en la mente y el espíritu del receptor, corrompiendo su juicio y sus stats de forma progresiva. Aplica status_corrupted: debuffs acumulativos en INT y STE más alteraciones de comportamiento en la IA enemiga. La corrupción puede hacer que un enemigo ataque a sus propios aliados en stacks avanzados.",
+              "generators": [
+                "Ataque de Espectro de tipo psíquico-oscuro (drenaje mental, no solo vital)",
+                "Zona de corrupción de nivel (sala específicamente maldita con aura de corrupción activa)",
+                "Ítem maldito equipado que corrompe progresivamente al portador",
+                "Acumulación de void_drain sin tratamiento (la vitalidad drenada deja espacio para la corrupción)"
+              ],
+              "receptors_affected": [
+                "Criaturas con mente activa y sistema de toma de decisiones",
+                "Receptor con acumulación de status_drained previo (más vulnerable a la corrupción)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Constructo de cualquier tipo (sin mente que corromper)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina (sin mente centralizada)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (mente parcial controlada por la mazmorra: la corrupción interfiere con el control)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Sombra / Espectro (ya está alineada con la oscuridad: no puede corromperse más)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Goblin (mente simple: la corrupción lo hace más agresivo e indiscriminado)",
+                  "level": "vulnerable"
+                },
+                {
+                  "trait": "Voluntad de hierro (buff mental)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Resistencia a oscuridad (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad a oscuridad (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Luz pura activa en zona (la luz purifica la corrupción: reduce 1 stack por turno)",
+                  "level": "resist_25"
+                }
+              ],
+              "design_notes": "El Esqueleto con corrupción activa ve interferida la vinculación de la mazmorra que lo controla: podría tener ventana de autonomía parcial durante la corrupción. Lore-relevante para el sistema de conscientes como Rusty: la corrupción de oscuridad externa paradójicamente puede liberar momentáneamente a un Esqueleto del control de Grimspire. En la IA enemiga: status_corrupted a máximo nivel hace que el receptor ataque al objetivo más cercano sin distinción de facción. La luz pura como purificador activo de corrupción establece la contramedida: el Mago con hechizos de luz puede purificar aliados corrompidos gastando acciones, no solo atacar con luz. Añade un rol de soporte al Mago de luz.",
+              "implementation_note": "needs_clarification"
+            },
+            {
+              "id": "elemental_dark_shadow_strike",
+              "name": "Golpe de sombra concentrado",
+              "description": "Proyectil o impacto de energía oscura pura dirigido a un objetivo. Daño moderado con alta probabilidad de aplicar status_drained. Ignora parcialmente las protecciones físicas: la oscuridad se filtra entre la armadura. Más efectivo en zonas de poca luz. En zona de oscuridad total, el daño base se duplica.",
+              "generators": [
+                "Ataque activo de Sombra o Espectro (su vector de daño principal en combate)",
+                "Hechizo del Mago de oscuridad (Shadow Bolt: proyectil de energía oscura)",
+                "Ítem legendario con propiedad de energía oscura (futuro: arma maldita)"
+              ],
+              "receptors_affected": [
+                "Criaturas orgánicas vivas (receptores primarios del drenaje vital)",
+                "Entidades alineadas con la luz (reciben daño adicional por antítesis)"
+              ],
+              "typical_resistances": [
+                {
+                  "trait": "Sombra / Espectro (immune a su propio tipo de energía)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Esqueleto (no-muerto: resist parcial a energía oscura)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Constructo de cualquier tipo",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Slime gelatina",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Goblin (orgánico: vulnerable al drenaje vital)",
+                  "level": "normal"
+                },
+                {
+                  "trait": "Zona de luz intensa activa (la luz reduce el daño del golpe de sombra)",
+                  "level": "resist_50"
+                },
+                {
+                  "trait": "Zona de oscuridad total (duplica el daño base del golpe)",
+                  "level": "extreme_vulnerable"
+                },
+                {
+                  "trait": "Resistencia a oscuridad (buff)",
+                  "level": "resist_75"
+                },
+                {
+                  "trait": "Inmunidad a oscuridad (buff)",
+                  "level": "immune"
+                },
+                {
+                  "trait": "Alineación con luz sagrada (buff: recibe daño adicional por antítesis)",
+                  "level": "vulnerable"
+                }
+              ],
+              "design_notes": "La duplicación del daño en oscuridad total es la implementación mecánica del pilar de iluminación como gameplay: apagar todas las antorchas de una sala no solo da sigilo al jugador, también potencia al doble el ataque principal de las Sombras. Oscuridad total es literalmente darle el campo a las Sombras. Esto obliga al jugador a mantener aunque sea una fuente de luz activa para suprimir el bonus de oscuridad: la antorcha es defensa, no solo visión. La filtración entre armadura (ignora 25% de resistencia física) se implementa igual que elemental_acid_corrode: el vector se aplica a la entidad, no a su armadura. La armadura mitiga el daño físico pero no el energético oscuro.",
+              "implementation_note": "standard"
+            }
+          ]
+        }
+      ]
     }
   ],
   "combinations": [],

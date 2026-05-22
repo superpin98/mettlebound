@@ -49,5 +49,9 @@ en chat web. Estructura prevista: 30+ categorias)
 | 6 | Daño elemental — Eléctrico | elemental_electric | 12 | ✅ Poblado |
 | 7 | Daño elemental — Ácido / Corrosivo | elemental_acid | 10 | ✅ Poblado |
 | 8 | Daño elemental — Veneno / Orgánico | elemental_poison | 14 | ✅ Poblado |
+| 9 | Daño elemental — Tierra / Sísmico | elemental_earth | 6 | ✅ Poblado |
+| 9b | Daño elemental — Aire / Vacío / Sónico letal | elemental_air | 6 | ✅ Poblado |
+| 9c | Daño elemental — Agua / Presión | elemental_water | 4 | ✅ Poblado |
+| 9d | Daño elemental — Luz / Oscuridad puras | elemental_light_dark | 6 | ✅ Poblado |
 
 (Esta tabla se actualizara conforme entren las categorias)
