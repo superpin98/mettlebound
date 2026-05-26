@@ -708,8 +708,8 @@ Tabla generada al cierre de Parte A. Las 34 entradas corresponden a las 31 categ
 | Sección | Estado | Entradas |
 |---------|--------|:---:|
 | B1. Combinaciones emergentes | ✅ Completa | 60 inyectadas |
-| B2. Mapa de resistencias por raza | ⏳ Pendiente | - |
+| B2. Mapa de resistencias por raza | ✅ Completa | 11 razas inyectadas |
 | B3. Buffs/Debuffs únicos | ✅ Completa | 40 inyectados |
 | B4. Propuestas creativas | ⏳ Pendiente | - |
 
-*Última actualización: B3 Parte 2/2 — 40 buffs/curses inyectados en `unique_buffs[]`. B3 COMPLETA.*
+*Última actualización: B2 COMPLETA — 11 razas inyectadas en `race_resistances{}`. (B1: 60, B3: 40 también completas)*

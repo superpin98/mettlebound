@@ -20541,7 +20541,1259 @@
       "design_notes": "El campo gravitacional de aplastamiento comprime a las entidades hacia el centro; la atracción radial refuerza la retención en la zona; el fuego persistente las abrasa sin posibilidad de huida. La sinergia clave: la gravedad intensificada hace que el fuego queme más profundamente (burns_progressive amplificado). Tres categorías completamente distintas: exótico-gravitacional + movimiento-forzado + elemental-fuego. El Constructo Golem puede generar crush_field como comportamiento innato; combinado con fuego ambiental (antorchas) y un hechizo de atracción del Mago, la sala se convierte en una trampa de muerte sin salida."
     }
   ],
-  "race_resistances": {},
+  "race_resistances": {
+    "skeleton_minion": {
+      "race_id": "skeleton_minion",
+      "name": "Esqueleto Sirviente",
+      "lore_summary": "El escalón más bajo de la jerarquía de No-Muertos. Aventureros caídos cuyo odio acumulado fue insuficiente para elevarlos de rango. Sin casco ni equipo significativo. Rusty es el único Esqueleto Sirviente conocido que ha roto el control de la mazmorra.",
+      "base_stats": {
+        "hp": 45,
+        "dex": 9,
+        "str": 8,
+        "int": 3,
+        "ste": 5
+      },
+      "default_resistance": "normal",
+      "resistance_exceptions": [
+        {
+          "vectorIdPrefix": "status_bleed_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_internal_hemorrhage_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_vascular_rupture",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_status_poisoned",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_skin",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_wound",
+          "level": "immune"
+        },
+        {
+          "vectorId": "metabolic_dehydration",
+          "level": "immune"
+        },
+        {
+          "vectorId": "metabolic_exhaustion",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_dark_corruption_aura",
+          "level": "heal"
+        },
+        {
+          "vectorIdPrefix": "physical_external_blunt_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "exotic_aligned_smite_undead",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_holy_beam",
+          "level": "extreme_vulnerable"
+        }
+      ],
+      "innate_vectors_used": [
+        "physical_external_slash_light",
+        "physical_external_blunt_light"
+      ],
+      "behavior_priorities": [
+        "advance_toward_nearest_entity",
+        "attack_basic_melee_only",
+        "no_tactical_awareness",
+        "does_not_flee_at_low_hp"
+      ],
+      "closing_distance_vectors": [
+        "physical_external_crush_momentum"
+      ],
+      "design_notes": "El enemigo tutorial del juego. Estadísticas bajas, sin habilidades especiales, comportamiento completamente predecible. Su perfil de resistencias es idéntico al rasgo buff_necrotic_aura_skeleton_trait (referencia canónica). Rusty tiene este perfil exacto pero flag non_hostile=true. El Sirviente enseña al jugador la regla fundamental: veneno y sangrado son inútiles contra esqueletos; el mazo y el fuego son la respuesta."
+    },
+    "skeleton_warrior": {
+      "race_id": "skeleton_warrior",
+      "name": "Esqueleto Guerrero",
+      "lore_summary": "Aventurero caído cuyo odio concentrado en la batalla lo transformó en un combatiente competente bajo el control de la mazmorra. Porta los restos de su armadura original. Más lento que el Sirviente pero considerablemente más resistente y consciente tácticamente.",
+      "base_stats": {
+        "hp": 80,
+        "dex": 11,
+        "str": 15,
+        "int": 5,
+        "ste": 4
+      },
+      "default_resistance": "normal",
+      "resistance_exceptions": [
+        {
+          "vectorIdPrefix": "status_bleed_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_internal_hemorrhage_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_vascular_rupture",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_status_poisoned",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_skin",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_wound",
+          "level": "immune"
+        },
+        {
+          "vectorId": "metabolic_dehydration",
+          "level": "immune"
+        },
+        {
+          "vectorId": "metabolic_exhaustion",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_dark_corruption_aura",
+          "level": "heal"
+        },
+        {
+          "vectorIdPrefix": "physical_external_slash_",
+          "level": "resist_25"
+        },
+        {
+          "vectorIdPrefix": "physical_external_pierce_",
+          "level": "resist_25"
+        },
+        {
+          "vectorIdPrefix": "physical_external_blunt_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_fire_flame_persistent",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "exotic_aligned_smite_undead",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_holy_beam",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_psychic_terror_major",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "exotic_psychic_terror_minor",
+          "level": "immune"
+        },
+        {
+          "vectorId": "influence_intimidate",
+          "level": "immune"
+        }
+      ],
+      "innate_vectors_used": [
+        "physical_external_slash_heavy",
+        "physical_external_pierce_heavy",
+        "physical_external_blunt_heavy",
+        "movement_forced_push_heavy"
+      ],
+      "behavior_priorities": [
+        "advance_and_engage_melee",
+        "prefer_isolated_targets",
+        "use_shield_block_when_low_hp",
+        "call_skeleton_mage_backup_if_present_and_low_hp",
+        "does_not_flee"
+      ],
+      "closing_distance_vectors": [
+        "physical_external_crush_momentum",
+        "movement_forced_push_heavy"
+      ],
+      "design_notes": "El tanque estándar de la primera zona. La resistencia parcial a slash y pierce refleja que los cortes y punciones en hueso son menos efectivos que en carne. El escudo que lleva como restos de su equipo justifica la resistencia parcial a ataques directos. El Guerrero jugador necesita cambiar a su mazo o a fuego para ser efectivo. Llama al Mago esqueleto cuando está bajo HP: IA cooperativa básica."
+    },
+    "skeleton_mage": {
+      "race_id": "skeleton_mage",
+      "name": "Esqueleto Mago",
+      "lore_summary": "El rango más temido de la jerarquía esqueleto. El odio de un mago caído, concentrado en siglos de encierro, produce una inteligencia táctica superior. Manipula oscuridad, maldiciones y corrupción. Evita el combate cuerpo a cuerpo activamente.",
+      "base_stats": {
+        "hp": 55,
+        "dex": 13,
+        "str": 6,
+        "int": 18,
+        "ste": 8
+      },
+      "default_resistance": "normal",
+      "resistance_exceptions": [
+        {
+          "vectorIdPrefix": "status_bleed_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_internal_hemorrhage_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_vascular_rupture",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_status_poisoned",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_skin",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_wound",
+          "level": "immune"
+        },
+        {
+          "vectorId": "metabolic_dehydration",
+          "level": "immune"
+        },
+        {
+          "vectorId": "metabolic_exhaustion",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_dark_corruption_aura",
+          "level": "heal"
+        },
+        {
+          "vectorId": "elemental_dark_void_drain",
+          "level": "heal"
+        },
+        {
+          "vectorIdPrefix": "exotic_psychic_terror_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "influence_intimidate",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "influence_domination_",
+          "level": "resist_75"
+        },
+        {
+          "vectorIdPrefix": "physical_external_blunt_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "exotic_aligned_smite_undead",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_holy_beam",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_blinding_damage",
+          "level": "vulnerable"
+        }
+      ],
+      "innate_vectors_used": [
+        "elemental_dark_shadow_strike",
+        "elemental_dark_void_drain",
+        "exotic_dark_corruption_aura",
+        "exotic_dark_desecrate",
+        "exotic_dark_profane_strike",
+        "exotic_curse_direct",
+        "exotic_psychic_terror_minor",
+        "exotic_psychic_illusion_terrain",
+        "heal_hp_direct_minor"
+      ],
+      "behavior_priorities": [
+        "maintain_distance_from_player_3_tiles_minimum",
+        "desecrate_zone_before_engaging",
+        "apply_cursed_flesh_to_player_first_turn",
+        "use_corruption_aura_on_allied_skeletons_to_heal_them",
+        "use_terror_minor_to_disrupt_player_positioning",
+        "call_skeleton_warrior_forward_as_shield",
+        "flee_when_below_20pct_hp_to_regroup"
+      ],
+      "closing_distance_vectors": [
+        "exotic_psychic_terror_minor",
+        "movement_forced_pull_single"
+      ],
+      "design_notes": "El Esqueleto Mago es el enemigo de mayor complejidad de la primera zona. Su cierre de distancia es psíquico, no físico: usa terror para reposicionar al jugador o pull para acercarlo a la trampa desecrada. Se cura con void_drain y curar a aliados con corruption_aura es su mecánica de soporte más sorprendente para el jugador la primera vez. Prioridad táctica de IA: nunca estár en melee range."
+    },
+    "skeleton_rogue": {
+      "race_id": "skeleton_rogue",
+      "name": "Esqueleto Pícaro",
+      "lore_summary": "El odio de un ladrón o asesino caído, concentrado en velocidad y brutalidad. Más ágil que cualquier otro esqueleto. Prefiere flanquear y atacar desde ángulos ciegos. El único esqueleto que activamente intenta usar sigilo.",
+      "base_stats": {
+        "hp": 55,
+        "dex": 18,
+        "str": 10,
+        "int": 7,
+        "ste": 14
+      },
+      "default_resistance": "normal",
+      "resistance_exceptions": [
+        {
+          "vectorIdPrefix": "status_bleed_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_internal_hemorrhage_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_vascular_rupture",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_status_poisoned",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_skin",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_wound",
+          "level": "immune"
+        },
+        {
+          "vectorId": "metabolic_dehydration",
+          "level": "immune"
+        },
+        {
+          "vectorId": "metabolic_exhaustion",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_dark_corruption_aura",
+          "level": "heal"
+        },
+        {
+          "vectorIdPrefix": "physical_external_blunt_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "exotic_aligned_smite_undead",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_holy_beam",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "stealth_detect_active",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "stealth_break",
+          "level": "resist_25"
+        },
+        {
+          "vectorId": "status_slow_major",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "status_stun_concussion",
+          "level": "resist_25"
+        }
+      ],
+      "innate_vectors_used": [
+        "physical_external_slash_light",
+        "physical_external_stab_flurry",
+        "physical_external_pierce_light",
+        "status_bleed_minor",
+        "stealth_shadow_cast",
+        "stealth_noise_suppression"
+      ],
+      "behavior_priorities": [
+        "attempt_stealth_approach_before_engaging",
+        "target_lowest_hp_entity",
+        "flank_attack_from_behind_when_possible",
+        "apply_bleed_minor_on_first_hit",
+        "disengage_and_restealth_after_attack_if_stealth_available",
+        "never_engage_construct_golem"
+      ],
+      "closing_distance_vectors": [
+        "physical_external_crush_momentum",
+        "stealth_shadow_cast"
+      ],
+      "design_notes": "El único esqueleto que requiere que el jugador gestione el sigilo activamente. Su resist a stun y slow refleja la agilidad de huesos sin masa muscular que amortigüe: los golpes aturden menos a algo que no siente dolor. El cierre con stealth_shadow_cast significa que se acerca pegado a las sombras, no en línea recta. La Cazadora es su contrapartida natural: su STE alto y la detección de rastros lo expone."
+    },
+    "slime_basic": {
+      "race_id": "slime_basic",
+      "name": "Gelatina Básica",
+      "lore_summary": "Masa de materia orgánica disuelta y recombinada por la energía de la mazmorra. Sin inteligencia discernible. Se mueve hacia el calor y el olor orgánico. Se divide al recibir suficiente daño contundente, creando dos instancias menores.",
+      "base_stats": {
+        "hp": 60,
+        "dex": 6,
+        "str": 10,
+        "int": 1,
+        "ste": 2
+      },
+      "default_resistance": "resist_25",
+      "resistance_exceptions": [
+        {
+          "vectorIdPrefix": "elemental_acid_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "terrain_fluid_place_acid",
+          "level": "immune"
+        },
+        {
+          "vectorId": "fluid_acid_react_organic",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_skin",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_poison_status_poisoned",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "status_bleed_major",
+          "level": "immune"
+        },
+        {
+          "vectorId": "status_bleed_minor",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_internal_hemorrhage_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_bone_fracture",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_organ_crush",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_external_slash_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorIdPrefix": "physical_external_pierce_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_sonic_lethal_wave",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_sonic_shatter",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_cold_freeze_solid",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_cold_freeze_blast",
+          "level": "vulnerable"
+        },
+        {
+          "vectorIdPrefix": "exotic_psychic_terror_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "influence_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "movement_forced_push_heavy",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "movement_forced_push_radial",
+          "level": "resist_50"
+        }
+      ],
+      "innate_vectors_used": [
+        "physical_external_crush_stomp",
+        "physical_external_bite",
+        "fluid_bile_adhesive",
+        "fluid_bile_corrosive",
+        "elemental_acid_splash",
+        "elemental_acid_status_corroding"
+      ],
+      "behavior_priorities": [
+        "move_toward_heat_source_or_organic_smell",
+        "engulf_target_applying_bile_adhesive",
+        "split_on_blunt_damage_above_threshold",
+        "no_tactical_retreat",
+        "ignore_constructs_and_skeletons_as_non_organic"
+      ],
+      "closing_distance_vectors": [
+        "fluid_bile_adhesive",
+        "physical_external_crush_stomp"
+      ],
+      "design_notes": "El default_resistance de resist_25 refleja la masa gelatinosa que amortigua casi todo. La inmunidad al ácido más la immune al terror e influencia (sin mente) lo hacen completamente impervio a estrategias psíquicas. El cierre de distancia es la bilis adhesiva: no necesita empuje físico, engancha al objetivo. Sónico y frío son las grandes vulnerabilidades: resonancia molecular fragmenta la gelatina, y el hielo la colapsa. La división por contundente es la mecánica emergente más importante del slime."
+    },
+    "slime_acid": {
+      "race_id": "slime_acid",
+      "name": "Gelatina Ácida",
+      "lore_summary": "Variante del slime saturada de ácido concentrado. Su masa disuelve el metal y el tejido orgánico con contacto sostenido. Particularmente peligrosa para el Guerrero con armadura: el ácido penetra las juntas metálicas con cada golpe.",
+      "base_stats": {
+        "hp": 50,
+        "dex": 7,
+        "str": 8,
+        "int": 1,
+        "ste": 2
+      },
+      "default_resistance": "resist_25",
+      "resistance_exceptions": [
+        {
+          "vectorIdPrefix": "elemental_acid_",
+          "level": "heal"
+        },
+        {
+          "vectorId": "terrain_fluid_place_acid",
+          "level": "heal"
+        },
+        {
+          "vectorId": "fluid_acid_react_organic",
+          "level": "heal"
+        },
+        {
+          "vectorId": "fluid_acid_react_water",
+          "level": "vulnerable"
+        },
+        {
+          "vectorIdPrefix": "elemental_poison_",
+          "level": "resist_75"
+        },
+        {
+          "vectorIdPrefix": "status_bleed_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_internal_hemorrhage_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_bone_fracture",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_external_slash_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorIdPrefix": "physical_external_pierce_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_sonic_lethal_wave",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_sonic_shatter",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_cold_freeze_solid",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "resist_50"
+        },
+        {
+          "vectorIdPrefix": "exotic_psychic_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "influence_",
+          "level": "immune"
+        }
+      ],
+      "innate_vectors_used": [
+        "elemental_acid_splash",
+        "elemental_acid_pool",
+        "elemental_acid_status_corroding",
+        "elemental_acid_dissolve_organic",
+        "elemental_acid_dissolve_gelatine",
+        "terrain_fluid_place_acid",
+        "fluid_bile_corrosive"
+      ],
+      "behavior_priorities": [
+        "move_toward_armored_targets_preferentially",
+        "create_acid_pool_at_current_position_each_turn",
+        "prioritize_armor_corrosion_over_direct_damage",
+        "absorb_acid_pools_created_by_mage_or_traps",
+        "ignore_fire_hazards_as_partial_resistance"
+      ],
+      "closing_distance_vectors": [
+        "elemental_acid_splash",
+        "terrain_fluid_place_acid"
+      ],
+      "design_notes": "La variante más peligrosa para el Guerrero. El heal en ácido significa que el Mago aliado que lanza ácido por error está curando al Slime. El agua diluye su ácido corporal haciéndolo vulnerable: saber esto es una entrada de Codex crucial. El cierre de distancia es proyectivo (splash de ácido) y de terreno (charcos que obligan a redirigir). Resistencia parcial al fuego: su masa ácida no arde bien pero tampoco es inocua."
+    },
+    "goblin_scout": {
+      "race_id": "goblin_scout",
+      "name": "Goblin Scout",
+      "lore_summary": "El tipo más común de Goblin encontrado en mazmorras. Rápido, cobarde en solitario, peligroso en grupo. Tiene visión nocturna parcial innata. Prioriza avisar a sus aliados antes de comprometerse en combate.",
+      "base_stats": {
+        "hp": 40,
+        "dex": 16,
+        "str": 8,
+        "int": 8,
+        "ste": 12
+      },
+      "default_resistance": "normal",
+      "resistance_exceptions": [
+        {
+          "vectorId": "exotic_psychic_terror_minor",
+          "level": "immune",
+          "condition": {
+            "type": "custom",
+            "value": "ally_goblin_alive_in_room"
+          }
+        },
+        {
+          "vectorId": "exotic_psychic_terror_major",
+          "level": "resist_75",
+          "condition": {
+            "type": "custom",
+            "value": "ally_goblin_alive_in_room"
+          }
+        },
+        {
+          "vectorId": "status_panic",
+          "level": "resist_50",
+          "condition": {
+            "type": "custom",
+            "value": "ally_goblin_alive_in_room"
+          }
+        },
+        {
+          "vectorId": "exotic_psychic_terror_major",
+          "level": "extreme_vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "last_goblin_in_room"
+          }
+        },
+        {
+          "vectorId": "status_panic",
+          "level": "extreme_vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "last_goblin_in_room"
+          }
+        },
+        {
+          "vectorId": "light_blind_darkness_veil",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "light_reduce_dim",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "status_bleed_minor",
+          "level": "normal"
+        },
+        {
+          "vectorId": "elemental_poison_status_poisoned",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "status_slow_minor",
+          "level": "resist_50"
+        }
+      ],
+      "innate_vectors_used": [
+        "physical_external_slash_light",
+        "physical_external_pierce_light",
+        "physical_external_throw_impact",
+        "sound_alarm_alert_escalation",
+        "sound_alarm_deliberate_lure",
+        "stealth_shadow_cast"
+      ],
+      "behavior_priorities": [
+        "alert_goblin_allies_before_engaging_if_more_than_2_tiles_away",
+        "attack_from_range_if_outnumbered",
+        "investigate_sound_sources_in_patrol",
+        "retreat_to_group_when_below_30pct_hp",
+        "exploit_smell_tracking_to_find_hidden_player",
+        "avoid_bright_light_zones_in_patrol"
+      ],
+      "closing_distance_vectors": [
+        "physical_external_throw_impact",
+        "physical_external_crush_momentum"
+      ],
+      "design_notes": "El Goblin Scout es un anunciador antes que un combatiente. Su primera acción en combate debe ser alert_allies si hay margen de distancia. La vulnerabilidad al veneno refleja su fisiología más orgánica que los No-Muertos. El cierre con throw_impact (lanza objetos o se lanza él mismo) y crush_momentum distingue su aproximación de la del esqueleto. Su DEX alta lo hace difícil de perseguir para el Guerrero."
+    },
+    "goblin_shaman": {
+      "race_id": "goblin_shaman",
+      "name": "Goblin Chamán",
+      "lore_summary": "El Goblin de mayor rango intelectual. Mezcla instinto tribal con conocimiento rudimentario de venenos y maldiciones. Soporte de grupo y amenaza de estado. Raramente aparece solo: siempre tiene al menos 2 scouts como escolta.",
+      "base_stats": {
+        "hp": 45,
+        "dex": 12,
+        "str": 7,
+        "int": 13,
+        "ste": 9
+      },
+      "default_resistance": "normal",
+      "resistance_exceptions": [
+        {
+          "vectorId": "exotic_psychic_terror_minor",
+          "level": "immune",
+          "condition": {
+            "type": "custom",
+            "value": "ally_goblin_alive_in_room"
+          }
+        },
+        {
+          "vectorId": "exotic_psychic_terror_major",
+          "level": "resist_50",
+          "condition": {
+            "type": "custom",
+            "value": "ally_goblin_alive_in_room"
+          }
+        },
+        {
+          "vectorId": "exotic_psychic_terror_major",
+          "level": "extreme_vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "last_goblin_in_room"
+          }
+        },
+        {
+          "vectorId": "light_blind_darkness_veil",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "elemental_poison_status_poisoned",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_poison_contact_skin",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "vulnerable"
+        },
+        {
+          "vectorIdPrefix": "influence_domination_",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "status_confused_target",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "exotic_psychic_mind_blast",
+          "level": "resist_25"
+        }
+      ],
+      "innate_vectors_used": [
+        "elemental_poison_inhaled_spore",
+        "elemental_poison_contact_skin",
+        "elemental_poison_status_poisoned",
+        "elemental_poison_paralysis_motor",
+        "fluid_blood_scent",
+        "influence_demoralize",
+        "sound_alarm_alert_escalation",
+        "exotic_psychic_terror_minor",
+        "heal_hp_direct_minor"
+      ],
+      "behavior_priorities": [
+        "stay_behind_scout_escort_at_all_times",
+        "apply_poison_spore_to_player_first_turn",
+        "use_demoralize_when_player_hp_below_50pct",
+        "heal_lowest_hp_goblin_ally_each_turn_if_available",
+        "use_blood_scent_to_track_wounded_player_if_stealth",
+        "flee_immediately_if_escort_eliminated"
+      ],
+      "closing_distance_vectors": [
+        "elemental_poison_inhaled_spore",
+        "exotic_psychic_terror_minor"
+      ],
+      "design_notes": "El Chamán es la razón por la que los grupos de Goblins son peligrosos. Sus spores de veneno inhalado cubren área; su blood_scent anula el sigilo de un jugador herido; su heal sobre aliados prolonga el combate. La resistencia al veneno propio es coherente con su rol de envenador. El cierre de distancia es por proyectil de spore y por terror (reposiciona al jugador hacia el grupo). Prioridad de kill en combate: matar al Chamán primero invalida la sinergia de grupo."
+    },
+    "shadow_spectre": {
+      "race_id": "shadow_spectre",
+      "name": "Sombra / Espectro",
+      "lore_summary": "Entidad de energía oscura pura que habita los planos entre el mundo físico y el vacío. No tiene origen conocido documentado: a diferencia de los esqueletos, no son aventureros caídos sino algo anterior o diferente. Su presencia drena la vitalidad de los organismos vivos y apaga la luz.",
+      "base_stats": {
+        "hp": 65,
+        "dex": 17,
+        "str": 6,
+        "int": 14,
+        "ste": 16
+      },
+      "default_resistance": "resist_50",
+      "resistance_exceptions": [
+        {
+          "vectorIdPrefix": "physical_external_slash_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_external_pierce_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_external_blunt_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_external_crush_",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "physical_external_explosion_wave",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "physical_external_shrapnel",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_dark_void_drain",
+          "level": "heal"
+        },
+        {
+          "vectorId": "elemental_dark_shadow_strike",
+          "level": "heal"
+        },
+        {
+          "vectorId": "elemental_dark_corruption",
+          "level": "heal"
+        },
+        {
+          "vectorId": "exotic_dark_corruption_aura",
+          "level": "heal"
+        },
+        {
+          "vectorId": "light_reduce_extinguish",
+          "level": "heal"
+        },
+        {
+          "vectorId": "light_blind_darkness_veil",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "terrain_fluid_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "terrain_trap_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "movement_forced_slip",
+          "level": "immune"
+        },
+        {
+          "vectorId": "stealth_trail_footprint",
+          "level": "immune"
+        },
+        {
+          "vectorId": "stealth_smell_organic",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "elemental_poison_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "status_bleed_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "metabolic_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "exotic_psychic_terror_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "influence_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_light_holy_beam",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_radiant_burst",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_blinding_damage",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_aligned_smite_undead",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_sacred_divine_smite",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_sacred_holy_aura",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "light_increase_flare",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "light_increase_ambient_create",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_fire_flame_persistent",
+          "level": "vulnerable"
+        }
+      ],
+      "innate_vectors_used": [
+        "elemental_dark_shadow_strike",
+        "elemental_dark_void_drain",
+        "elemental_dark_corruption",
+        "exotic_dark_corruption_aura",
+        "light_reduce_extinguish",
+        "light_reduce_dim",
+        "light_blind_darkness_veil",
+        "exotic_psychic_terror_major",
+        "exotic_psychic_terror_minor",
+        "stealth_shadow_create",
+        "stealth_trail_suppress",
+        "exotic_temporal_phase_shift"
+      ],
+      "behavior_priorities": [
+        "extinguish_nearest_light_source_before_engaging",
+        "maintain_darkness_in_all_adjacent_tiles",
+        "drain_life_from_organic_entities_each_turn_passively",
+        "use_terror_to_separate_player_from_lit_zones",
+        "phase_shift_through_walls_to_flank",
+        "retreat_through_wall_if_light_vector_detected",
+        "never_enter_consecrated_terrain"
+      ],
+      "closing_distance_vectors": [
+        "exotic_temporal_phase_shift",
+        "elemental_dark_void_drain",
+        "exotic_psychic_terror_major"
+      ],
+      "design_notes": "La raza más compleja del juego base. El default_resistance de resist_50 refleja su naturaleza parcialmente intangible incluso para vectores no físicos. Apagar la luz es su primera acción obligatoria: sin oscuridad, pierde todas sus ventajas. Su cierre de distancia es único: phase_shift atraviesa paredes, void_drain actúa a distancia y terror reposiciona al jugador. El jugador que no gestiona la iluminación activamente pierde ante una Sombra. Antorcha encendida = arma."
+    },
+    "construct_golem_stone": {
+      "race_id": "construct_golem_stone",
+      "name": "Constructo Golem de Piedra",
+      "lore_summary": "Golem fabricado de roca de la mazmorra y animado por energía arcana primitiva. Lento, implacable, devastador en melee. No tiene inteligencia táctica sofisticada pero su masa lo hace casi inaparable en espacios cerrados. Sus articulaciones de piedra crujen con cada movimiento.",
+      "base_stats": {
+        "hp": 140,
+        "dex": 5,
+        "str": 22,
+        "int": 2,
+        "ste": 1
+      },
+      "default_resistance": "resist_25",
+      "resistance_exceptions": [
+        {
+          "vectorIdPrefix": "status_bleed_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_internal_hemorrhage_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_organ_crush",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_vascular_rupture",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "elemental_poison_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "metabolic_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "exotic_psychic_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "influence_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_electric_overload_construct",
+          "level": "resist_25"
+        },
+        {
+          "vectorId": "elemental_electric_discharge_direct",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "elemental_cold_freeze_blast",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_acid_corrode_armor",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_acid_splash",
+          "level": "normal"
+        },
+        {
+          "vectorId": "physical_structural_construct_core",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "physical_structural_construct_joint",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "physical_structural_construct_limb",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_earth_seismic_resonance",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "sound_vibration_structural_weaken",
+          "level": "vulnerable"
+        },
+        {
+          "vectorIdPrefix": "movement_forced_push_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "movement_forced_pull_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "movement_forced_grab_throw",
+          "level": "immune"
+        },
+        {
+          "vectorId": "movement_forced_launch_up",
+          "level": "resist_75"
+        }
+      ],
+      "innate_vectors_used": [
+        "physical_external_blunt_heavy",
+        "physical_external_blunt_slam",
+        "physical_external_crush_stomp",
+        "physical_external_crush_momentum",
+        "movement_forced_grab_slam_ground",
+        "movement_forced_grab_hold",
+        "movement_forced_push_heavy",
+        "movement_forced_push_radial",
+        "physical_structural_wall_breach",
+        "physical_structural_chain_reaction",
+        "exotic_gravity_crush_field"
+      ],
+      "behavior_priorities": [
+        "advance_in_straight_line_toward_target",
+        "use_slam_if_target_within_2_tiles",
+        "break_walls_if_path_blocked",
+        "crush_field_if_multiple_enemies_in_range",
+        "grab_and_slam_if_target_has_hollow_bones_curse",
+        "no_tactical_retreat_ever"
+      ],
+      "closing_distance_vectors": [
+        "physical_external_crush_momentum",
+        "movement_forced_push_radial",
+        "physical_structural_wall_breach"
+      ],
+      "design_notes": "El Golem de Piedra resiste empujes (immune a movement_forced) pero no puede moverse rápido. El jugador que intenta kitearlo descubre que rompe las paredes para acortar el camino (wall_breach como cierre de distancia). La eléctrica y el ácido a sus juntas son los puntos débiles que recompensan el conocimiento del Codex. Inmune a casi todo lo biológico y psíquico: inútil usar veneno, terror o sangrado. La vibración sísmica y sónica debilita su estructura: setup para combos B1."
+    },
+    "construct_golem_metal": {
+      "race_id": "construct_golem_metal",
+      "name": "Constructo Golem de Metal",
+      "lore_summary": "Variante del Golem fabricada de metal fundido de la mazmorra. Más rápido que el de piedra, ligeramente menos resistente físicamente pero con una vulnerabilidad crítica: su estructura metálica conduce la electricidad de forma devastadora. Sus articulaciones metálicas brillan con el movimiento.",
+      "base_stats": {
+        "hp": 110,
+        "dex": 9,
+        "str": 18,
+        "int": 4,
+        "ste": 2
+      },
+      "default_resistance": "resist_25",
+      "resistance_exceptions": [
+        {
+          "vectorIdPrefix": "status_bleed_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_internal_hemorrhage_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_organ_crush",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_vascular_rupture",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "elemental_poison_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "metabolic_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "exotic_psychic_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "influence_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_electric_overload_construct",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_electric_discharge_direct",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_electric_conduction_metal",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_electric_arc_spread",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_electric_status_paralysis",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_acid_corrode_armor",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_acid_corrode_weapon",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_cold_freeze_blast",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "physical_structural_construct_core",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "physical_structural_construct_joint",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "physical_structural_construct_limb",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "movement_forced_magnetize",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorIdPrefix": "movement_forced_push_",
+          "level": "resist_75"
+        },
+        {
+          "vectorIdPrefix": "movement_forced_pull_",
+          "level": "resist_75"
+        }
+      ],
+      "innate_vectors_used": [
+        "physical_external_blunt_heavy",
+        "physical_external_blunt_slam",
+        "physical_external_crush_momentum",
+        "physical_external_crush_stomp",
+        "movement_forced_grab_slam_ground",
+        "movement_forced_grab_throw",
+        "movement_forced_push_heavy",
+        "movement_forced_magnetize",
+        "elemental_electric_discharge_direct",
+        "physical_structural_construct_core"
+      ],
+      "behavior_priorities": [
+        "advance_faster_than_stone_golem",
+        "use_magnetize_on_armored_targets_to_pull_toward_melee",
+        "discharge_electric_if_target_is_wet",
+        "grab_and_throw_lighter_targets",
+        "prioritize_targets_with_metal_equipment",
+        "no_tactical_retreat"
+      ],
+      "closing_distance_vectors": [
+        "movement_forced_magnetize",
+        "physical_external_crush_momentum",
+        "elemental_electric_discharge_direct"
+      ],
+      "design_notes": "El Golem de Metal es el contrapunto del de Piedra: más rápido, más matable, pero exponencialmente más peligroso si el jugador no conoce su punto débil eléctrico. La magnetización como cierre de distancia es su mecánica distintiva: en vez de perseguir al jugador, lo atrae hacia sí. Especialmente peligroso contra el Guerrero con armadura metálica (el metal atrae al Golem de Metal) y absolutamente devastado por el Mago con rayo. El Guerrero necesita quitarse la armadura o usar la Runa de Tierra antes de enfrentarlo."
+    }
+  },
   "unique_buffs": [
     {
       "id": "buff_iron_skin",
