@@ -702,3 +702,14 @@ Tabla generada al cierre de Parte A. Las 34 entradas corresponden a las 31 categ
 *Para detalles de cada vector, consultar `docs/data/interaction_vectors.json`.*
 
 ---
+
+## Apéndice B: Estado de Parte B
+
+| Sección | Estado | Entradas |
+|---------|--------|:---:|
+| B1. Combinaciones emergentes | ✅ Completa | 60 inyectadas |
+| B2. Mapa de resistencias por raza | ⏳ Pendiente | - |
+| B3. Buffs/Debuffs únicos | ⏳ Pendiente | - |
+| B4. Propuestas creativas | ⏳ Pendiente | - |
+
+*Última actualización: B1 Parte 3/3 — 60 combinaciones inyectadas en `combinations[]`. B1 COMPLETA.*

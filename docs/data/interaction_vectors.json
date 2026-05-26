@@ -18493,7 +18493,2054 @@
       ]
     }
   ],
-  "combinations": [],
+  "combinations": [
+    {
+      "id": "oil_plus_toxic_gas_plus_fire_cloud",
+      "name": "Nube tóxica combustible",
+      "trigger": {
+        "type": "vectors_simultaneous_in_area",
+        "vectors": [
+          "fluid_oil_fuel",
+          "fluid_gas_toxic_zone",
+          "elemental_fire_combustion_direct"
+        ],
+        "condition": "all_three_active_in_overlapping_tiles"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_fire_combustion_flash",
+            "magnitude": "high",
+            "target": "area",
+            "areaRadius": 3,
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "elemental_poison_inhaled_smoke",
+            "magnitude": "high",
+            "target": "area",
+            "areaRadius": 4,
+            "durationTurns": 3
+          }
+        ],
+        "consumes_fluids": [
+          "fluid_oil_fuel",
+          "fluid_gas_toxic_zone"
+        ],
+        "terrain_after": "burning_toxic_residue"
+      },
+      "design_notes": "Tres ingredientes de categorías distintas (fluido inerte + gas + ignición) producen una explosión química con nube persistente. El Mago puede configurarlo solo con dos hechizos si ya hay charco de aceite en sala. Los Goblins con IA cooperativa deberían poder ejecutarlo si tienen acceso a los tres vectores."
+    },
+    {
+      "id": "blood_pool_plus_water_plus_cold_freeze",
+      "name": "Trampa de hielo hemorrágico",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "fluid_blood_pool",
+          "terrain_fluid_place_water",
+          "elemental_cold_freeze_blast"
+        ],
+        "condition": "blood_and_water_overlap_then_freeze_applied"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_cold_frost_surface",
+            "magnitude": "medium",
+            "target": "area",
+            "areaRadius": 2,
+            "durationTurns": 4
+          },
+          {
+            "vectorId": "status_immobile_rooted",
+            "magnitude": "medium",
+            "target": "area",
+            "durationTurns": 2
+          }
+        ],
+        "terrain_after": "bloody_ice_surface",
+        "terrain_tags": [
+          "frozen_surface",
+          "slippery",
+          "biohazard"
+        ]
+      },
+      "design_notes": "La mezcla de sangre y agua se solidifica al congelarse, creando una superficie bio-peligrosa que inmoviliza y aplica riesgo de infección. Requiere tres pasos de setup: sangrar a un enemigo, añadir agua (hechizo o barril), y lanzar frío. El Pícaro puede generar sangre; el Mago pone el hielo. Combo de clase dual."
+    },
+    {
+      "id": "toxic_gas_plus_air_vortex_plus_fire_flash",
+      "name": "Bola de fuego química",
+      "trigger": {
+        "type": "vectors_simultaneous_in_area",
+        "vectors": [
+          "fluid_gas_toxic_zone",
+          "elemental_air_vortex",
+          "elemental_fire_combustion_flash"
+        ],
+        "condition": "vortex_concentrates_gas_then_ignition"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_fire_combustion_concentrated",
+            "magnitude": "extreme",
+            "target": "area",
+            "areaRadius": 5,
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "elemental_poison_inhaled_smoke",
+            "magnitude": "high",
+            "target": "area",
+            "areaRadius": 6,
+            "durationTurns": 2
+          }
+        ],
+        "consumes_fluids": [
+          "fluid_gas_toxic_zone"
+        ],
+        "magnitude_amplified_by_vortex": true
+      },
+      "design_notes": "El vórtice de aire concentra el gas, aumentando la magnitud de la detonación. El viento convierte una explosión normal en extreme. Inspirado en Noita: la física del gas como multiplicador de daño. El radio de onda de fuego supera al de veneno residual."
+    },
+    {
+      "id": "psychic_terror_plus_bleed_plus_radial_push",
+      "name": "Pánico hemorrágico",
+      "trigger": {
+        "type": "vector_applied_to_entity_with_status",
+        "vectors": [
+          "exotic_psychic_terror_major",
+          "status_bleed_major",
+          "movement_forced_push_radial"
+        ],
+        "condition": "entity_has_bleed_major_active_when_terror_and_push_applied"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_panic",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 4
+          },
+          {
+            "vectorId": "fluid_blood_pool",
+            "magnitude": "medium",
+            "target": "trail_on_movement",
+            "durationTurns": 3
+          }
+        ],
+        "secondary": "entity_flees_leaving_blood_trail_for_3_tiles"
+      },
+      "design_notes": "Un enemigo sangrando que recibe terror + empuje huye en pánico dejando un rastro de sangre que puede usarse para tracking, ritual o congelación. El combo castiga al jugador que kite: si el enemigo huye sangrando, crea un hazard en la ruta de escape. Aplicable en ambas direcciones (jugador también puede entrar en pánico hemorrágico)."
+    },
+    {
+      "id": "confusion_target_plus_attack_ally",
+      "name": "Fuego amigo forzado",
+      "trigger": {
+        "type": "vector_applied_to_entity_with_status",
+        "vectors": [
+          "status_confused_target",
+          "physical_external_slash_heavy"
+        ],
+        "condition": "entity_has_status_confused_target_active_when_performing_attack_action"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "physical_external_slash_heavy",
+            "magnitude": "medium",
+            "source": "confused_entity",
+            "target": "nearest_ally_of_confused_entity",
+            "durationTurns": 0
+          }
+        ],
+        "overrides_ai_target_selection": true,
+        "applies_to": "any_attack_vector_declared_by_confused_entity"
+      },
+      "design_notes": "El estado status_confused_target redirige cualquier ataque declarado hacia el aliado más cercano del confundido. El motor redirige el VectorImpact original, no genera uno nuevo de daño fijo: si el goblin shaman confundido iba a lanzar elemental_fire_combustion_concentrated sobre el jugador, lo lanza sobre su propio goblin_warrior adyacente. Aplica igual al jugador: confusion de target + skill propia = self-dañino."
+    },
+    {
+      "id": "illusion_terrain_plus_trap_set_plus_gravity_fall",
+      "name": "Trampa psíquica de vacío",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "exotic_psychic_illusion_terrain",
+          "terrain_trap_set",
+          "exotic_gravity_fall_forced"
+        ],
+        "condition": "illusion_covers_trap_tile_entity_steps_on_it"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "terrain_trap_trigger_remote",
+            "magnitude": "medium",
+            "target": "trapped_entity",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "exotic_gravity_fall_forced",
+            "magnitude": "high",
+            "target": "trapped_entity",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "status_stun_concussion",
+            "magnitude": "medium",
+            "target": "trapped_entity",
+            "durationTurns": 2
+          }
+        ],
+        "setup_turns_required": 2
+      },
+      "design_notes": "La ilusión de terreno camufla la trampa visual y mecánicamente. La víctima no ve ni la trampa ni el pozo hasta que cae. Requiere dos turnos de setup pero la recompensa es triple: trampa activa + caída + stun. La IA enemiga (Esqueleto Mago o futura entidad psíquica) debería poder ejecutar esta cadena en patrol si detecta al jugador de lejos."
+    },
+    {
+      "id": "darkness_veil_plus_sound_silence_plus_trail_suppress",
+      "name": "Invisibilidad táctica perfecta",
+      "trigger": {
+        "type": "vectors_all_active_same_entity",
+        "vectors": [
+          "light_blind_darkness_veil",
+          "sound_silence_targeted",
+          "stealth_trail_suppress"
+        ],
+        "condition": "all_three_active_simultaneously_on_same_entity"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_stealth_active",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 3
+          }
+        ],
+        "secondary": "immune_to_stealth_detect_active_during_duration",
+        "breaks_on": "performing_attack_or_interact_action"
+      },
+      "design_notes": "Tres vectores de supresión (visual + auditivo + rastro) convergen en un stealth de magnitud extreme, el único nivel que es inmune a stealth_detect_active. Ninguno de los tres por separado alcanza este nivel. Pensado para el Pícaro como combo de preparación de turno 0 con el Errante como distractor. Coste alto: tres recursos o turnos de setup."
+    },
+    {
+      "id": "sound_lure_plus_illusion_terrain_plus_fire_flash",
+      "name": "Señuelo explosivo",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "sound_alarm_deliberate_lure",
+          "exotic_psychic_illusion_terrain",
+          "elemental_fire_combustion_flash"
+        ],
+        "condition": "enemy_moves_to_lure_tile_with_illusion_covering_fire_trap"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_fire_combustion_flash",
+            "magnitude": "high",
+            "target": "area",
+            "areaRadius": 2,
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "status_stun_concussion",
+            "magnitude": "low",
+            "target": "area",
+            "durationTurns": 1
+          }
+        ],
+        "ai_behavior_exploited": "patrol_investigate_sound"
+      },
+      "design_notes": "Explota la prioridad de IA de los Goblins de investigar sonidos. La ilusión de terreno hace que el tile con fuego parezca seguro. El resultado es una emboscada perfecta: el jugador genera el sonido, el Goblin investiga, y pisa el tile de fuego camuflado. Anti-kiting invertido: el jugador atrae, no el enemigo."
+    },
+    {
+      "id": "smell_organic_plus_blood_scent_plus_trap_set",
+      "name": "Cebo de olor y trampa",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "stealth_smell_organic",
+          "fluid_blood_scent",
+          "terrain_trap_set"
+        ],
+        "condition": "organic_smell_or_blood_scent_active_on_tile_with_trap"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "terrain_trap_trigger_remote",
+            "magnitude": "medium",
+            "target": "first_enemy_entering_scent_tile",
+            "durationTurns": 0
+          }
+        ],
+        "ai_behavior_exploited": "smell_tracking_priority",
+        "works_against": [
+          "goblin",
+          "shadow_spectre_with_life_sense"
+        ]
+      },
+      "design_notes": "Las razas con tracking por olor (Goblins, futuras criaturas de caza) priorizan moverse hacia el foco de olor más fuerte. Posicionar la trampa en el foco convierte el instinto de la IA en su propia trampa. El blood_scent es especialmente potente: anula la ventaja de sigilo de la Cazadora si sangra."
+    },
+    {
+      "id": "gravity_inversion_plus_oil_terrain",
+      "name": "Lluvia de aceite invertida",
+      "trigger": {
+        "type": "vectors_simultaneous_in_area",
+        "vectors": [
+          "exotic_gravity_inversion",
+          "terrain_fluid_place_oil"
+        ],
+        "condition": "gravity_inverted_in_zone_with_oil_pool_on_floor"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "fluid_oil_fuel",
+            "magnitude": "medium",
+            "target": "area",
+            "areaRadius": 3,
+            "durationTurns": 2,
+            "tags": [
+              "ceiling_drip",
+              "flammable"
+            ]
+          }
+        ],
+        "terrain_after": "inverted_oil_drip_zone",
+        "chain_if_fire_present": {
+          "condition": "any_fire_vector_in_zone_while_oil_drip_active",
+          "produces": "elemental_fire_combustion_flash",
+          "magnitude": "high",
+          "target": "area"
+        }
+      },
+      "design_notes": "La gravedad invertida eleva el aceite del suelo al techo. Esto por sí solo es moderadamente peligroso (caída de gotas). Si hay cualquier chispa o antorcha en la zona, se convierte en lluvia de fuego. Tres vectores efectivos (gravedad + aceite + fuego) con el tercero siendo ambiental (antorcha existente). Noita-core: física emergente."
+    },
+    {
+      "id": "gravity_fall_plus_pillar_crack_plus_poison_surface",
+      "name": "Trampa de derrumbe envenenado",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "physical_structural_pillar_crack",
+          "elemental_poison_contact_surface",
+          "exotic_gravity_fall_forced"
+        ],
+        "condition": "enemy_pushed_onto_cracked_pillar_tile_with_poison_surface"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "physical_structural_pillar_collapse",
+            "magnitude": "high",
+            "target": "area",
+            "areaRadius": 2,
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "elemental_poison_contact_skin",
+            "magnitude": "medium",
+            "target": "entities_in_collapse_zone",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "status_stun_concussion",
+            "magnitude": "medium",
+            "target": "entities_in_collapse_zone",
+            "durationTurns": 2
+          }
+        ]
+      },
+      "design_notes": "Setup de 3 pasos: agrietar el pilar (hechizo o arma contundente), envenenar la superficie bajo él, y empujar al enemigo encima. Al caer, el colapso del pilar afecta un radio de 2 casillas con escombros + veneno de contacto. Ilustra el pilar 'todo es interactuable': el pilar como vector de daño diferido."
+    },
+    {
+      "id": "temporal_compression_plus_poison_status",
+      "name": "Veneno a velocidad letal",
+      "trigger": {
+        "type": "vector_applied_to_entity_with_status",
+        "vectors": [
+          "exotic_temporal_compression",
+          "elemental_poison_status_poisoned"
+        ],
+        "condition": "entity_has_any_poison_status_when_temporal_compression_applied"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_poison_systemic",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 0
+          }
+        ],
+        "secondary": "poison_tick_damage_applied_twice_per_turn_during_compression",
+        "interaction_note": "existing_poison_stacks_escalated_to_systemic"
+      },
+      "design_notes": "La compresión temporal hace que el veneno active su tick dos veces por turno. Un veneno de low magnitud se convierte en sistémico. Especialmente brutal contra entidades sin metabolismo alternativo (los Constructos son inmunes; los Goblins y personajes orgánicos lo sufren más). Combo Mago: envenenar + comprimir tiempo."
+    },
+    {
+      "id": "time_dilation_plus_cold_freeze_plus_immobile_rooted",
+      "name": "Prisma temporal",
+      "trigger": {
+        "type": "vectors_all_active_same_entity",
+        "vectors": [
+          "exotic_temporal_dilation_hostile",
+          "elemental_cold_freeze_solid",
+          "status_immobile_rooted"
+        ],
+        "condition": "all_three_active_simultaneously_on_target"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_paralysis_physical_full",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 4
+          }
+        ],
+        "secondary": "entity_skips_all_turns_during_paralysis",
+        "visual_hint": "entity_encased_in_translucent_temporal_ice_prism",
+        "breaks_on": "any_fire_vector_above_medium_magnitude"
+      },
+      "design_notes": "Tres vectores de ralentización distintos (temporal + térmico + físico) se suman en parálisis total. El Mago puede aplicar los tres con setup: dilation en turno 1, freeze en turno 2, root con hechizo o entorno. La entidad queda en 'cristal temporal': visible, atacable sin respuesta, liberada por fuego de magnitud medium+."
+    },
+    {
+      "id": "seismic_resonance_plus_wall_crack_plus_blunt_heavy",
+      "name": "Derrumbe inducido por resonancia",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "elemental_earth_seismic_resonance",
+          "physical_structural_wall_crack",
+          "physical_external_blunt_heavy"
+        ],
+        "condition": "cracked_wall_in_resonance_zone_receives_blunt_heavy"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "physical_structural_wall_breach",
+            "magnitude": "high",
+            "target": "cracked_wall_tile",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "elemental_earth_rockfall",
+            "magnitude": "high",
+            "target": "area",
+            "areaRadius": 3,
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "terrain_obstacle_debris_pile",
+            "magnitude": "medium",
+            "target": "breach_tile",
+            "durationTurns": -1
+          }
+        ]
+      },
+      "design_notes": "La resonancia sísmica debilita la estructura del muro. Si ese muro ya tenía una grieta previa Y recibe un impacto contundente, el derrumbe es inmediato y masivo. Crea un nuevo pasaje (unlock_area) pero llena la zona de escombros. El Guerrero con su mazo puede ser el detonador. Combo de exploración: abrir atajos estructurales."
+    },
+    {
+      "id": "sonic_shatter_plus_cryo_brittle_plus_blunt_heavy",
+      "name": "Ejecución cristalina",
+      "trigger": {
+        "type": "vector_applied_to_entity_with_status",
+        "vectors": [
+          "elemental_sonic_shatter",
+          "elemental_cold_cryo_brittle",
+          "physical_external_blunt_heavy"
+        ],
+        "condition": "entity_has_cryo_brittle_active_receives_sonic_then_blunt"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_cold_cryo_shatter",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "physical_external_shrapnel",
+            "magnitude": "medium",
+            "target": "area",
+            "areaRadius": 2,
+            "durationTurns": 0
+          }
+        ],
+        "instant_kill_threshold": "target_below_30pct_hp",
+        "shrapnel_hits_allies": true
+      },
+      "design_notes": "Cadena de tres: frío fragiliza la estructura, sónico la estresa hasta la vibración crítica, contundente la detona. El resultado son esquirlas de hielo que dañan en radio 2. Si el objetivo estaba por debajo del 30% HP, la ejecución es instantánea independientemente de la resistencia a blunt. El Guerrero es el detonador final; el Mago prepara los dos primeros."
+    },
+    {
+      "id": "dark_corruption_plus_psychic_terror_plus_life_drain",
+      "name": "Triada de la no-muerte",
+      "trigger": {
+        "type": "vectors_all_active_same_entity",
+        "vectors": [
+          "exotic_dark_corruption_aura",
+          "exotic_psychic_terror_major",
+          "exotic_aligned_life_drain"
+        ],
+        "condition": "all_three_applied_to_living_organic_entity"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_soul_decay",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 5
+          },
+          {
+            "vectorId": "run_corruption_progressive",
+            "magnitude": "medium",
+            "target": "self",
+            "durationTurns": -1
+          }
+        ],
+        "heals_undead_source": true,
+        "special": "entity_killed_by_triada_has_chance_to_rise_as_skeleton_minion"
+      },
+      "design_notes": "La trinidad oscura: corrupción + terror + drenaje. El vector soul_decay es especialmente brutal porque reduce el maxHp de forma permanente en combate. El bonus más jugoso: la entidad orgánica muerta por este combo tiene probabilidad de levantarse como skeleton_minion neutral-hostil (semilla de mecánica de nigromancia futura). Aplica a jugador también."
+    },
+    {
+      "id": "dehydration_plus_heat_extreme_plus_poison_gas",
+      "name": "Colapso sistémico por ambiente",
+      "trigger": {
+        "type": "vectors_all_active_same_entity",
+        "vectors": [
+          "metabolic_dehydration",
+          "temp_ambient_heat_extreme",
+          "elemental_poison_inhaled_gas"
+        ],
+        "condition": "entity_already_dehydrated_in_extreme_heat_zone_with_gas_cloud"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "metabolic_thermoregulation_failure",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 3
+          },
+          {
+            "vectorId": "stat_debuff_str_major",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 3
+          },
+          {
+            "vectorId": "stat_debuff_dex_major",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 3
+          }
+        ],
+        "affects": "organic_entities_only",
+        "immune": [
+          "construct_golem",
+          "skeleton"
+        ]
+      },
+      "design_notes": "Combo de presión ambiental acumulada. Ninguno de los tres vectores por separado es letal a corto plazo, pero su intersección produce un colapso metabólico que destruye STR y DEX a la vez. Los constructos y esqueletos son inmunes (sin metabolismo). Relevante para salas de bioma caliente futuro (Sprint 6). Inspirado en RimWorld: condiciones ambientales acumuladas."
+    },
+    {
+      "id": "exhaustion_plus_bleed_major_plus_hemorrhage_major",
+      "name": "Sépsis acelerada",
+      "trigger": {
+        "type": "vector_applied_to_entity_with_status",
+        "vectors": [
+          "metabolic_exhaustion",
+          "status_bleed_major",
+          "physical_internal_hemorrhage_major"
+        ],
+        "condition": "exhausted_entity_receives_bleed_major_and_hemorrhage_major"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_sepsis",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": -1
+          },
+          {
+            "vectorId": "status_exsanguination",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 4
+          }
+        ],
+        "requires_heal_state_physical_to_cure": true,
+        "affects": "organic_entities_only"
+      },
+      "design_notes": "El agotamiento suprime el sistema inmune; el sangrado mayor + hemorragia interna combinados desencadenan sépsis irreversible sin curación activa. El Errante en estado de Furia es especialmente vulnerable: su mecánica de alto daño a bajo HP puede llevarlo a este combo contra sí mismo si no hay soporte. Un Pícaro que aplica bleed + veneno en combinación con cualquier fuente de agotamiento lo activa."
+    },
+    {
+      "id": "dimensional_displacement_plus_trap_set_plus_acid_pool",
+      "name": "Teletransporte a trampa ácida",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "terrain_fluid_place_acid",
+          "terrain_trap_set",
+          "exotic_dimensional_displacement"
+        ],
+        "condition": "displacement_target_tile_has_acid_pool_and_trap"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_acid_splash",
+            "magnitude": "high",
+            "target": "displaced_entity",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "elemental_acid_status_corroding",
+            "magnitude": "medium",
+            "target": "displaced_entity",
+            "durationTurns": 3
+          },
+          {
+            "vectorId": "terrain_trap_trigger_remote",
+            "magnitude": "medium",
+            "target": "displaced_entity",
+            "durationTurns": 0
+          }
+        ],
+        "setup_note": "el setup (ácido + trampa) debe existir antes de usar el desplazamiento"
+      },
+      "design_notes": "El Mago prepara el tile de destino antes de usar el desplazamiento dimensional sobre el enemigo. Es una trampa de bienvenida: el enemigo llega al tile y activa trampa + ácido simultáneamente. La clave es que el jugador puede ver el tile vacío preparado pero el enemigo no. Asimetría de información convertida en ventaja táctica."
+    },
+    {
+      "id": "dimensional_rift_tear_plus_air_vortex",
+      "name": "Succión al vacío",
+      "trigger": {
+        "type": "vectors_simultaneous_in_area",
+        "vectors": [
+          "exotic_dimensional_rift_tear",
+          "elemental_air_vortex"
+        ],
+        "condition": "rift_tear_open_in_vortex_zone"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "exotic_dimensional_rift_pull",
+            "magnitude": "extreme",
+            "target": "area",
+            "areaRadius": 5,
+            "durationTurns": 2
+          },
+          {
+            "vectorId": "elemental_air_vacuum_local",
+            "magnitude": "high",
+            "target": "area",
+            "areaRadius": 4,
+            "durationTurns": 2
+          }
+        ],
+        "secondary": "entities_without_anchor_pulled_1_tile_per_turn_toward_rift",
+        "prop_affected": "loose_props_and_fluid_tiles_pulled_into_rift"
+      },
+      "design_notes": "El vórtice de aire amplifica la succión dimensional del rift. El resultado es una zona de gravedad negativa que arrastra entidades, props sueltos y fluidos hacia el punto de ruptura. Las entidades con isAnchored=true son inmunes. El Constructo Golem es inmune por defecto; todo lo orgánico y ligero es succionado. Crea caos táctico masivo en sala pequeña."
+    },
+    {
+      "id": "allegiance_confusion_plus_domination_partial",
+      "name": "Cambio de bando forzado",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "status_confused_allegiance",
+          "influence_domination_partial"
+        ],
+        "condition": "entity_has_confused_allegiance_active_when_domination_partial_applied"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "influence_domination_full",
+            "magnitude": "medium",
+            "target": "self",
+            "durationTurns": 3
+          }
+        ],
+        "secondary": "entity_acts_as_temporary_ally_attacks_former_allies",
+        "breaks_on": "domination_duration_ends_or_entity_takes_damage_above_medium"
+      },
+      "design_notes": "La confusión de lealtad afloja el sentido de identidad de la entidad; la dominación parcial, que normalmente solo reduce la precisión del target, aprovecha ese estado para volverse dominación completa. Resultado: el enemigo actúa como aliado temporal durante 3 turnos. Combo Mago de alto riesgo: si el dominado recibe daño significativo, se rompe y recupera hostilidad completa. Aplicable también por Esqueleto Mago contra el jugador."
+    },
+    {
+      "id": "phobia_trigger_plus_darkness_veil_plus_terrified",
+      "name": "Terror de sala oscura",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "light_reduce_shadow_cloud",
+          "exotic_psychic_phobia_trigger",
+          "status_frightened"
+        ],
+        "condition": "entity_frightened_in_dark_zone_receives_phobia_trigger"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_terrified",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 4
+          },
+          {
+            "vectorId": "exotic_psychic_terror_major",
+            "magnitude": "high",
+            "target": "area",
+            "areaRadius": 2,
+            "durationTurns": 0
+          }
+        ],
+        "secondary": "terrified_entity_emits_fear_aura_hitting_nearby_allies",
+        "affects": "organic_entities_only"
+      },
+      "design_notes": "La oscuridad amplifica el miedo existente hasta que el trigger de fobia lo convierte en pánico total con efecto de contagio. La entidad aterrorizada irradia el terror a sus aliados adyacentes: un Goblin en pánico aterroriza a su grupo. Las Sombras son inmunes (su ambiente natural) y pueden usar esta cadena intencionadamente como táctica de grupo. El Pícaro puede apagar antorchas primero para preparar el combo."
+    },
+    {
+      "id": "light_mark_plus_darkness_veil_plus_stealth_active",
+      "name": "Marca en la oscuridad",
+      "trigger": {
+        "type": "vectors_all_active_same_entity",
+        "vectors": [
+          "light_mark_entity",
+          "status_stealth_active",
+          "light_blind_darkness_veil"
+        ],
+        "condition": "stealthed_entity_marked_with_light_mark_in_darkness_zone"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "light_mark_reveal_hidden",
+            "magnitude": "extreme",
+            "target": "marked_entity",
+            "durationTurns": 4
+          },
+          {
+            "vectorId": "stealth_detect_active",
+            "magnitude": "high",
+            "target": "marked_entity",
+            "durationTurns": 4
+          }
+        ],
+        "secondary": "stealth_active_cancelled_on_marked_entity",
+        "visual_hint": "glowing_outline_visible_through_darkness"
+      },
+      "design_notes": "La marca lumínica cancela el stealth aunque la sala esté oscura: la entidad brilla contra el negro. Contrarresta la invisibilidad táctica perfecta (combo 7 de Parte 1). Aplica a jugador y enemigo por igual. La Cazadora puede marcar al Pícaro enemigo que intenta flanquear; los Esqueletos Mago pueden marcar al jugador antes de ordenar la carga. Luz como mecánica de information warfare."
+    },
+    {
+      "id": "shadow_cast_plus_shadow_suppress_plus_stealth_break",
+      "name": "Trampa de sombra falsa",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "stealth_shadow_create",
+          "stealth_shadow_suppress",
+          "stealth_break"
+        ],
+        "condition": "entity_enters_false_shadow_zone_stealth_suppressed_then_broken"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "stealth_break",
+            "magnitude": "high",
+            "target": "entity_in_zone",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "light_mark_reveal_hidden",
+            "magnitude": "medium",
+            "target": "entity_in_zone",
+            "durationTurns": 2
+          }
+        ],
+        "secondary": "entity_loses_stealth_bonus_for_2_turns_and_is_revealed_to_all"
+      },
+      "design_notes": "Se crea una zona de sombra artificial que parece segura para el sigilo pero lleva integrada la supresión de sombra. El Pícaro enemigo que entre creyendo ocultarse descubre que su stealth se rompe y queda marcado. Contramedida táctica contra clases de sigilo: preparar el terreno antes de que el sigiloso entre. La IA Goblin Rogue debería buscar sombras; esta trampa explota ese comportamiento."
+    },
+    {
+      "id": "bile_adhesive_plus_poison_contact_wound_plus_drag_ground",
+      "name": "Arrastre envenenado",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "fluid_bile_adhesive",
+          "elemental_poison_contact_wound",
+          "movement_forced_drag_ground"
+        ],
+        "condition": "entity_coated_in_adhesive_bile_has_open_wound_then_dragged"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_poison_contact_wound",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "physical_external_friction_drag",
+            "magnitude": "medium",
+            "target": "self",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "status_slow_wound_limb",
+            "magnitude": "medium",
+            "target": "self",
+            "durationTurns": 3
+          }
+        ],
+        "secondary": "bile_on_floor_creates_poison_trail_along_drag_path"
+      },
+      "design_notes": "La bilis adhesiva pega la entidad al suelo; al arrastrarla, las heridas abiertas entran en contacto con el veneno que impregna la bilis. El rastro de arrastre queda envenenado en el suelo. Pensado para los Slimes de bilis que pueden crear este combo pasivamente: el jugador que intenta escapar de un Slime y tiene una herida abierta sufre el combo sin que el Slime lo haya planificado. Interactividad emergente pura."
+    },
+    {
+      "id": "blood_bile_combo_plus_fire_ignition",
+      "name": "Combustión orgánica",
+      "trigger": {
+        "type": "vectors_simultaneous_in_area",
+        "vectors": [
+          "fluid_combo_blood_bile",
+          "elemental_fire_surface_ignition"
+        ],
+        "condition": "blood_bile_combo_fluid_on_tile_receives_fire_ignition"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_fire_flame_persistent",
+            "magnitude": "medium",
+            "target": "area",
+            "areaRadius": 2,
+            "durationTurns": 4
+          },
+          {
+            "vectorId": "elemental_poison_inhaled_smoke",
+            "magnitude": "medium",
+            "target": "area",
+            "areaRadius": 3,
+            "durationTurns": 3
+          }
+        ],
+        "terrain_after": "burning_organic_pool",
+        "special": "skeleton_entities_receive_heal_level_from_smoke_if_undead_aligned"
+      },
+      "design_notes": "La mezcla de sangre y bilis crea una sustancia orgánica altamente combustible. Al arder produce un humo tóxico específico: smoke de origen orgánico. La nota de diseño especial es que este humo, paradójicamente, potencia a los No-Muertos (su level para el smoke es heal). Una sala llena de esqueletos en llamas orgánicas es un enemigo más peligroso que uno en llamas normales."
+    },
+    {
+      "id": "oil_acid_combo_plus_armor_corrode_plus_pierce_bypass",
+      "name": "Disolvente de armadura total",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "fluid_combo_oil_acid",
+          "elemental_acid_corrode_armor",
+          "physical_external_pierce_armor_bypass"
+        ],
+        "condition": "armored_entity_coated_in_oil_acid_combo_receives_armor_corrode_then_pierce"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "stat_reduce_defense_physical",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 4
+          },
+          {
+            "vectorId": "physical_external_pierce_armor_bypass",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 0
+          }
+        ],
+        "secondary": "equipment_resistance_entries_for_physical_external_nullified_for_duration",
+        "designed_against": [
+          "construct_golem",
+          "skeleton_warrior_with_heavy_armor"
+        ]
+      },
+      "design_notes": "La mezcla aceite-ácido penetra en las juntas de la armadura, el ácido corrosivo la debilita estructuralmente, y el perforador la atraviesa en el punto más frágil. El resultado es que las bonificaciones de equipo para daño físico quedan anuladas durante 4 turnos. Combo de tres actores: Mago aplica el combo de fluido, Cazadora dispara para corroer, Guerrero perfora. O la Cazadora sola si tiene los tres vectores."
+    },
+    {
+      "id": "temporal_age_accelerate_plus_corrode_spreading",
+      "name": "Corrosión acelerada por tiempo",
+      "trigger": {
+        "type": "vector_applied_to_entity_with_status",
+        "vectors": [
+          "exotic_temporal_age_accelerate",
+          "status_corrode_spreading"
+        ],
+        "condition": "entity_has_corrode_spreading_when_temporal_age_accelerate_applied"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_corrode_accelerating",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "elemental_acid_corrode_weapon",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 0
+          }
+        ],
+        "secondary": "corrosion_jumps_to_equipment_slots_weapon_first_then_armor",
+        "escalation_note": "corrode_spreading_upgraded_to_corrode_accelerating_instantly"
+      },
+      "design_notes": "La aceleración temporal hace que la corrosión progrese varios ciclos en un único turno. Una corrosión que tardaría 5 turnos en destruir la armadura lo hace en 1. El salto a arma primero es deliberado: el Pícaro con veneno corrosivo + acceso temporal puede desarmar a un Guerrero en un turno. Contra Constructos: la oxidación acelerada afecta a sus articulaciones metálicas de forma severa."
+    },
+    {
+      "id": "vibration_weaken_plus_construct_joint_plus_electric_overload",
+      "name": "Sobrecarga de articulación resonante",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "sound_vibration_structural_weaken",
+          "physical_structural_construct_joint",
+          "elemental_electric_overload_construct"
+        ],
+        "condition": "construct_joint_weakened_by_vibration_receives_electric_overload"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "physical_structural_construct_core",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "status_paralysis_physical_full",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 3
+          },
+          {
+            "vectorId": "elemental_electric_arc_spread",
+            "magnitude": "medium",
+            "target": "area",
+            "areaRadius": 2,
+            "durationTurns": 0
+          }
+        ],
+        "designed_against": [
+          "construct_golem_stone",
+          "construct_golem_metal"
+        ]
+      },
+      "design_notes": "La vibración abre microfisuras en las articulaciones del Constructo. La sobrecarga eléctrica viaja por esas fisuras directamente al núcleo en vez de disiparse por la superficie. El arco se propaga además a entidades metálicas adyacentes. Combo específico anti-Golem de dos clases: el Guerrero golpea para vibrar, el Mago lanza el rayo. El Constructo que antes era immune a eléctrico se vuelve vulnerable a esta secuencia."
+    },
+    {
+      "id": "berserker_rage_plus_bleed_major_plus_psychic_pain",
+      "name": "Furia de muerte",
+      "trigger": {
+        "type": "vectors_all_active_same_entity",
+        "vectors": [
+          "status_berserker_rage",
+          "status_bleed_major",
+          "exotic_psychic_direct_pain"
+        ],
+        "condition": "entity_in_berserker_rage_has_bleed_major_and_receives_direct_pain"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_focused_rage",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 4
+          },
+          {
+            "vectorId": "stat_buff_str_major",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 4
+          }
+        ],
+        "secondary": "entity_ignores_all_status_debuffs_during_focused_rage",
+        "cost": "entity_cannot_flee_or_use_non_attack_actions_during_duration",
+        "designed_for": [
+          "errante_class"
+        ]
+      },
+      "design_notes": "El Errante en Berserker Rage que está sangrando Y recibe daño psíquico directo no colapsa: convierte el dolor en combustible. La furia focalizada es el techo de la mecánica del Errante: STR extreme + inmunidad a debuffs, pero pierde acceso a huir o inspeccionar. Un Pícaro enemigo que intenta usar dolor psíquico para romper la furia del Errante obtiene el efecto contrario."
+    },
+    {
+      "id": "holy_aura_plus_smite_undead_plus_radiant_burst",
+      "name": "Purificación en cadena",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "exotic_sacred_holy_aura",
+          "exotic_aligned_smite_undead",
+          "elemental_light_radiant_burst"
+        ],
+        "condition": "holy_aura_active_smite_applied_to_undead_then_radiant_burst"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_light_holy_beam",
+            "magnitude": "extreme",
+            "target": "area",
+            "areaRadius": 4,
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "exotic_sacred_purify",
+            "magnitude": "high",
+            "target": "area",
+            "areaRadius": 4,
+            "durationTurns": 0
+          }
+        ],
+        "secondary": "undead_entities_in_radius_receive_extreme_vulnerable_to_holy_for_2_turns",
+        "heals_living_allies_in_radius": true,
+        "designed_against": [
+          "skeleton",
+          "shadow_spectre"
+        ]
+      },
+      "design_notes": "El aura sagrada carga el smite que a su vez actúa como detonador del burst radial. El resultado es una explosión de luz purificadora que amplifica la vulnerabilidad de todos los no-muertos en radio 4 y cura a los aliados vivos. Combo de boss room contra grupos de esqueletos. El Mago con hechizos sagrados puede ejecutarlo solo en tres turnos de preparación. Las Sombras son las más dañadas: extreme_vulnerable a luz."
+    },
+    {
+      "id": "desecrate_plus_dark_profane_plus_heal_shield_physical",
+      "name": "Escudo de profanación",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "exotic_dark_desecrate",
+          "exotic_dark_profane_strike",
+          "heal_shield_physical"
+        ],
+        "condition": "desecrated_zone_entity_receives_profane_strike_then_shield_activates"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "heal_shield_elemental",
+            "magnitude": "high",
+            "target": "profane_strike_source",
+            "durationTurns": 3
+          },
+          {
+            "vectorId": "stat_reduce_defense_all",
+            "magnitude": "high",
+            "target": "struck_entity",
+            "durationTurns": 3
+          }
+        ],
+        "secondary": "profane_source_gains_shield_absorbing_next_2_physical_hits",
+        "designed_for": [
+          "skeleton_mage",
+          "shadow_spectre"
+        ]
+      },
+      "design_notes": "En terreno profanado, el golpe profano transfiere parte de la energía dañina al atacante en forma de escudo elemental. El Esqueleto Mago que desacraliza su zona de batalla antes de atacar no solo daña más: se protege. El jugador que entra en territorio profanado descubre que el enemigo se auto-escuda con sus propios ataques. Invierte la agresión: atacar en terreno profanado castiga al atacante."
+    },
+    {
+      "id": "synesthesia_plus_sound_cover_plus_sensory_overload",
+      "name": "Colapso sensorial cruzado",
+      "trigger": {
+        "type": "vectors_all_active_same_entity",
+        "vectors": [
+          "exotic_psychic_synesthesia",
+          "sound_cover_active_creation",
+          "exotic_psychic_sensory_overload"
+        ],
+        "condition": "entity_with_synesthesia_in_active_sound_cover_receives_sensory_overload"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_confused_direction",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 3
+          },
+          {
+            "vectorId": "stat_debuff_dex_major",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 3
+          },
+          {
+            "vectorId": "stat_debuff_ste_major",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 3
+          }
+        ],
+        "secondary": "entity_cannot_use_stealth_or_dodge_actions_during_duration",
+        "affects": "organic_entities_only"
+      },
+      "design_notes": "La sinestesia hace que la entidad procese el sonido como dato espacial. El cover sonoro activo invierte esa referencia espacial. El overload la satura. Resultado: la entidad literalmente no sabe dónde está en la sala. DEX y STE se destruyen. El Pícaro enemigo que usa camuflaje sonoro descubre que ese mismo camuflaje, combinado con sinestesia, lo inutiliza. Combo específico anti-sigiloso."
+    },
+    {
+      "id": "grab_slam_plus_floor_crack_plus_acid_pool",
+      "name": "Golpe de suelo ácido",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "terrain_fluid_place_acid",
+          "physical_structural_floor_crack",
+          "movement_forced_grab_slam_ground"
+        ],
+        "condition": "cracked_floor_tile_has_acid_pool_entity_slammed_into_it"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "physical_structural_floor_collapse",
+            "magnitude": "high",
+            "target": "slam_tile",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "elemental_acid_splash",
+            "magnitude": "extreme",
+            "target": "area",
+            "areaRadius": 2,
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "terrain_demolish_tactical_pit",
+            "magnitude": "medium",
+            "target": "slam_tile",
+            "durationTurns": -1
+          }
+        ],
+        "secondary": "slammed_entity_falls_into_pit_with_acid_residue"
+      },
+      "design_notes": "El slam en suelo ya agrietado + ácido produce un colapso inmediato que crea un pozo táctico con residuo ácido. La entidad golpeada cae al pozo. El Constructo Golem tiene grab_slam como vector innato; si hay suelo preparado, lo convierte en ejecución de entorno. El Guerrero con shield bash puede hacer el slam; el Mago prepara el terreno. El pozo persiste como obstáculo permanente."
+    },
+    {
+      "id": "curse_mark_plus_doom_plus_karma_negative",
+      "name": "Condena acumulada",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "exotic_curse_mark",
+          "exotic_curse_doom",
+          "meta_karma_negative"
+        ],
+        "condition": "entity_has_curse_mark_active_when_doom_applied_with_negative_karma"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "run_curse_chain",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": -1
+          },
+          {
+            "vectorId": "run_corruption_threshold",
+            "magnitude": "medium",
+            "target": "self",
+            "durationTurns": -1
+          }
+        ],
+        "secondary": "next_3_random_events_in_run_biased_toward_negative_outcomes",
+        "affects": "player_run_meta_only"
+      },
+      "design_notes": "La maldición de marca actúa como receptor para la condena; el karma negativo acumulado hace que la cadena de maldición se propague a nivel de run. No es daño inmediato: es corrupción de la suerte de la run actual. Los tres vectores son de categorías completamente distintas (exótico puntual + exótico temporal + meta). Inspirado en Hades: las maldiciones de deidad acumuladas que alteran la run. Aplicable solo a entidades con run_meta (el jugador)."
+    },
+    {
+      "id": "compulsion_action_plus_trap_trigger_remote",
+      "name": "Suicidio compulsivo",
+      "trigger": {
+        "type": "vector_applied_to_entity_with_status",
+        "vectors": [
+          "influence_compulsion_action",
+          "terrain_trap_set"
+        ],
+        "condition": "entity_has_compulsion_action_active_with_trap_on_target_tile"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "terrain_trap_trigger_remote",
+            "magnitude": "high",
+            "target": "compelled_entity",
+            "durationTurns": 0
+          }
+        ],
+        "secondary": "compulsion_forces_entity_to_move_to_trap_tile_and_trigger_it",
+        "ai_override": "pathfinding_forced_toward_trap_tile_ignoring_danger_detection"
+      },
+      "design_notes": "La compulsión de acción sobreescribe el pathfinding de la IA: la entidad se mueve directamente al tile indicado sin evaluar peligros. Si ese tile tiene una trampa, la activa. La IA normalmente evita tiles peligrosos conocidos; la compulsión elimina esa evaluación. Aplica también al jugador: ser compelido hacia una trampa es una de las situaciones de mayor urgencia táctica del juego."
+    },
+    {
+      "id": "blood_ritual_plus_desecrate_plus_life_drain",
+      "name": "Ritual de sangre profanada",
+      "trigger": {
+        "type": "vectors_all_active_same_area",
+        "vectors": [
+          "fluid_blood_ritual",
+          "exotic_dark_desecrate",
+          "exotic_aligned_life_drain"
+        ],
+        "condition": "blood_ritual_active_in_desecrated_zone_life_drain_applied"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "heal_aura_resistance",
+            "magnitude": "high",
+            "target": "ritual_caster",
+            "durationTurns": 4
+          },
+          {
+            "vectorId": "run_corruption_progressive",
+            "magnitude": "low",
+            "target": "ritual_caster",
+            "durationTurns": -1
+          },
+          {
+            "vectorId": "status_soul_decay",
+            "magnitude": "medium",
+            "target": "drained_entity",
+            "durationTurns": 3
+          }
+        ],
+        "secondary": "caster_gains_temporary_immunity_to_one_random_vector_category",
+        "cost": "run_corruption_applied_to_caster_as_tradeoff"
+      },
+      "design_notes": "El ritual de sangre en zona profanada + drenaje vital crea una transferencia de resistencias del drenado al caster. El caster gana un escudo de resistencia temporal pero acumula corrupción de run. Es un tradeoff: poder ahora, pagar después. Un Esqueleto Mago en su propia zona profanada puede ejecutar este ritual si hay sangre en el suelo (de combate previo). El jugador que lo ejecuta debe valorar si la resistencia temporal vale la corrupción acumulada."
+    },
+    {
+      "id": "bone_fracture_plus_organ_crush_plus_hemorrhage_major",
+      "name": "Trauma múltiple",
+      "trigger": {
+        "type": "vectors_all_active_same_entity",
+        "vectors": [
+          "physical_internal_bone_fracture",
+          "physical_internal_organ_crush",
+          "physical_internal_hemorrhage_major"
+        ],
+        "condition": "entity_has_all_three_internal_damage_statuses_active"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_slow_major",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": -1
+          },
+          {
+            "vectorId": "stat_reduce_hp_max_major",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": -1
+          }
+        ],
+        "secondary": "entity_cannot_run_or_use_movement_skills_until_heal_state_physical_applied",
+        "affects": "organic_entities_only",
+        "cure_requirement": "heal_state_physical_magnitude_high_or_above"
+      },
+      "design_notes": "Los tres vectores de daño interno físico juntos producen un estado de trauma sistémico permanente de combate: el HP máximo cae y el movimiento queda destruido de forma duradera. Requiere curación física de alta magnitud para revertir, no solo un turno de regeneración. El Guerrero puede acumular estos tres vectores en combate prolongado contra un Golem que use grab + slam + crush. Los Constructos son inmunes (sin órganos)."
+    },
+    {
+      "id": "floor_collapse_plus_debris_pile_plus_create_cover",
+      "name": "Fortín improvisado",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "physical_structural_floor_collapse",
+          "terrain_obstacle_debris_pile",
+          "terrain_demolish_create_cover"
+        ],
+        "condition": "floor_collapse_creates_debris_then_cover_action_applied"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "terrain_obstacle_barricade",
+            "magnitude": "high",
+            "target": "collapse_zone",
+            "durationTurns": -1
+          }
+        ],
+        "secondary": "barricade_grants_resist_50_to_ranged_vectors_for_entities_behind_it",
+        "secondary_2": "barricade_blocks_movement_forced_push_light",
+        "build_turns": 1
+      },
+      "design_notes": "El derrumbe crea escombros; convertir esos escombros en una barricada táctica requiere solo una acción de construcción. El resultado es cobertura permanente que resiste proyectiles y empujes ligeros. La Cazadora puede usar esto para crear una posición de francotiradora improvisada. Los Goblins también pueden construir barricadas de escombros si su IA prioriza posición defensiva en grupo. Convierte la destrucción en ventaja táctica."
+    },
+    {
+      "id": "curse_conditional_plus_luck_negative_plus_chain",
+      "name": "Maldición en cascada",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "run_curse_conditional",
+          "meta_luck_negative",
+          "run_curse_chain"
+        ],
+        "condition": "conditional_curse_triggers_under_negative_luck_with_chain_active"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "run_curse_stat_permanent",
+            "magnitude": "medium",
+            "target": "self",
+            "durationTurns": -1
+          },
+          {
+            "vectorId": "meta_luck_negative",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": -1
+          }
+        ],
+        "secondary": "each_subsequent_curse_in_run_costs_double_resources_to_cleanse",
+        "affects": "player_run_meta_only",
+        "maximum_chain_depth": 3
+      },
+      "design_notes": "La maldición condicional que se activa bajo mala suerte + cadena activa se propaga a una maldición de stat permanente de run. Es la espiral descendente de maldiciones: una maldición activa la siguiente. El cap de 3 niveles de cadena (del motor de B5) evita que sea infinita. Inspirado en Caves of Qud: las maldiciones acumuladas que se retroalimentan. El jugador que ignora la mala suerte acumulada descubre que las maldiciones se vuelven más caras de limpiar."
+    },
+    {
+      "id": "gravity_null_plus_launch_up_plus_slam_terminal",
+      "name": "Catapulta gravitacional",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "exotic_gravity_null",
+          "movement_forced_launch_up",
+          "exotic_gravity_slam_terminal"
+        ],
+        "condition": "entity_in_null_gravity_zone_launched_upward_then_gravity_restored"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "movement_forced_vertical_slam",
+            "magnitude": "extreme",
+            "target": "launched_entity",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "elemental_earth_impact_ground",
+            "magnitude": "extreme",
+            "target": "impact_tile",
+            "areaRadius": 2,
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "status_stun_concussion",
+            "magnitude": "high",
+            "target": "launched_entity",
+            "durationTurns": 3
+          }
+        ],
+        "secondary": "entities_in_impact_radius_receive_knockback",
+        "instant_kill_threshold": "target_below_20pct_hp"
+      },
+      "design_notes": "Gravedad nula levita la entidad; el lanzamiento la sube; restaurar la gravedad la estrella contra el suelo a velocidad terminal. Los tres vectores son de categorías completamente distintas (exótico gravitacional + movimiento forzado + exótico gravitacional terminal). El impacto en suelo genera onda que empuja a entidades adyacentes. El Constructo Golem puede usar launch_up como vector innato; el Mago restaura la gravedad. Combo de clase cruzada con potencial de ejecución."
+    },
+    {
+      "id": "gravity_oscillation_plus_magnetize_plus_electric_conduction",
+      "name": "Jaula magnética electrificada",
+      "trigger": {
+        "type": "vectors_simultaneous_in_area",
+        "vectors": [
+          "exotic_gravity_oscillation",
+          "movement_forced_magnetize",
+          "elemental_electric_conduction_metal"
+        ],
+        "condition": "oscillation_active_metallic_entity_magnetized_in_electric_conduction_zone"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_electric_overload_construct",
+            "magnitude": "high",
+            "target": "magnetized_entity",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "status_immobile_pinned",
+            "magnitude": "extreme",
+            "target": "magnetized_entity",
+            "durationTurns": 3
+          },
+          {
+            "vectorId": "elemental_electric_arc_spread",
+            "magnitude": "medium",
+            "target": "area",
+            "areaRadius": 2,
+            "durationTurns": 0
+          }
+        ],
+        "designed_against": [
+          "construct_golem_metal",
+          "skeleton_warrior_armored"
+        ],
+        "immune": [
+          "construct_golem_stone"
+        ]
+      },
+      "design_notes": "La oscilación gravitacional hace que la entidad metálica vibre; la magnetización la fija al suelo amplificando la conducción eléctrica a través de toda su masa. Resultado: sobrecarga y parálisis. El Golem de Metal queda literalmente clavado y electrocutado. El Golem de Piedra es inmune. Requiere que la entidad objetivo sea metálica (armadura de placa, Constructo metálico); inapplicable a Goblins o Sombras."
+    },
+    {
+      "id": "teleport_random_plus_acid_pool_plus_trap_set",
+      "name": "Ruleta de trampas",
+      "trigger": {
+        "type": "vectors_all_active_same_area",
+        "vectors": [
+          "terrain_fluid_place_acid",
+          "terrain_trap_set",
+          "movement_forced_teleport_random"
+        ],
+        "condition": "room_has_multiple_hazard_tiles_entity_receives_random_teleport"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "terrain_trap_trigger_remote",
+            "magnitude": "medium",
+            "target": "teleported_entity",
+            "durationTurns": 0,
+            "tags": [
+              "on_arrival_if_tile_has_trap"
+            ]
+          },
+          {
+            "vectorId": "elemental_acid_splash",
+            "magnitude": "medium",
+            "target": "teleported_entity",
+            "durationTurns": 0,
+            "tags": [
+              "on_arrival_if_tile_has_acid"
+            ]
+          }
+        ],
+        "secondary": "hazard_density_determines_probability_of_landing_on_dangerous_tile",
+        "design_mechanic": "room_preparation_before_teleport_increases_expected_damage"
+      },
+      "design_notes": "El teleport aleatorio por sí solo es neutro: aterriza en tile aleatorio. Si la sala fue preparada con múltiples tiles peligrosos, la probabilidad de aterrizaje dañino sube proporcionalmente. El Mago puede preparar 4-5 tiles de ácido y trampas antes de usar el teleport en el enemigo, convirtiendo la aleatoriedad en presión probabilística. La IA debería evaluar densidad de hazards antes de usar teleport_random sobre el jugador."
+    },
+    {
+      "id": "swap_plus_desecrate_plus_profane_strike",
+      "name": "Intercambio al terreno profano",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "exotic_dark_desecrate",
+          "movement_forced_swap",
+          "exotic_dark_profane_strike"
+        ],
+        "condition": "desecrated_zone_exists_entity_swapped_into_it_receives_profane_strike"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "exotic_dark_profane_strike",
+            "magnitude": "high",
+            "target": "swapped_entity",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "stat_reduce_defense_all",
+            "magnitude": "high",
+            "target": "swapped_entity",
+            "durationTurns": 3
+          }
+        ],
+        "secondary": "swapper_entity_exits_desecrated_zone_to_safe_tile",
+        "designed_for": [
+          "skeleton_mage",
+          "shadow_spectre"
+        ]
+      },
+      "design_notes": "El Esqueleto Mago desacraliza su posición, intercambia posición con el jugador (que entra en la zona profana) y lanza el golpe profano sobre el jugador ya situado en el terreno desfavorable. El swap es el componente clave: el caster abandona la zona peligrosa mientras el objetivo la ocupa. Inversión de posiciones táctica con triple efecto: reposicionamiento + terreno + golpe amplificado."
+    },
+    {
+      "id": "hydraulic_impact_plus_floor_crack_plus_drowning",
+      "name": "Inundación de mazmorra",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "elemental_water_hydraulic_impact",
+          "physical_structural_floor_crack",
+          "elemental_water_drowning"
+        ],
+        "condition": "hydraulic_impact_cracks_floor_water_fills_pit_entity_falls_in"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "terrain_remove_floor_create_pit",
+            "magnitude": "medium",
+            "target": "cracked_tile",
+            "durationTurns": -1
+          },
+          {
+            "vectorId": "terrain_fluid_place_water",
+            "magnitude": "high",
+            "target": "pit_area",
+            "areaRadius": 2,
+            "durationTurns": 8
+          },
+          {
+            "vectorId": "elemental_water_drowning",
+            "magnitude": "medium",
+            "target": "entities_in_flooded_pit",
+            "durationTurns": 3
+          }
+        ],
+        "immune": [
+          "construct_golem",
+          "skeleton"
+        ],
+        "secondary": "flooded_pit_interacts_with_electric_vectors_if_present"
+      },
+      "design_notes": "El impacto hidráulico a alta presión agrieta el suelo; el agua lo perfora y llena el hueco resultante. La inundación localizada afecta solo al área del pozo. Los Constructos y Esqueletos son inmunes al ahogamiento. El pozo inundado es el mejor setup para la combinación agua + eléctrico: si el Mago lanza un rayo sobre el pozo inundado lleno de entidades orgánicas, el resultado es masivo. Combo de dos fases con payoff en la tercera."
+    },
+    {
+      "id": "wave_slam_plus_oil_slick_plus_fire_ignition",
+      "name": "Ola de fuego",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "fluid_oil_slick",
+          "elemental_water_wave_slam",
+          "elemental_fire_surface_ignition"
+        ],
+        "condition": "oil_slick_on_floor_wave_slam_spreads_it_then_fire_ignites_trail"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_fire_flame_trail",
+            "magnitude": "high",
+            "target": "area",
+            "areaRadius": 4,
+            "durationTurns": 3
+          },
+          {
+            "vectorId": "movement_forced_push_radial",
+            "magnitude": "medium",
+            "target": "area",
+            "areaRadius": 3,
+            "durationTurns": 0
+          }
+        ],
+        "secondary": "wave_carries_oil_3_tiles_before_fire_catches_creating_moving_fire_front",
+        "terrain_after": "burning_oil_wave_residue"
+      },
+      "design_notes": "La ola de agua no apaga el aceite: lo extiende. La ignición posterior crea un frente de fuego en movimiento con ola de empuje incorporada. El resultado visual es una ola de fuego que barre la sala. Tres categorías muy distintas: fluido de superficie + elemental agua + elemental fuego. El agua como amplificador del aceite es contraintuitivo y memorablemente sorprendente cuando el jugador lo descubre."
+    },
+    {
+      "id": "air_void_implosion_plus_air_blade_plus_vortex",
+      "name": "Trituradora de vacío",
+      "trigger": {
+        "type": "vectors_simultaneous_in_area",
+        "vectors": [
+          "elemental_air_void_implosion",
+          "elemental_air_blade",
+          "elemental_air_vortex"
+        ],
+        "condition": "all_three_air_vectors_active_same_zone"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "physical_external_lacerate_tear",
+            "magnitude": "extreme",
+            "target": "area",
+            "areaRadius": 3,
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "elemental_air_vacuum_local",
+            "magnitude": "extreme",
+            "target": "area",
+            "areaRadius": 4,
+            "durationTurns": 2
+          },
+          {
+            "vectorId": "status_slow_major",
+            "magnitude": "high",
+            "target": "area",
+            "durationTurns": 2
+          }
+        ],
+        "secondary": "loose_objects_and_props_destroyed_instantly_in_zone",
+        "immune": [
+          "construct_golem_stone_anchored"
+        ]
+      },
+      "design_notes": "Los tres vectores de aire en la misma zona crean una trituradora: el vacío succiona, las cuchillas cortan, el vórtice amplifica la rotación. Props sueltos (barriles, mesas, estanterías) se destruyen instantáneamente. Las entidades orgánicas reciben laceración extrema. Es la combinación de categoría única más destructiva del catálogo de aire, pero requiere que los tres vectores de la misma categoría converjan, lo que la hace difícil de preparar y fácil de recordar."
+    },
+    {
+      "id": "causality_break_plus_trap_disarm_plus_chain_reaction",
+      "name": "Paradoja de trampa",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "exotic_temporal_causality_break",
+          "terrain_trap_disarm",
+          "physical_structural_chain_reaction"
+        ],
+        "condition": "causality_break_active_trap_disarmed_retroactively_triggers_chain"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "physical_structural_chain_reaction",
+            "magnitude": "high",
+            "target": "area",
+            "areaRadius": 3,
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "terrain_trap_trigger_remote",
+            "magnitude": "medium",
+            "target": "adjacent_trap_tiles",
+            "durationTurns": 0
+          }
+        ],
+        "secondary": "disarmed_trap_retroactively_triggers_before_disarm_completes",
+        "temporal_paradox": "trap_both_disarmed_and_triggered_in_same_turn",
+        "design_mechanic": "causality_break_reverses_action_order_for_one_event"
+      },
+      "design_notes": "La ruptura de causalidad invierte el orden temporal de un evento: la trampa se desarma Y se activa en el mismo turno, en ese orden invertido (activa primero, luego se desarma). La cadena de reacción se propaga a las trampas adyacentes antes de que el desarmado las alcance. Mecánica de alto coste cognitivo pero muy memorable: el jugador que intenta desactivar un sistema de trampas bajo causality_break descubre que el desactivado lo activa. Inspirado en Caves of Qud: paradojas temporales con consecuencias físicas."
+    },
+    {
+      "id": "phase_shift_plus_wall_passage_plus_trap_set",
+      "name": "Emboscada desde las paredes",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "exotic_temporal_phase_shift",
+          "terrain_remove_wall_passage",
+          "terrain_trap_set"
+        ],
+        "condition": "entity_phase_shifts_through_wall_into_passage_with_trap"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "terrain_trap_trigger_remote",
+            "magnitude": "high",
+            "target": "phase_shifted_entity",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "status_stun_concussion",
+            "magnitude": "medium",
+            "target": "phase_shifted_entity",
+            "durationTurns": 2
+          }
+        ],
+        "secondary": "phase_shifted_entity_cannot_re_phase_for_2_turns_after_trap",
+        "design_mechanic": "traps_on_passages_created_by_wall_removal_catch_phase_shifters"
+      },
+      "design_notes": "El paso de fase permite atravesar paredes, pero si el pasaje fue creado por derribo de muro Y tiene una trampa colocada en él, la trampa activa al entrar. Contramedida específica contra entidades con phase_shift (Sombras, Espectros, futuras entidades). El jugador que conoce el Codex puede preparar pasajes-trampa anticipando rutas de infiltración de las Sombras. Requiere knowledge as progression: saber que las Sombras usan phase_shift."
+    },
+    {
+      "id": "age_reverse_plus_mutation_positive_plus_regen_field",
+      "name": "Rejuvenecimiento combativo",
+      "trigger": {
+        "type": "vectors_all_active_same_entity",
+        "vectors": [
+          "exotic_temporal_age_reverse",
+          "run_mutation_positive",
+          "heal_regen_over_time_field"
+        ],
+        "condition": "age_reverse_active_entity_has_positive_mutation_in_regen_field"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "heal_regen_wound_apply",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 4
+          },
+          {
+            "vectorId": "stat_buff_str_major",
+            "magnitude": "medium",
+            "target": "self",
+            "durationTurns": 4
+          },
+          {
+            "vectorId": "stat_buff_dex_major",
+            "magnitude": "medium",
+            "target": "self",
+            "durationTurns": 4
+          }
+        ],
+        "secondary": "one_negative_status_effect_removed_per_turn_during_duration",
+        "affects": "organic_entities_only",
+        "rare_trigger": true
+      },
+      "design_notes": "Los tres vectores de regeneración/mutación/reversión temporal juntos producen un estado de regeneración combativa extrema. Es un combo raro (requiere los tres activos simultáneamente) pero el payoff es considerable: el jugador recupera estados y stats mientras se cura. Pensado como recompensa de exploración: el campo de regeneración es un elemento de sala especial (altar, manantial); la mutación positiva es resultado de una run previa; la reversión temporal es hechizo de alto tier."
+    },
+    {
+      "id": "memory_drain_plus_willpower_crush_plus_domination_full",
+      "name": "Mente en blanco dominada",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "exotic_psychic_memory_drain",
+          "exotic_psychic_willpower_crush",
+          "influence_domination_full"
+        ],
+        "condition": "entity_memory_drained_willpower_crushed_then_full_domination_applied"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "influence_domination_full",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 6
+          },
+          {
+            "vectorId": "stat_debuff_int_major",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 6
+          }
+        ],
+        "secondary": "dominated_entity_forgets_skill_use_cannot_use_class_abilities_during_domination",
+        "secondary_2": "domination_duration_doubled_compared_to_normal_full_domination",
+        "cure_requirement": "heal_state_mental_magnitude_high_or_exotic_sacred_purify"
+      },
+      "design_notes": "El drenaje de memoria vacía la resistencia intelectual; el aplastamiento de voluntad elimina la autonomía; la dominación plena sobre una entidad ya vaciada dura el doble. El efecto especial: la entidad dominada no puede usar habilidades de clase (olvidó cómo). Un Guerrero dominado solo puede atacar básico; un Mago dominado pierde acceso a todos sus hechizos. Devastador contra el jugador con builds de clase; aplica a enemigos también: el Esqueleto Mago dominado se vuelve inútil sin sus hechizos."
+    },
+    {
+      "id": "reality_fracture_plus_illusion_pain_plus_direct_pain",
+      "name": "Dolor que se vuelve real",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "exotic_psychic_reality_fracture",
+          "exotic_psychic_illusion_pain",
+          "exotic_psychic_direct_pain"
+        ],
+        "condition": "reality_fracture_active_illusion_pain_applied_then_direct_pain"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "physical_internal_organ_crush",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "status_stun_concussion",
+            "magnitude": "medium",
+            "target": "self",
+            "durationTurns": 2
+          }
+        ],
+        "secondary": "illusion_damage_becomes_real_damage_while_reality_fracture_active",
+        "secondary_2": "all_psychic_illusion_vectors_deal_50pct_real_damage_during_fracture",
+        "affects": "organic_entities_only"
+      },
+      "design_notes": "La fractura de realidad colapsa la distinción entre ilusión y realidad. El dolor ilusorio que normalmente solo simula daño se convierte en daño físico real: la mente lesiona el cuerpo. Inspirado en Caves of Qud: la línea entre percepción y realidad como mecánica jugable. Las Sombras pueden usar esta cadena contra el jugador; el Mago puede usarla contra enemigos orgánicos. Los Constructos y Esqueletos son completamente inmunes (sin mente orgánica que fracturar)."
+    },
+    {
+      "id": "sonic_lethal_plus_vibration_detect_plus_earth_tremor",
+      "name": "Resonancia sísmica fatal",
+      "trigger": {
+        "type": "vectors_simultaneous_in_area",
+        "vectors": [
+          "elemental_sonic_lethal_wave",
+          "sound_vibration_detect",
+          "elemental_earth_tremor"
+        ],
+        "condition": "lethal_sonic_wave_in_zone_with_active_vibration_detection_and_tremor"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_earth_seismic_wave",
+            "magnitude": "extreme",
+            "target": "area",
+            "areaRadius": 5,
+            "durationTurns": 0
+          },
+          {
+            "vectorId": "physical_structural_wall_crack",
+            "magnitude": "high",
+            "target": "all_walls_in_radius",
+            "areaRadius": 4,
+            "durationTurns": -1
+          }
+        ],
+        "secondary": "vibration_detection_amplifies_sonic_wave_turning_it_into_seismic_event",
+        "structural_damage": "all_cracked_surfaces_in_radius_weakened_for_subsequent_combos"
+      },
+      "design_notes": "El sistema de detección de vibraciones actúa como amplificador involuntario: la onda sónica letal es captada, amplificada y devuelta como onda sísmica. El combate en una sala con sistema de alarma de vibración activo puede desencadenar un terremoto local si hay fuentes sónicas suficientes. Todas las paredes en radio quedan agrietadas: setup masivo para combos de derrumbe posteriores. Consecuencia emergente de mezclar sigilo-sonido con elemental-tierra."
+    },
+    {
+      "id": "smell_suppression_plus_false_signature_plus_confusion_allegiance",
+      "name": "Identidad falsa completa",
+      "trigger": {
+        "type": "vectors_all_active_same_entity",
+        "vectors": [
+          "stealth_smell_suppression",
+          "sound_alarm_false_signature",
+          "status_confused_allegiance"
+        ],
+        "condition": "entity_smell_suppressed_emitting_false_sound_signature_with_confused_allegiance"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "influence_domination_partial",
+            "magnitude": "medium",
+            "target": "nearby_enemies_of_disguised_entity",
+            "areaRadius": 3,
+            "durationTurns": 3
+          }
+        ],
+        "secondary": "enemies_treat_disguised_entity_as_ally_for_3_turns",
+        "breaks_on": "disguised_entity_attacks_or_takes_damage_from_deceived_enemies",
+        "designed_for": [
+          "picaro_class",
+          "cazadora_class"
+        ]
+      },
+      "design_notes": "Tres vectores de supresión/falsificación de identidad (olfato suprimido + firma sonora falsa + confusión de lealtad) producen una ilusión de identidad completa. Los enemigos cercanos no pueden distinguir al jugador de un aliado. Durante 3 turnos, el jugador puede moverse entre grupos enemigos sin ser atacado. El Pícaro es la clase natural para este combo: sus tres vectores de sigilo pueden cubrir los tres ingredientes. Romper el disfraz atacando convierte la sala entera en hostil simultáneamente."
+    },
+    {
+      "id": "luminous_mark_plus_chain_guarantee_plus_loot_amplify",
+      "name": "Objetivo de caza marcado",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "light_increase_luminous_mark",
+          "meta_chain_guarantee",
+          "meta_loot_amplify"
+        ],
+        "condition": "enemy_marked_with_luminous_mark_chain_guaranteed_loot_amplify_active"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "meta_loot_amplify",
+            "magnitude": "extreme",
+            "target": "marked_entity",
+            "durationTurns": -1
+          },
+          {
+            "vectorId": "meta_chain_guarantee",
+            "magnitude": "high",
+            "target": "marked_entity",
+            "durationTurns": -1
+          }
+        ],
+        "secondary": "marked_enemy_guaranteed_to_drop_one_tier_higher_loot_on_death",
+        "secondary_2": "all_combo_hits_on_marked_enemy_guaranteed_to_chain",
+        "designed_for": [
+          "cazadora_class"
+        ]
+      },
+      "design_notes": "La marca luminosa convierte al enemigo en objetivo de caza prioritario. Con la garantía de cadena y el amplificador de loot activos, el enemigo marcado cae con loot de tier superior garantizado y todas las cadenas de combo se garantizan (eliminando el RNG de chain). La Cazadora es la clase natural: su DEX alta ya prioriza chains; este combo los vuelve seguros. Mezcla categorías muy distintas: luz + meta-progresión + meta-loot. Knowledge as progression: el jugador que aprende a combinar estas tres mecánicas obtiene una ventaja significativa de farming."
+    },
+    {
+      "id": "awe_plus_deep_focus_plus_int_major",
+      "name": "Revelación táctica",
+      "trigger": {
+        "type": "vectors_all_active_same_entity",
+        "vectors": [
+          "influence_awe",
+          "status_deep_focus",
+          "stat_buff_int_major"
+        ],
+        "condition": "entity_in_awe_state_with_deep_focus_and_int_major_buff_active"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_tactical_analysis",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 4
+          },
+          {
+            "vectorId": "status_mental_clarity",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 4
+          }
+        ],
+        "secondary": "all_inspect_actions_this_combat_reveal_resistance_weaknesses_automatically",
+        "secondary_2": "codex_entries_for_enemies_in_room_auto_completed_for_vector_categories",
+        "designed_for": [
+          "mago_class"
+        ]
+      },
+      "design_notes": "La reverencia + concentración profunda + INT amplificada producen un estado de claridad táctica extrema. El efecto especial rompe la asimetría de información habitual: Inspeccionar en este estado revela automáticamente las debilidades de resistencia del enemigo sin necesidad de descubrirlas por experiencia. Las entradas del Codex se autocompletan para las categorías de vectores. Es el buff de conocimiento definitivo del Mago: trade-off entre power bruto y ventaja informativa."
+    },
+    {
+      "id": "corruption_cleanse_plus_mutation_race_trait_plus_purify",
+      "name": "Mutación purificada",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "run_corruption_cleanse",
+          "run_mutation_race_trait",
+          "exotic_sacred_purify"
+        ],
+        "condition": "corruption_cleansed_while_race_trait_mutation_active_purify_applied"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "run_mutation_positive",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": -1
+          },
+          {
+            "vectorId": "heal_state_cleanse",
+            "magnitude": "high",
+            "target": "self",
+            "durationTurns": 0
+          }
+        ],
+        "secondary": "race_trait_mutation_becomes_permanent_positive_instead_of_random",
+        "secondary_2": "all_active_curses_in_run_reduced_by_1_severity_tier",
+        "rare_trigger": true
+      },
+      "design_notes": "Limpiar la corrupción mientras una mutación racial está activa y luego purificar el proceso estabiliza la mutación como positiva permanente. Normalmente las mutaciones raciales son aleatorias (pueden ser negativas); este combo garantiza que la que está activa se fija como beneficiosa. Los tres vectores son de categorías completamente distintas: meta-run + meta-run + exótico-sagrado. Es el combo de meta-progresión más poderoso: convertir la aleatoriedad de la mutación en certeza."
+    },
+    {
+      "id": "magic_trail_plus_flare_plus_reveal_hidden",
+      "name": "Rastro de delación mágica",
+      "trigger": {
+        "type": "vectors_sequential_setup_trigger",
+        "vectors": [
+          "stealth_trail_magical",
+          "light_increase_flare",
+          "light_mark_reveal_hidden"
+        ],
+        "condition": "magical_trail_active_flare_ignites_it_revealing_trail_owner"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "light_mark_reveal_hidden",
+            "magnitude": "extreme",
+            "target": "trail_owner",
+            "durationTurns": 3
+          },
+          {
+            "vectorId": "stealth_break",
+            "magnitude": "high",
+            "target": "trail_owner",
+            "durationTurns": 0
+          }
+        ],
+        "secondary": "flare_ignites_magical_trail_creating_luminous_path_to_hidden_entity",
+        "works_against": [
+          "shadow_spectre",
+          "status_stealth_active_any_entity"
+        ]
+      },
+      "design_notes": "Los rastros mágicos son invisibles en condiciones normales pero reaccionan a la energía lumínica. Una bengala sobre un rastro mágico lo ilumina completamente, trazando un camino brillante hasta la entidad oculta y cancelando su sigilo. Contramedida específica contra Sombras y Espectros que dejan rastros mágicos al moverse en modo sigilo. El jugador que aprende en el Codex que las Sombras dejan rastros mágicos puede preparar bengalas para revelarlas. Asimetría de información como mecánica central."
+    },
+    {
+      "id": "foreign_parasite_plus_age_decay_plus_necrosis_spread",
+      "name": "Infestación necrótica acelerada",
+      "trigger": {
+        "type": "vectors_all_active_same_entity",
+        "vectors": [
+          "physical_internal_foreign_parasite",
+          "exotic_temporal_age_decay",
+          "elemental_poison_necrosis_spread"
+        ],
+        "condition": "entity_has_parasite_active_temporal_decay_applied_necrosis_spreading"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "elemental_poison_necrosis_bone_rot",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": 5
+          },
+          {
+            "vectorId": "stat_reduce_hp_max_major",
+            "magnitude": "extreme",
+            "target": "self",
+            "durationTurns": -1
+          }
+        ],
+        "secondary": "parasite_accelerated_by_decay_consumes_host_at_double_rate",
+        "secondary_2": "entity_killed_by_this_combo_cannot_be_raised_as_undead",
+        "affects": "organic_entities_only",
+        "cure_requirement": "heal_state_physical_magnitude_extreme_within_3_turns"
+      },
+      "design_notes": "El parásito interno consume al huésped; la decadencia temporal acelera el proceso décadas en turnos; la necrosis en expansión convierte el tejido consumido en masa necrótica activa. El HP máximo cae de forma permanente e irreversible sin curación de emergencia en 3 turnos. El detalle más oscuro: la entidad muerta por este combo no puede levantarse como No-Muerto (la necrosis total destruye la cohesión estructural necesaria). Aplica la temática de horror corporal del sistema de vectores internos al máximo."
+    },
+    {
+      "id": "gravity_crush_plus_pull_radial_plus_burn_progressive",
+      "name": "Pira gravitacional",
+      "trigger": {
+        "type": "vectors_simultaneous_in_area",
+        "vectors": [
+          "exotic_gravity_crush_field",
+          "movement_forced_pull_radial",
+          "elemental_fire_flame_persistent"
+        ],
+        "condition": "crush_field_and_radial_pull_active_in_zone_with_persistent_fire"
+      },
+      "effect": {
+        "produces_vectors": [
+          {
+            "vectorId": "status_burn_progressive",
+            "magnitude": "extreme",
+            "target": "area",
+            "areaRadius": 3,
+            "durationTurns": 4
+          },
+          {
+            "vectorId": "physical_external_crush_stomp",
+            "magnitude": "high",
+            "target": "area",
+            "areaRadius": 3,
+            "durationTurns": 0
+          }
+        ],
+        "secondary": "entities_in_zone_cannot_escape_pull_while_crush_field_active",
+        "secondary_2": "burn_progressive_ticks_faster_under_gravity_pressure"
+      },
+      "design_notes": "El campo gravitacional de aplastamiento comprime a las entidades hacia el centro; la atracción radial refuerza la retención en la zona; el fuego persistente las abrasa sin posibilidad de huida. La sinergia clave: la gravedad intensificada hace que el fuego queme más profundamente (burns_progressive amplificado). Tres categorías completamente distintas: exótico-gravitacional + movimiento-forzado + elemental-fuego. El Constructo Golem puede generar crush_field como comportamiento innato; combinado con fuego ambiental (antorchas) y un hechizo de atracción del Mago, la sala se convierte en una trampa de muerte sin salida."
+    }
+  ],
   "race_resistances": {},
   "unique_buffs": [],
   "additional_proposals": []
