@@ -24003,5 +24003,1326 @@
       "design_notes": "Tier 3 + noCycling: el buff de run definitorio del Guerrero. Resist_25 base es modesto pero el primer golpe negado automáticamente por combate es enormemente valioso en combate por turnos: absorber el primer ataque de sorpresa del enemigo. Los kills como stacks de acumulación incentivan el estilo agresivo del Guerrero. La vulnerabilidad a drenaje de memoria es el contrajuego temático: sus recuerdos de batalla son el recurso que puede ser robado."
     }
   ],
-  "additional_proposals": []
+  "additional_proposals": [
+    {
+      "id": "elemental_steam_scald",
+      "name": "Escaldadura de vapor",
+      "description": "Vapor a alta temperatura en contacto con el receptor. A diferencia del fuego directo, el vapor penetra armaduras y ranuras ya que no es sólido. Cubre un área reducida durante 2-3 turnos. Reduce la visibilidad en la zona afectada a 0 mientras persiste.",
+      "generators": [
+        "Caldera o conducto roto en sala (interactuable de entorno)",
+        "Combinación de agua + fuego en el mismo tile (reacción emergente)",
+        "Hechizo del Mago de tier 2 (Steam Burst)",
+        "Barril de agua volcado sobre superficie ardiendo"
+      ],
+      "receptors_affected": [
+        "Criaturas orgánicas con piel expuesta",
+        "Armaduras metálicas (el calor se transmite al portador)",
+        "Slimes (el calor parcial los afecta sin congelarlos)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Constructo de piedra (inerte al calor húmedo)",
+          "level": "immune"
+        },
+        {
+          "trait": "Sombra / Espectro (sin cuerpo físico que escaldar)",
+          "level": "immune"
+        },
+        {
+          "trait": "Esqueleto (sin tejido blando que quemar)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Buff de resistencia al fuego activo",
+          "level": "resist_50"
+        },
+        {
+          "trait": "Levitación (el vapor asciende pero menos concentrado)",
+          "level": "resist_25"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre fuego y agua: el vapor no arde ni moja pero quema e impide visión. La reducción de visibilidad crea una zona táctica de niebla de guerra que beneficia al sigilo. Interesante para el Pícaro: usar una caldera rota como cobertura visual.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "elemental_electric_magnetic_pulse",
+      "name": "Pulso magnético",
+      "description": "Descarga de energía electromagnética que no daña directamente pero desestabiliza campos magnéticos y sistemas eléctricos en el área. Desarma temporalmente trampas eléctricas, desactiva constructos 1 turno, y hace que objetos metálicos pequeños salgan disparados.",
+      "generators": [
+        "Sobrecarga de runa eléctrica (elemental_electric_overload_rune como efecto secundario)",
+        "Hechizo del Mago de tier 2 (EMP Pulse: utilidad pura, sin daño directo)",
+        "Constructo Golem de Metal al ser destruido (pulso de muerte)"
+      ],
+      "receptors_affected": [
+        "Constructos y Golems (desactivación temporal)",
+        "Trampas y mecanismos con componente eléctrico",
+        "Entidades con equipamiento metálico (objetos salen disparados)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Entidades orgánicas sin metal (sin efecto directo)",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo de piedra (sin componente metálico)",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo de metal (vulnerable a pulso EM)",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "trait": "Esqueleto (sin componente eléctrico)",
+          "level": "resist_75"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre eléctrico como daño y eléctrico como utilidad. El EMP permite neutralizar temporalmente un Golem de Metal sin destruirlo, crear una ventana de acción de 1 turno. Muy específico pero enormemente valioso en el contexto correcto.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "elemental_acid_mist_cloud",
+      "name": "Niebla ácida",
+      "description": "Nube de micropartículas ácidas suspendidas en el aire. Daño muy bajo por turno pero cubre un área de 3x3 tiles y dura 4 turnos. Corroe lentamente el equipamiento metálico de todo lo que esté dentro. Diferente al splash (puntual e instantáneo) y al pool (solo en suelo).",
+      "generators": [
+        "Slime Ácido destruido (explosión de contenido interno)",
+        "Hechizo del Mago de tier 2 (Acid Fog)",
+        "Barril de ácido destruido con impacto explosivo",
+        "terrain_fluid_place_acid + elemental_air_vortex (el vórtice levanta el ácido)"
+      ],
+      "receptors_affected": [
+        "Criaturas orgánicas en el área (corrosión continua de piel)",
+        "Equipamiento metálico (degradación acumulativa)",
+        "Entidades con heridas abiertas (el ácido entra por las heridas)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Slime Ácido (su hábitat natural)",
+          "level": "heal"
+        },
+        {
+          "trait": "Levitación (sigue en la nube, sin inmunidad)",
+          "level": "normal"
+        },
+        {
+          "trait": "Sombra / Espectro (sin superficie física)",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo de piedra (el ácido actúa pero muy lento)",
+          "level": "resist_50"
+        },
+        {
+          "trait": "Máscara o protección facial (bloquea inhalación)",
+          "level": "resist_75"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre ácido instantáneo (splash) y ácido de suelo (pool). La niebla ácida es la versión de zona de denegación del ácido. Especialmente relevante al destruir al Slime Ácido: su muerte crea el peligro más grande del combate.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "elemental_sonic_subsonic_wave",
+      "name": "Onda subsónica",
+      "description": "Vibración por debajo del umbral auditivo consciente. No se oye pero se siente: náusea, desorientación espacial y pérdida de equilibrio. A diferencia del sónico audible, no destruye estructuras; afecta principalmente al sistema vestibular de criaturas orgánicas.",
+      "generators": [
+        "Hechizo del Mago de tier 2 (Subsonic Pulse)",
+        "Mecanismo de trampa de sala especial (generador de vibración subsónica)",
+        "Constructo de resonancia enemigo (futuro: boss de sala sónica)"
+      ],
+      "receptors_affected": [
+        "Criaturas orgánicas con oído interno (desorientación garantizada)",
+        "Goblin (especialmente sensible por su tamaño y anatomía del oído)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Constructo (sin sistema vestibular)",
+          "level": "immune"
+        },
+        {
+          "trait": "Esqueleto (sin fluido interno que vibre)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (masa amorfa sin oído interno)",
+          "level": "immune"
+        },
+        {
+          "trait": "Sombra / Espectro (sin física orgánica)",
+          "level": "immune"
+        },
+        {
+          "trait": "Buff de Voluntad de Hierro (la concentración mental mitiga la desorientación)",
+          "level": "resist_50"
+        }
+      ],
+      "design_notes": "El sónico ya tiene lethal_wave (destructor) y shatter (rompe estructuras). El subsónico cubre el hueco del sónico de control: nauseabundo, desorientador, pero no letal. Solo afecta a lo orgánico. La Cazadora con anatomía élfica podría ser extremamente vulnerable (futura mecánica de raza jugadora).",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "elemental_light_prismatic_burst",
+      "name": "Explosión prismática",
+      "description": "La luz se descompone en sus componentes cromáticos y cada uno afecta de forma diferente. El receptor recibe simultáneamente: daño de luz (rojo/infrarrojo), confusión de profundidad (verde), y ceguera parcial (violeta/ultravioleta). Duración muy corta pero efecto triple garantizado.",
+      "generators": [
+        "Hechizo del Mago de tier 3 (Prismatic Ray: el más complejo de los hechizos de luz)",
+        "Cristal de prism destruido en sala (prop especial de sala de torre/biblioteca)",
+        "Combinación de elemental_light_radiant_burst + elemental_light_blinding_damage simultáneos"
+      ],
+      "receptors_affected": [
+        "Cualquier entidad con sistema visual activo",
+        "Sombras/Espectros (triple vulnerable: todo el espectro las daña)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Sombra / Espectro (todo el espectro la daña, triple efecto)",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "trait": "Constructo sin sensores ópticos",
+          "level": "immune"
+        },
+        {
+          "trait": "Ciego o sin ojos (esqueleto sin globos oculares)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Visión Nocturna activa (amplificación → más daño de flash)",
+          "level": "vulnerable"
+        }
+      ],
+      "design_notes": "Cubre el hueco de luz como vector de control múltiple en un solo vector. La triple penalización lo hace memorablemente impactante en el primer uso. El tier 3 del hechizo está justificado por la triple aplicación simultánea. Requiere un Mago con INT muy alta para ejecutarlo.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "elemental_fire_napalm_adhesive",
+      "name": "Fuego napalm adhesivo",
+      "description": "Fuego que se adhiere a la superficie del receptor y no puede ser apagado con agua estándar. A diferencia del fuego normal, el napalm requiere sofocación activa (arena, barro, remoción física de la capa ardiente) para extinguirse. Quema progresivamente más mientras esté activo.",
+      "generators": [
+        "Barril de napalm destruido (prop especial de sala avanzada)",
+        "Hechizo del Mago de tier 3 (Napalm Coat: coste alto, efecto devastador)",
+        "Goblin Chamán con receta de fuego especial (variante futura)"
+      ],
+      "receptors_affected": [
+        "Cualquier superficie orgánica o combustible",
+        "Armaduras metálicas (el napalm sella las ranuras y conduce calor)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Sombra / Espectro (sin superficie física a la que adherirse)",
+          "level": "immune"
+        },
+        {
+          "trait": "Agua (no extingue napalm, penalización normal)",
+          "level": "normal"
+        },
+        {
+          "trait": "Barro o arena activa (sofoca el napalm, extingue tras 1 turno)",
+          "level": "immune"
+        },
+        {
+          "trait": "Inmunidad al fuego (buff de tier 3)",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo de piedra (el napalm arde sobre la superficie pero no penetra)",
+          "level": "resist_75"
+        }
+      ],
+      "design_notes": "Cubre el hueco del fuego que no se apaga con el counter obvio (agua). Invierte la expectativa del jugador: el agua no funciona aquí. El barro (fluid_mud_thick, B4 vector 16) es la respuesta inesperada. Aprendizaje de Codex memorable: 'el napalm no se apaga con agua'.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "elemental_cold_permafrost_create",
+      "name": "Creación de permafrost",
+      "description": "Congela el tile de terreno de forma permanente para el combate (o para la sala si la fuente es estructural). A diferencia de frost_surface (temporal), el permafrost no se deshiela con calor moderado: requiere un vector de fuego de magnitud extreme para revertirlo. Cualquier entidad en el tile sufre cold_status_chilled de forma continua.",
+      "generators": [
+        "Hechizo del Mago de tier 3 (Permafrost: modifica el terreno de forma semi-permanente)",
+        "Constructo de hielo (enemigo futuro) como habilidad de zona",
+        "Combinación de elemental_cold_freeze_solid sostenido 3 turnos en el mismo tile"
+      ],
+      "receptors_affected": [
+        "El tile de terreno afectado (cambio permanente de estado de terreno)",
+        "Cualquier entidad que entre al tile (continua aplicación de chilled)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Levitación (el receptor no toca el suelo)",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo de piedra (el frío no le afecta pero ralentiza su movimiento)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Sombra / Espectro (levitación innata)",
+          "level": "immune"
+        },
+        {
+          "trait": "Buff Manto de Brasas activo",
+          "level": "resist_75"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre frío temporal y modificación permanente de terreno. El permafrost como control de sala duradera es una herramienta táctica diferente: el Mago puede convertir una sala en un campo de batalla inhóspito para los enemigos orgánicos antes de que entren.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "elemental_earth_quicksand",
+      "name": "Arena movediza",
+      "description": "El suelo bajo el receptor se convierte en arena movediza o terreno inestable que engulle lentamente. Cada turno que el receptor no actúa para escapar, se hunde 1 nivel (lento → inmovilizado → engullido). Los No-Muertos ligeros (esqueletos) son especialmente susceptibles por su masa distribuida.",
+      "generators": [
+        "Hechizo del Mago de tier 2 (Earthen Grip)",
+        "elemental_earth_tremor prolongado que licua el suelo",
+        "Trampa de sala especial (suelo de arena con activador de placa de presión)"
+      ],
+      "receptors_affected": [
+        "Cualquier entidad en contacto con el suelo afectado",
+        "Entidades de alta masa (se hunden más rápido por peso)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Levitación (sin contacto con el suelo)",
+          "level": "immune"
+        },
+        {
+          "trait": "Sombra / Espectro (levitación innata)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (masa adaptable que no se hunde igual)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Constructo de metal (muy pesado: se hunde extra rápido)",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "trait": "Anclaje activo (paradoja: anclado al suelo que se mueve, engullido más rápido)",
+          "level": "vulnerable"
+        }
+      ],
+      "design_notes": "El Anclaje como vulnerabilidad es el detalle de diseño más sorprendente: quedarse quieto en arena movediza acelera el hundimiento. La paradoja anclaje-quicksand crea un dilema táctico memorable. El Golem de Metal frente a quicksand es una muerte casi automática si no hay Mago aliado.",
+      "implementation_note": "needs_research"
+    },
+    {
+      "id": "physical_internal_crystallization",
+      "name": "Cristalización interna",
+      "description": "Los fluidos internos del receptor se cristalizan por frío extremo aplicado de forma sostenida. A diferencia del freeze_solid (congelación externa), la cristalización ocurre desde dentro. Daño interno masivo al descongelarse. El receptor cristalizado es extraordinariamente frágil a impactos contundentes.",
+      "generators": [
+        "elemental_cold_freeze_solid aplicado 3 turnos consecutivos en el mismo receptor",
+        "Hechizo del Mago de tier 3 (Internal Frost: apunta a fluidos internos, no a la superficie)",
+        "Inmersión en permafrost_create durante 3+ turnos"
+      ],
+      "receptors_affected": [
+        "Criaturas orgánicas con fluidos internos (sangre, linfa, humores)",
+        "Slimes (toda su masa se cristaliza: catastrófico)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Constructo (sin fluidos orgánicos internos)",
+          "level": "immune"
+        },
+        {
+          "trait": "Esqueleto (sin fluidos internos relevantes)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (toda la masa es fluido: cristalización total)",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "trait": "Buff Manto de Brasas (el calor externo previene la cristalización interna)",
+          "level": "immune"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre frío como congelación superficial y frío como destrucción interna. La fase de descongelación es deliberadamente peligrosa: el daño real llega al deshielo, no al congelamiento. Un Slime cristalizado que recibe fuego explota con sus propios cristales como shrapnel.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "physical_structural_ceiling_collapse",
+      "name": "Derrumbe de techo",
+      "description": "El techo o una sección de él colapsa sobre las entidades en la zona afectada. A diferencia del floor_collapse (crea un hoyo que cae), el ceiling_collapse cae sobre las entidades desde arriba. El escombro cubre los tiles y crea terreno difícil + obstáculo. Potencial de kill instantáneo si la masa es alta.",
+      "generators": [
+        "physical_structural_pillar_collapse de un pilar que sostenía el techo",
+        "elemental_earth_seismic_wave de magnitud extreme en sala con estructura comprometida",
+        "Trampa de sala especial (mecanismo de detonación que colapsa el techo de una sección)",
+        "elemental_sonic_lethal_wave + physical_structural_wall_crack previo en puntos de apoyo"
+      ],
+      "receptors_affected": [
+        "Cualquier entidad en los tiles bajo la sección colapsada",
+        "Los tiles afectados (quedan cubiertos de escombros: terrain_obstacle_debris_pile)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Levitación (en el aire, el escombro la alcanza igual)",
+          "level": "normal"
+        },
+        {
+          "trait": "Sombra / Espectro (forma etérea: los escombros pasan a través)",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo de piedra de alta masa (resiste el impacto del derrumbe)",
+          "level": "resist_50"
+        },
+        {
+          "trait": "Anclaje activo (clavado al suelo: el derrumbe lo aplasta con más severidad)",
+          "level": "vulnerable"
+        }
+      ],
+      "design_notes": "Cubre el hueco de la dimensión vertical en el sistema estructural. El floor_collapse crea pozos; el ceiling_collapse crea montones. La mecánica de Anclaje como vulnerabilidad al ceiling (no puede esquivar si está clavado) es temáticamente coherente y tácticamente interesante.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "physical_external_chain_strike",
+      "name": "Golpe de cadena con alcance",
+      "description": "Ataque con cadena, látigo o arma de alcance extendido que permite golpear a 2 tiles de distancia y puede enredar al receptor. Si el golpe impacta, hay probabilidad de aplicar status_immobile_entangled. El atacante puede usar la cadena para atraer al receptor 1 tile hacia sí.",
+      "generators": [
+        "Esqueleto Guerrero con cadenas de sus grilletes (variante especial)",
+        "Habilidad del Pícaro con látigo (futuro arma de clase)",
+        "Constructo Golem con brazos de cadena (variante futura)"
+      ],
+      "receptors_affected": [
+        "Cualquier entidad en rango de 2 tiles",
+        "Props pequeños (puede enganchar y mover objetos del entorno)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Sombra / Espectro (forma etérea: la cadena pasa a través)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (la cadena se hunde en la masa sin engancharse bien)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Anclaje activo (no puede ser arrastrado)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Entidades de alta masa (la atracción de 1 tile no aplica)",
+          "level": "resist_50"
+        }
+      ],
+      "design_notes": "Cubre el hueco de melee extendido con control. La cadena como arma que puede mover props (enganchar un barril y arrastrarlo hacia el jugador) añade interactividad de entorno a un vector de ataque estándar. El Esqueleto con sus cadenas de prisionero es flavor coherente con el lore.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "physical_structural_mechanism_jam",
+      "name": "Atasco de mecanismo",
+      "description": "Un mecanismo o dispositivo complejo queda bloqueado e inutilizable temporalmente. Aplica a puertas, palancas, trampas, catapultas de sala o cualquier interactuable mecánico. Diferente a lock_break (destruye el mecanismo): el atasco es temporal y reversible con la acción adecuada.",
+      "generators": [
+        "Impacto físico impreciso sobre un mecanismo delicado (acción de Inspeccionar mal ejecutada)",
+        "Fluido viscoso (fluid_tar, fluid_bile_adhesive) aplicado sobre un mecanismo",
+        "elemental_cold_freeze_touch sobre un mecanismo con partes móviles",
+        "Habilidad de sabotaje del Pícaro (Jam Mechanism)"
+      ],
+      "receptors_affected": [
+        "Mecanismos de puertas, trampas, palancas y interactuables mecánicos",
+        "Constructo Golem (sus articulaciones pueden atascarse)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Mecanismo de construcción mágica (no mecánica pura)",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo de magia pura (sin partes mecánicas)",
+          "level": "immune"
+        },
+        {
+          "trait": "Mecanismo de engranajes simples (más fácil de desatascar)",
+          "level": "vulnerable"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre 'destruir mecanismo' y 'mecanismo funciona'. El atasco como herramienta táctica del Pícaro: bloquear la trampa que el enemigo intentará activar, o bloquear la puerta de refuerzo que llegarán aliados enemigos. La reversibilidad lo distingue de object_break.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "physical_external_headbutt",
+      "name": "Cabezazo",
+      "description": "Impacto de la cabeza o parte superior del cuerpo contra el receptor a corta distancia. Daño bajo pero probabilidad alta de aplicar status_stagger y una pequeña cantidad de daño al atacante (también se golpea). Los receptores con armadura de cabeza mitigan el efecto. Especialmente efectivo para romper guardias.",
+      "generators": [
+        "Habilidad del Errante (Headbutt: ataque de cuerpo cuando no hay arma disponible)",
+        "Constructo Golem de piedra con cabeza de ariete (variante futura)",
+        "Goblin desesperado sin arma"
+      ],
+      "receptors_affected": [
+        "Cualquier entidad orgánica o con cabeza definida",
+        "Escudos (el headbutt puede romper la postura de shield_block)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Esqueleto (el cráneo sin músculo no transmite shock)",
+          "level": "resist_50"
+        },
+        {
+          "trait": "Slime (la masa absorbe el impacto sin stagger)",
+          "level": "immune"
+        },
+        {
+          "trait": "Sombra / Espectro (sin cuerpo físico)",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo de piedra (el headbutt daña al atacante más que al receptor)",
+          "level": "immune"
+        },
+        {
+          "trait": "Casco de armadura pesada (absorbe el impacto de cabeza)",
+          "level": "resist_75"
+        }
+      ],
+      "design_notes": "El Errante sin arma tiene puños como vector innato. El headbutt es su alternativa de apertura o de ruptura de guardia. El auto-daño lo hace una decisión táctica, no un recurso trivial. Sabor mecánico correcto para la fantasía del bárbaro sin armadura.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "fluid_tar_viscous",
+      "name": "Alquitrán viscoso",
+      "description": "Fluido negro, denso y pegajoso que se adhiere a superficies y entidades. Ralentiza el movimiento drasticamente (status_slow_major automático). Al contacto con cualquier fuente de fuego, arde con mayor intensidad y duración que el aceite. No se disuelve con agua.",
+      "generators": [
+        "Depósito de alquitrán destruido (prop de sala de mazmorra profunda)",
+        "Trampa de sala especial (chorros de alquitrán desde el techo)",
+        "Criatura especializada en exudar alquitrán (futuro: enemigo de bioma específico)"
+      ],
+      "receptors_affected": [
+        "Cualquier superficie de suelo (crea terreno dificultoso persistente)",
+        "Entidades en el tile (slow_major inmediato + adhesión al suelo)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Levitación (sin contacto con el suelo)",
+          "level": "immune"
+        },
+        {
+          "trait": "Sombra / Espectro (forma etérea)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (el alquitrán no se adhiere a la masa gelatinosa)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Constructo de metal (el alquitrán se adhiere, ralentiza)",
+          "level": "vulnerable"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre aceite (combustible ligero) y algo realmente pegajoso. El alquitrán como terreno de control de movimiento severo + multiplicador de fuego es la combinación más poderosa de setup de terreno del sistema. La trampa del techo de alquitrán + antorcha = muerte para lo que entre.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "fluid_mercury_toxic",
+      "name": "Mercurio tóxico",
+      "description": "Metal líquido de alta densidad y toxicidad acumulativa. Los tiles de mercurio ralentizan por peso pero no impiden el paso. La exposición continua acumula mercurio en el sistema (máximo 5 stacks), y al stack 5 aplica un debuff neurológico severo permanente para el combate.",
+      "generators": [
+        "Termómetro gigante o instrumento de medición destruido (prop de sala de laboratorio)",
+        "Trampa de sala especial (suelo de mercurio en sala sellada)",
+        "Hechizo alquímico de Mago de tier 3 (Mercury Flood: raro y costoso)"
+      ],
+      "receptors_affected": [
+        "Criaturas orgánicas (acumulación neurológica)",
+        "Constructo de metal (el mercurio disuelve aleaciones y corroe componentes)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Levitación (sin contacto)",
+          "level": "immune"
+        },
+        {
+          "trait": "Sombra / Espectro (sin sistema nervioso)",
+          "level": "immune"
+        },
+        {
+          "trait": "Esqueleto (sin sistema nervioso activo)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (el mercurio se mezcla con la masa sin efectos neurológicos)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Constructo de piedra (resistente a corrosión por metal líquido)",
+          "level": "resist_50"
+        }
+      ],
+      "design_notes": "Cubre el hueco de veneno acumulativo lento con umbral de toxicidad. A diferencia del veneno estándar (efecto desde el primer tick), el mercurio requiere acumulación. Incentiva al jugador a salir del tile antes de alcanzar el stack 5. El Mago aliado que inunda con mercurio debe respetar que él también acumula stacks si entra.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "fluid_mud_thick",
+      "name": "Barro denso",
+      "description": "Barro espeso que cubre el suelo y adhiere el movimiento. Aplica status_slow_minor continuo y atenúa el fuego (un tile de barro en llamas reduce la magnitud del fuego en 1 nivel). Al congelarse, crea una superficie de barro helado con propiedades mixtas de suelo resbaladizo + barro adhesivo.",
+      "generators": [
+        "Agua + tierra/arena en el mismo tile (reacción emergente de entorno)",
+        "Hechizo del Mago de tier 1 (Mudslide: barato, utilidad de control)",
+        "Derrumbe de tierra parcial con agua presente"
+      ],
+      "receptors_affected": [
+        "Cualquier entidad en contacto con el suelo",
+        "Fuentes de fuego en la zona (atenuación)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Levitación",
+          "level": "immune"
+        },
+        {
+          "trait": "Sombra / Espectro (levitación innata)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (el barro es su ambiente natural)",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo de metal (el barro obstruye sus articulaciones)",
+          "level": "vulnerable"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre los fluidos existentes: más versátil que el aceite (no combustible), más barato que el napalm, con la interacción fuego-atenuación única. El barro helado como estado emergente (barro + frío) es el vector compuesto más accesible del catálogo para el Mago de tier 1.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "fluid_steam_burst_cloud",
+      "name": "Nube de vapor explosivo",
+      "description": "Liberación súbita de vapor a presión extrema. A diferencia de elemental_steam_scald (gradual), este es instantáneo y de alta presión: empuja físicamente a las entidades además de escaldarlas. Puede activar mecanismos de presión y destapar conductos sellados.",
+      "generators": [
+        "Caldera o recipiente de presión que explota (interactuable destruido)",
+        "Combinación de water_hydraulic_impact + fuente de calor en espacio cerrado",
+        "Trampa de sala especial (cañón de vapor)"
+      ],
+      "receptors_affected": [
+        "Entidades en el área de liberación",
+        "Mecanismos de presión y conductos (activación mecánica)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Sombra / Espectro (sin superficie física)",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo de piedra (inerte al vapor caliente)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Esqueleto (sin tejido que escaldar)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Levitación (el vapor la empuja más por menor masa)",
+          "level": "vulnerable"
+        }
+      ],
+      "design_notes": "Versión explosiva de elemental_steam_scald. La clave de diseño es el empuje físico: combina calor con movimiento forzado en un solo vector instantáneo. Las calderas como trampas activas de entorno son una de las mecánicas más interactivas de salas industriales futuras.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "terrain_hazard_spike_floor",
+      "name": "Suelo de pinchos",
+      "description": "Área del suelo cubierta de pinchos fijos o semi-ocultos. Cualquier entidad que entre al tile recibe daño de pierce_light automáticamente y puede aplicar bleed_minor. Los pinchos son visibles si hay suficiente luz; ocultos en oscuridad. Pueden ser cubiertos con escombros para neutralizarlos.",
+      "generators": [
+        "Trampa de sala fija (preset de sala: pinchos instalados en el suelo)",
+        "terrain_trap_set en una variante de suelo de pinchos extensivo",
+        "Estalactitas caídas de techo que crean un campo de pinchos (ceiling_collapse sobre suelo blando)"
+      ],
+      "receptors_affected": [
+        "Cualquier entidad que se desplace por el tile",
+        "Entidades empujadas hacia el tile (el empuje hacia pinchos es letal)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Levitación (sin contacto con el suelo)",
+          "level": "immune"
+        },
+        {
+          "trait": "Sombra / Espectro (forma etérea, sin materialidad)",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo de metal (los pinchos no penetran la carcasa metálica)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (los pinchos se clavan pero sin efecto de sangrado)",
+          "level": "resist_50"
+        },
+        {
+          "trait": "Armadura de placas (la suela protegida reduce el daño)",
+          "level": "resist_75"
+        }
+      ],
+      "design_notes": "Cubre el hueco de trampa de suelo permanente (vs terrain_trap_set que es colocada, los pinchos son parte del diseño de sala). El empuje hacia pinchos es la mecánica clave: un push_heavy hacia un campo de pinchos convierte un empuje normal en una ejecución.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "terrain_hazard_pendulum_arc",
+      "name": "Péndulo de arco",
+      "description": "Trampa mecánica de sala: una cuchilla o masa pesada oscila en un arco predefinido. Activa de forma cíclica (1 golpe por turno en su arco). Las entidades en el arco de oscilación reciben el golpe si no se mueven. Puede ser detenida empujando un objeto en su mecanismo o con sound_vibration_mechanism_trigger.",
+      "generators": [
+        "Trampa de sala especial (trampa arquitectónica instalada: no se puede 'crear')",
+        "Mecanismo activado por elemental_earth_tremor o sound_vibration_mechanism_trigger"
+      ],
+      "receptors_affected": [
+        "Entidades en los tiles del arco de oscilación cada turno",
+        "Props en el arco (los destruye si son destructibles)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Sombra / Espectro (forma etérea)",
+          "level": "immune"
+        },
+        {
+          "trait": "Levitación (por encima del arco si es bajo)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "status_fortified_stance activo (absorbe el golpe)",
+          "level": "resist_50"
+        },
+        {
+          "trait": "Slime (el impacto la divide en vez de dañarla como daño bloq)",
+          "level": "normal"
+        }
+      ],
+      "design_notes": "Cubre el hueco de trampa de sala con ciclo predecible que el jugador puede aprender. El péndulo crea una zona de control de movimiento: los enemigos también deben evitarlo. El jugador puede usar el péndulo como aliado si empuja a un enemigo hacia su arco. Inspirado en Zelda clásico: trampa con ritmo.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "terrain_environmental_void_pocket",
+      "name": "Bolsillo del vacío",
+      "description": "Un pequeño pliegue del plano dimensional materializado en el terreno. El tile parece vacío pero al entrar, la entidad es expulsada a 2 tiles en dirección aleatoria. Los objetos tirados al tile desaparecen (destruidos o enviados a otro plano). Persiste hasta ser sellado con exotic_sacred_purify.",
+      "generators": [
+        "exotic_dimensional_rift_tear mal ejecutado o descontrolado",
+        "Interactuable de sala especial (grieta dimensional: props de sala de torre arcana)"
+      ],
+      "receptors_affected": [
+        "Cualquier entidad o objeto que entre al tile",
+        "Fluidos (son absorbidos por el bolsillo, limpiando el tile de fluidos)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Sombra / Espectro (en parte dimensional: navega el bolsillo sin ser expulsada)",
+          "level": "immune"
+        },
+        {
+          "trait": "Levitación (si el portal está en el suelo, la levitación lo evita)",
+          "level": "immune"
+        },
+        {
+          "trait": "Anclaje activo (la expulsión no aplica pero la entidad queda atrapada en el tile)",
+          "level": "vulnerable"
+        }
+      ],
+      "design_notes": "Cubre el hueco de hazard dimensional de terreno. La absorción de fluidos es la mecánica más útil tácticamente: se puede usar el bolsillo del vacío para limpiar un charco de ácido o aceite. El anclaje como vulnerable es el giro de diseño: anclado en un bolsillo dimensional = queda atrapado.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "terrain_environmental_sacred_ground",
+      "name": "Suelo sagrado permanente",
+      "description": "Un tile de terreno que ha sido consagrado de forma permanente (o que era sagrado antes de la corrupción de la mazmorra). Los vectores oscuros y de corrupción tienen magnitud reducida en este tile. Las entidades de No-Muertos sufren daño menor pasivo por turno al pisarlo. No puede ser profanado por acciones de combate.",
+      "generators": [
+        "Altar sagrado intacto (radio de efecto en los tiles adyacentes)",
+        "buff_holy_consecration_aura mantenido 5+ turnos en el mismo tile (lo marca permanentemente)",
+        "Prop de sala especial (relicario, suelo bendecido desde la construcción original)"
+      ],
+      "receptors_affected": [
+        "Los tiles afectados (modificación permanente de terreno)",
+        "No-Muertos en esos tiles (daño pasivo continuo)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "exotic_dark_desecrate aplicado (neutraliza el suelo sagrado durante 3 turnos)",
+          "level": "vulnerable"
+        },
+        {
+          "trait": "Entidades no-No-Muertos (el suelo sagrado no les afecta negativamente)",
+          "level": "immune"
+        }
+      ],
+      "design_notes": "Cubre el hueco de modificación de terreno sagrado persistente (vs el aura de combate del buff). El suelo sagrado permanente como elemento de sala invierte la dinámica habitual: las Sombras evitan activamente esas zonas, el jugador puede forzarlas hacia ellas. Base para futuras mecánicas de sala de santuario.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "terrain_environmental_cursed_ground",
+      "name": "Suelo maldito permanente",
+      "description": "Un tile de terreno permanentemente profanado. Los vectores sagrados y de curación tienen su magnitud reducida en 1 nivel en este tile. Los No-Muertos recuperan 1 HP por turno al estar en él. Persiste hasta exotic_sacred_purify de magnitud extreme o run_corruption_cleanse.",
+      "generators": [
+        "exotic_dark_desecrate mantenido 5+ turnos en el mismo tile",
+        "Altar profanado (el tile central queda permanentemente maldito)",
+        "Boss de mazmorra con aura de profanación como efecto de sala"
+      ],
+      "receptors_affected": [
+        "Los tiles afectados",
+        "No-Muertos en esos tiles (regeneración pasiva)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Entidades oscuras y No-Muertos (el suelo los potencia, no los daña)",
+          "level": "heal"
+        },
+        {
+          "trait": "Entidades vivientes orgánicas (el suelo las debilita sutilmente)",
+          "level": "vulnerable"
+        }
+      ],
+      "design_notes": "El contrapunto de sacred_ground. El Esqueleto Mago que desacraliza su arena combativa de forma persistente convierte la sala en un campo de batalla donde él regenera cada turno. El jugador que lee el Codex debe reconocer el tile maldito como prioridad de eliminación antes que al propio Mago.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "status_disease_spreading",
+      "name": "Enfermedad contagiosa",
+      "description": "A diferencia del veneno (introducido externamente), la enfermedad se replica en el huésped y puede transmitirse. Si una entidad con esta enfermedad activa ataca a un receptor orgánico en melee, hay probabilidad de transmisión. Progresa por stages: stage 1 (reducción leve de stats) → stage 2 (status_slow) → stage 3 (fiebre: confusión + daño por turno).",
+      "generators": [
+        "Criatura enferma que ataca (Goblin portador de plaga, variante futura)",
+        "Entorno contaminado (sala de aguas residuales, cadáver no No-Muerto en descomposición)",
+        "Hechizo de nigromante enemigo (Plague Touch: implanta la enfermedad directamente)"
+      ],
+      "receptors_affected": [
+        "Criaturas orgánicas exclusivamente",
+        "Goblin (portador natural, vector de transmisión de sala a sala)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Constructo (sin biología que infectar)",
+          "level": "immune"
+        },
+        {
+          "trait": "Esqueleto (sin tejido vivo que enfermar)",
+          "level": "immune"
+        },
+        {
+          "trait": "Sombra / Espectro (sin biología)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (su química interna mata los patógenos)",
+          "level": "immune"
+        },
+        {
+          "trait": "Buff Metabolic Surge activo (el sistema inmune acelerado combate la enfermedad)",
+          "level": "resist_75"
+        }
+      ],
+      "design_notes": "Cubre el hueco de enfermedad como vector distinto al veneno. La transmisibilidad es la mecánica clave que no tiene equivalente en Parte A: el Pícaro que mata a un Goblin infectado sin heal_state_antidote puede convertirse en el siguiente vector. Inspirado en Caves of Qud: las enfermedades como ecosistema de riesgo.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "status_crystallized_tissue",
+      "name": "Tejido cristalizado",
+      "description": "El tejido orgánico se ha cristalizado parcialmente por exposición a frío extremo sostenido o a energía de cristalización. El receptor es mucho más frágil que en estado frozen: los impactos contundentes o sónicos lo astillan causando daño adicional de physical_external_shrapnel sobre el propio receptor.",
+      "generators": [
+        "physical_internal_crystallization completado sin intervención",
+        "Exposición a elemental_cold_permafrost_create durante 4+ turnos",
+        "Hechizo de tier 3 (Crystal Form: transforma tejido en cristal como sacrificio de defensa)"
+      ],
+      "receptors_affected": [
+        "Criaturas orgánicas con fluidos internos cristalizados",
+        "Slimes (cristalización total: fragmentación si reciben impacto)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Constructo (sin tejido orgánico que cristalizar)",
+          "level": "immune"
+        },
+        {
+          "trait": "Esqueleto (el hueso no cristaliza igual, efecto menor)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "physical_external_blunt_ (activa el shrapnel interno)",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "trait": "elemental_sonic_shatter (resonancia fragmenta los cristales internos)",
+          "level": "extreme_vulnerable"
+        }
+      ],
+      "design_notes": "Estado avanzado de la progresión de frío. El shrapnel interno es la mecánica que lo distingue del simple frozen: el receptor cristalizado que recibe un golpe de mazo se daña a sí mismo con sus propios cristales. Convierte al Guerrero en el más peligroso de los aliados si el Mago cristaliza a un enemigo.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "status_overheated",
+      "name": "Sobrecalentado",
+      "description": "El receptor acumula demasiado calor corporal sin poder disiparlo. No está en llamas (on_fire) pero su temperatura interna es peligrosa. Las acciones de esfuerzo físico aumentan el calor. El agua o el frío son el alivio inmediato. Si no se resuelve en 4 turnos, progresa a status_burn_internal.",
+      "generators": [
+        "Exposición a temp_ambient_heat_extreme durante 3+ turnos",
+        "buff_ember_cloak expirado sobre una entidad con poca disipación de calor",
+        "Constructo de metal en una sala de calor extremo (el metal retiene el calor)"
+      ],
+      "receptors_affected": [
+        "Criaturas orgánicas en ambientes de calor extremo",
+        "Constructos de metal (sin sistema de refrigeración)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Esqueleto (sin metabolismo térmico)",
+          "level": "immune"
+        },
+        {
+          "trait": "Sombra / Espectro (sin cuerpo físico)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (la evaporación los enfría naturalmente)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Agua sobre el receptor (cura el estado inmediatamente)",
+          "level": "heal"
+        }
+      ],
+      "design_notes": "Cubre el hueco de calor acumulado sin llamas activas. La diferencia con on_fire es que el sobrecalentado no daña props ni activa reacciones de aceite: está caliente pero no en llamas. El agua como heal es el counter obvio. Relevante para salas de bioma caliente y para el Errante en Furia (la Furia genera calor metabólico).",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "status_magnetic_locked",
+      "name": "Bloqueo magnético",
+      "description": "El receptor metálico queda bloqueado en posición por un campo magnético activo. Similar al anclaje pero solo aplicable a entidades con componente metálico significativo. Mientras el campo magnético está activo, el receptor no puede moverse pero tampoco puede ser empujado por vectores no-magnéticos.",
+      "generators": [
+        "elemental_electric_magnetic_pulse sostenido en el mismo tile",
+        "Constructo Golem de Metal usando su innate de movement_forced_magnetize sobre sí mismo como defensa",
+        "Trampa de sala especial (piso magnético que activa al contacto con metal)"
+      ],
+      "receptors_affected": [
+        "Constructos de metal y entidades con armadura metálica pesada",
+        "Objetos metálicos del entorno (trampas, mecanismos de metal)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Entidades sin componente metálico (no aplica)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (sin metal)",
+          "level": "immune"
+        },
+        {
+          "trait": "Sombra / Espectro (sin materialidad metálica)",
+          "level": "immune"
+        },
+        {
+          "trait": "Runa de Tierra activa (redirige el campo magnético a tierra)",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo de piedra (sin metal, sin campo)",
+          "level": "immune"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre anclaje (voluntario/mágico) y inmovilización forzada por física. El bloqueo magnético como defensa del Golem de Metal convierte su vulnerabilidad (magnetismo) en herramienta: se puede bloquear a sí mismo temporalmente para ser inamovible. Contrajuego al push_heavy: el jugador que empuja a un Golem magnéticamente bloqueado desperdicia su acción.",
+      "implementation_note": "needs_research"
+    },
+    {
+      "id": "status_ego_shattered",
+      "name": "Ego destrozado",
+      "description": "La identidad funcional del receptor queda fragmentada. No puede ejecutar habilidades de clase (ha olvidado cómo se usan conscientemente). Solo puede realizar acciones básicas de ataque y movimiento. La identidad se reconstruye con heal_state_mental o al final del combate.",
+      "generators": [
+        "exotic_psychic_ego_dissolution (B4 vector 29) como resultado",
+        "exotic_psychic_memory_drain en magnitud extreme sobre entidad con clase alta",
+        "Combinación de exotic_psychic_willpower_crush + exotic_psychic_memory_drain simultáneos"
+      ],
+      "receptors_affected": [
+        "Cualquier entidad con habilidades de clase o rol definido",
+        "Jugador (especialmente devastador en builds que dependan de skills)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Constructo (sin ego ni identidad de clase)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (sin ego)",
+          "level": "immune"
+        },
+        {
+          "trait": "Errante (su identidad es 'sin clase': el ego destrozado lo deja igual)",
+          "level": "immune"
+        },
+        {
+          "trait": "Voluntad de Hierro activa (el ego no puede ser destrozado mientras está activo)",
+          "level": "immune"
+        }
+      ],
+      "design_notes": "Cubre el hueco de debuff de clase como vector de estado. El Errante siendo immune es un diseño elegante: su identidad es no tener identidad de clase formal, así que no hay ego que destrozar. El Mago sin hechizos y el Guerrero sin habilidades son entidades completamente diferentes tácticamente.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "exotic_psychic_false_memory_implant",
+      "name": "Implante de memoria falsa",
+      "description": "El atacante implanta un recuerdo falso en el receptor: específicamente, la convicción de que ya realizó una acción este turno cuando no lo hizo. El receptor pierde su acción de turno creyendo haberla ejecutado. A diferencia de exotic_psychic_memory_drain (que borra), este añade un recuerdo fabricado.",
+      "generators": [
+        "Hechizo del Mago de tier 3 (False Memory: el más sutil de los hechizos psíquicos)",
+        "Sombra Mayor como boss con capacidades de manipulación de memoria"
+      ],
+      "receptors_affected": [
+        "Cualquier entidad orgánica con sistema de memoria activo",
+        "Goblin (especialmente fácil de confundir dado su baja INT)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Constructo (sin sistema de memoria biológico)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (sin memoria procesal)",
+          "level": "immune"
+        },
+        {
+          "trait": "Esqueleto (la memoria de los muertos es rígida, difícil de alterar)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Voluntad de Hierro activa (la mente cerrada no acepta memorias nuevas)",
+          "level": "immune"
+        },
+        {
+          "trait": "Buff Deep Focus activo (la concentración expone las inconsistencias del implante)",
+          "level": "immune"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre borrar memoria (memory_drain) e implantar una falsa. El efecto mecánico es robbar un turno de forma invisible: el receptor no sabe que lo perdió. El más difícil de detectar de los vectores psíquicos. Requiere un Codex avanzado para reconocerlo en combate.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "exotic_psychic_ego_dissolution",
+      "name": "Disolución del ego",
+      "description": "Ataque psíquico que no daña directamente sino que disuelve la percepción de identidad del receptor. La entidad deja de reconocerse como un 'yo' diferenciado. Resultado: aplica status_confused_allegiance, status_confused_target, y como efecto avanzado, puede aplicar status_ego_shattered en magnitud extreme.",
+      "generators": [
+        "Sombra Mayor con habilidades psíquicas avanzadas",
+        "Hechizo del Mago de tier 3 (Ego Dissolve: coste extremo)",
+        "Combinación de exotic_psychic_willpower_crush + exotic_psychic_memory_drain en el mismo turno"
+      ],
+      "receptors_affected": [
+        "Criaturas orgánicas con sentido del yo activo",
+        "Goblin en solitario (sin grupo que refuerce la identidad)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Constructo (sin ego que disolver)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (sin percepción de identidad individual)",
+          "level": "immune"
+        },
+        {
+          "trait": "Errante (sin ego definido de clase)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Voluntad de Hierro activa",
+          "level": "immune"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre ataques psíquicos de daño y ataques psíquicos de identidad. La disolución del ego como el vector psíquico más profundo: no duele, no aterra, simplemente te hace dejar de ser tú. El Errante resiste parcialmente por la misma razón que resiste el ego_shattered: no tiene ego formal que disolver.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "exotic_temporal_stasis_field",
+      "name": "Campo de estasis temporal",
+      "description": "Un campo que detiene completamente el tiempo para las entidades dentro de él. A diferencia de paralysis_physical_full (inmovilización física), la estasis detiene el tiempo: el receptor no puede ser dañado mientras esté en estasis pero tampoco puede actuar. Los buffs y debuffs activos se pausan (no consumen turnos).",
+      "generators": [
+        "Hechizo del Mago de tier 3 (Time Stop: solo aplicable a un objetivo, 2 turnos máximo)",
+        "Mecanismo de sala de laboratorio temporal (trampa de sala exótica)",
+        "exotic_temporal_compression llevado al extremo como efecto secundario"
+      ],
+      "receptors_affected": [
+        "Cualquier entidad",
+        "Objetos en vuelo (proyectiles, objetos lanzados quedan suspendidos)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Entidades con afinidad temporal (exotic_temporal_*)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Constructo con núcleo de energía pura (el tiempo externo no lo afecta)",
+          "level": "resist_50"
+        },
+        {
+          "trait": "Sombra / Espectro (parcialmente fuera del tiempo lineal)",
+          "level": "resist_50"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre paralysis (inmovilización con vulnerabilidad) y un estado donde el objetivo es literalmente intocable. La mecánica de pausa de buffs es la diferencia clave: no consume la duración de buff_iron_skin mientras está en estasis. Uso táctico: salvar a un aliado herido por 2 turnos para reorganizar.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "exotic_dimensional_echo_strike",
+      "name": "Golpe de eco dimensional",
+      "description": "El atacante hace que un ataque reciente (el último ataque realizado este combate) resuene en el plano dimensional y se repita sobre el mismo receptor, o en un receptor adyacente si el original ya no está en rango. El eco hace 50% del daño original pero aplica los mismos estados.",
+      "generators": [
+        "Hechizo del Mago de tier 3 (Dimensional Echo: repite el último hechizo)",
+        "Ítem legendario (Guante del Eco: el puño más reciente resuena dimensionalmente)"
+      ],
+      "receptors_affected": [
+        "El receptor original del último ataque (o el más cercano si está fuera de rango)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Sombra / Espectro (en su elemento dimensional, absorbe el eco)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "Campo de Anclaje Dimensional activo",
+          "level": "immune"
+        },
+        {
+          "trait": "Constructo con núcleo de energía pura (resuena pero atenúa)",
+          "level": "resist_50"
+        }
+      ],
+      "design_notes": "Cubre el hueco de repetición de efecto en el sistema dimensional. El eco hace 50% pero mantiene los estados: repetir un bleed_major al 50% de daño de todas formas aplica el estado. El Mago puede usar esto para aplicar un debuff de estado dos veces en el mismo turno sin coste doble de hechizo.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "exotic_mirror_damage_reflect",
+      "name": "Reflejo de daño",
+      "description": "El receptor activa un campo de reflejo que devuelve una porción del daño recibido al generador. El reflejo no copia el vector exacto: aplica physical_external_slash_light (daño físico genérico de reflejo) por el porcentaje reflejado. La fuente del daño recibe el reflejo aunque esté fuera de rango melee.",
+      "generators": [
+        "Hechizo del Mago de tier 3 (Mirror Field: 30% de daño reflejado, 3 turnos)",
+        "Ítem legendario (Escudo del Espejo: 20% reflejo pasivo de run)",
+        "Trampa de sala especial (sala con espejos mágicos: todo el daño refleja)"
+      ],
+      "receptors_affected": [
+        "El generador del daño (recibe el reflejo)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Sombra / Espectro (etérea, el reflejo la atraviesa)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (sin sistema de detección del reflejo)",
+          "level": "normal"
+        },
+        {
+          "trait": "AoE de fuego (el reflejo de AoE aplica a todos los aliados del generador también)",
+          "level": "vulnerable"
+        }
+      ],
+      "design_notes": "Cubre el hueco de reflejo como mecánica de penalización al atacante. La clave de diseño: el reflejo ignora el rango y llega al generador original. Una Cazadora que dispara a un receptor con Mirror Field recibe el reflejo en el punto de disparo. Los AoE se reflejan hacia el caster con bonus de área.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "exotic_gravity_slingshot",
+      "name": "Honda gravitacional",
+      "description": "El generador usa la gravedad de una entidad o estructura masiva como pivot para lanzar a otra entidad a alta velocidad. El receptor es acelerado alrededor del punto de pivot y lanzado en la dirección opuesta con velocidad multiplicada. El daño es por el impacto al final del arco, no durante el giro.",
+      "generators": [
+        "Hechizo del Mago de tier 3 (Gravity Slingshot: requiere dos objetivos, pivot y receptor)",
+        "Constructo Golem usando su propia masa como pivot (innate futuro)"
+      ],
+      "receptors_affected": [
+        "La entidad lanzada en arco",
+        "El punto de impacto final (daño de área por velocidad terminal)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Anclaje activo (el receptor anclado no puede ser el lanzado)",
+          "level": "immune"
+        },
+        {
+          "trait": "Levitación (ya en el aire, la honda lo lanza más lejos sin control)",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "trait": "Entidades de alta masa (requieren más energía para ser lanzadas)",
+          "level": "resist_50"
+        }
+      ],
+      "design_notes": "Cubre el hueco de movimiento forzado de alta velocidad usando física de gravedad. La mecánica de dos objetivos (pivot + receptor) lo distingue de todos los push/pull existentes. El Mago puede usar el Golem de Piedra estático como pivot para lanzar al Goblin contra la pared opuesta a alta velocidad.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "exotic_sacred_martyr_burst",
+      "name": "Explosión del Mártir",
+      "description": "Cuando una entidad sagrada o consagrada muere, libera una explosión de energía sagrada acumulada. El daño es proporcional al HP máximo de la entidad al morir. Afecta a No-Muertos en el radio con magnitud extreme. Los aliados vivos en el radio son curados por la mitad del daño aplicado a No-Muertos.",
+      "generators": [
+        "Entidad con buff_holy_consecration_aura activa al morir (se activa automáticamente)",
+        "Ítem de run legendario (Reliquia del Mártir: el portador explota al morir con esta explosión)",
+        "Habilidad de sacrificio del Mago de tier 3 (Martyr: el Mago se sacrifica para crear la explosión)"
+      ],
+      "receptors_affected": [
+        "No-Muertos en radio de 3 tiles (daño extreme)",
+        "Aliados vivos en radio de 3 tiles (curación)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Entidades de alineación neutra o positiva (solo curación, no daño)",
+          "level": "heal"
+        },
+        {
+          "trait": "Esqueleto / Sombra (daño extreme de sagrado)",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "trait": "Constructo de piedra (neutral a lo sagrado)",
+          "level": "normal"
+        }
+      ],
+      "design_notes": "Cubre el hueco de muerte como evento de vectores activos. La muerte de una entidad sagrada no es el final del combate: es el momento de mayor impacto ofensivo. Convierte el sacrificio en mecánica táctica: el Mago puede sacrificarse deliberadamente para limpiar una sala llena de esqueletos. Alto floor narrativo.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "exotic_curse_contact_spread",
+      "name": "Maldición de contagio por contacto",
+      "description": "Una maldición que se transmite por contacto físico. Si el receptor maldecido golpea a otro en melee, hay probabilidad de que la maldición salte al nuevo receptor (y puede o no mantenerse en el original, dependiendo de la variante). Las maldiciones más simples saltan con alta probabilidad; las más complejas con menor.",
+      "generators": [
+        "Esqueleto Mago con exotic_curse_direct que incluye el tag de contagio",
+        "Ítem maldito que el jugador toca y luego pasa a otros al golpear",
+        "Trampa de sala especial (suelo maldito que marca al primero que lo pisa, que luego contagia)"
+      ],
+      "receptors_affected": [
+        "La entidad objetivo del melee de la entidad ya maldecida"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Constructo (sin sistema de maldición que propague)",
+          "level": "immune"
+        },
+        {
+          "trait": "Sombra / Espectro (en su elemento: absorbe la maldición sin contagiarla)",
+          "level": "immune"
+        },
+        {
+          "trait": "Buff de Voluntad de Hierro (la mente cerrada no acepta maldiciones externas)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "exotic_sacred_purify activo (purifica antes de que la maldición salte)",
+          "level": "immune"
+        }
+      ],
+      "design_notes": "Cubre el hueco de maldición como vector contagioso. La mecánica de propagación convierte al jugador que está maldecido en un riesgo para sus aliados (si hubiera cooperativo futuro) o, más inmediatamente, en un problema si la maldición puede saltar de vuelta al Goblin que él acaba de golpear, que luego golpea a otro Goblin...",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "influence_obsession_lock",
+      "name": "Bloqueo obsesivo",
+      "description": "El receptor desarrolla una obsesión compulsiva con un objetivo específico: no puede cambiar de objetivo voluntariamente mientras la obsesión esté activa. Si el objetivo huye fuera de rango, el receptor persigue en línea recta sin evaluación de obstáculos. La obsesión solo se rompe si el objetivo muere o si la duración expira.",
+      "generators": [
+        "Hechizo del Mago de tier 2 (Obsess: fija la IA enemiga en un objetivo específico)",
+        "Habilidad de la Cazadora (Marked Prey: el enemigo marcado es perseguido obsesivamente)",
+        "exotic_curse_mark con variante de fijación de objetivo"
+      ],
+      "receptors_affected": [
+        "Cualquier entidad con sistema de selección de objetivo (IA o jugador)",
+        "Goblin Scout (su instinto de rastreo puede ser amplificado hasta obsesión)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Constructo (su sistema de targeting no es emocional)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (sin targeting específico)",
+          "level": "immune"
+        },
+        {
+          "trait": "Voluntad de Hierro activa",
+          "level": "immune"
+        },
+        {
+          "trait": "Entidad de alta INT (reconoce la manipulación)",
+          "level": "resist_50"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre confusión de objetivo (aleatorio) y fijación de objetivo (específico y deliberado). El bloqueo obsesivo sobre el Guerrero mientras el Pícaro flanquea es una táctica de coordinación de clase natural. En combate por turnos, forzar a un Goblin a perseguir a una entidad específica desequilibra la IA de grupo.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "influence_loyalty_fracture",
+      "name": "Fractura de lealtad",
+      "description": "El generador implanta la sospecha de traición entre aliados. La entidad receptora comienza a tratar a sus propios aliados cercanos con sospecha: no los ataca directamente pero los evita, no los protege y, si recibe daño de cualquier fuente mientras la fractura está activa, ataca al aliado más cercano como reacción.",
+      "generators": [
+        "Hechizo del Mago de tier 2 (Distrust: siembra la desconfianza)",
+        "exotic_psychic_confusion_ally amplificado a nivel de fractura de lealtad duradera",
+        "influence_suggestion_major con contenido específico de traición"
+      ],
+      "receptors_affected": [
+        "Criaturas con lealtades de grupo (Goblins en manada, cualquier grupo coordinado)"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Constructo (sin lealtades emocionales)",
+          "level": "immune"
+        },
+        {
+          "trait": "Esqueleto bajo control de mazmorra (la lealtad es compulsiva, no emocional)",
+          "level": "immune"
+        },
+        {
+          "trait": "Goblin en grupo grande (5+: la lealtad colectiva resiste la fractura individual)",
+          "level": "resist_50"
+        },
+        {
+          "trait": "Goblin solo (ya sin lealtades que fracturar)",
+          "level": "immune"
+        }
+      ],
+      "design_notes": "Cubre el hueco entre confusión_ally (redirige ataque) y fractura real de grupo (cambia el comportamiento de forma más sutil y duradera). El efecto de reacción cuando recibe daño es el diseño más interesante: el Cazadora puede disparar a un Goblin con Fractura de Lealtad activa para que ese Goblin ataque a su Chamán adyacente como reacción.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "influence_morale_cascade",
+      "name": "Cascada de moral",
+      "description": "El estado de moral de una entidad se propaga a las entidades de la misma facción en el radio. Una derrota notable, la muerte de un líder o un triunfo visible puede disparar una cascada: si la entidad fuente tiene status_demoralized, todas las entidades de la misma facción en radio 3 aplican status_frightened. Si tiene status_inspired, todas aplican status_brave.",
+      "generators": [
+        "Muerte de un líder de grupo (el Chamán Goblin muerto dispara cascade negativa)",
+        "Victoria notable del jugador (matar a 3 enemigos en 1 turno dispara cascade positiva en el jugador)",
+        "influence_demoralize aplicado con tag de cascade explícito"
+      ],
+      "receptors_affected": [
+        "Todas las entidades de la misma facción en radio 3 tiles de la entidad fuente"
+      ],
+      "typical_resistances": [
+        {
+          "trait": "Constructo (sin sistema de moral)",
+          "level": "immune"
+        },
+        {
+          "trait": "Slime (sin moral de grupo)",
+          "level": "immune"
+        },
+        {
+          "trait": "Esqueleto bajo control estricto (la mazmorra suprime las cascadas de moral)",
+          "level": "resist_75"
+        },
+        {
+          "trait": "buff_iron_will activo en cualquier entidad de la facción (bloquea la cascade sobre ella)",
+          "level": "immune"
+        }
+      ],
+      "design_notes": "Cubre el hueco de la moral como mecánica sistémica de grupo. En Parte A, los vectores de influencia son individuales. La cascade convierte la muerte del Chamán en un evento que afecta a toda la sala simultáneamente. El jugador que aprende este comportamiento en el Codex prioriza al Chamán como primer kill.",
+      "implementation_note": "standard"
+    },
+    {
+      "id": "meta_sacrifice_exchange",
+      "name": "Intercambio de sacrificio",
+      "description": "El receptor intercambia voluntariamente un recurso valioso por otro. El sacrificio puede ser: HP permanente por un buff de run, un ítem legendario por curación completa, o una estadística base por una resistencia racial permanente. Irrevocable una vez ejecutado. Solo aplicable al jugador.",
+      "generators": [
+        "Altar de sacrificio de sala especial (prop único de sala: un intercambio posible)",
+        "NPC mercader oscuro de sala especial (Rusty en una variante futura con rol comercial)",
+        "Ítem consumible de rareza mítica (Moneda del Precio Justo)"
+      ],
+      "receptors_affected": [
+        "Exclusivamente el jugador (intercambio meta de run)"
+      ],
+      "typical_resistances": [],
+      "design_notes": "Cubre el hueco de intercambio meta explícito en el sistema de vectores. En Parte A los meta_* vectores afectan a loot, luck o corruption. El sacrificio como intercambio de recursos es distinto: el jugador elige qué pierde y qué gana, con consecuencias permanentes de run. Inspirado en Hades: las bendiciones de Cámaron y los intercambios con NPCs.",
+      "implementation_note": "aspirational"
+    },
+    {
+      "id": "meta_run_echo_remnant",
+      "name": "Eco de run anterior",
+      "description": "Un residuo de la run anterior del jugador persiste en la sala actual. Puede ser positivo (una bendición dejada por el jugador anterior: un charco de agua sagrada, un arma abandonada que es útil) o negativo (una maldición activa del jugador previo que aún está en el tile). El tipo se determina por la última run del jugador.",
+      "generators": [
+        "Sistema de meta-persistencia de run (activado automáticamente al entrar en una sala que el jugador visitó en la run anterior)",
+        "Ítem de rareza épica (Fragmento del Pasado: deposita un eco positivo intencional)"
+      ],
+      "receptors_affected": [
+        "Los tiles de la sala donde la run anterior dejó eventos significativos"
+      ],
+      "typical_resistances": [],
+      "design_notes": "Cubre el hueco de conexión narrativa entre runs. En Caves of Qud y Hades, la persistencia entre runs crea continuidad emocional. El eco de run anterior convierte cada nueva visita a una sala en una interacción con el propio historial del jugador. Un eco negativo de una maldición activa de la run anterior crea una trampa que el jugador se puso a sí mismo sin saberlo.",
+      "implementation_note": "aspirational"
+    }
+  ]
 }
