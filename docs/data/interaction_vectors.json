@@ -20542,6 +20542,2214 @@
     }
   ],
   "race_resistances": {},
-  "unique_buffs": [],
+  "unique_buffs": [
+    {
+      "id": "buff_iron_skin",
+      "name": "Piel de Acero",
+      "type": "buff",
+      "description": "La piel del receptor se endurece hasta aproximarse al metal forjado. Los ataques cortantes y perforantes rebotan o se desvían; los contundentes aún pueden dejar marca. El buff canónico de referencia del juego para resistencias físicas de alta magnitud.",
+      "source_examples": [
+        "Hechizo del Mago de tier 3 (Iron Skin: coste alto, setup táctico)",
+        "Ítem legendario pasivo (Fajín de Acero Vivo: activo permanente de run)"
+      ],
+      "duration_type": "run",
+      "default_duration_value": -1,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "physical_external_slash_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_external_pierce_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_external_lacerate_",
+          "level": "resist_75"
+        },
+        {
+          "vectorIdPrefix": "physical_external_blunt_",
+          "level": "resist_25"
+        },
+        {
+          "vectorId": "physical_external_explosion_wave",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "physical_external_shrapnel",
+          "level": "resist_50"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "elemental_acid_splash",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_acid_status_corroding",
+          "level": "vulnerable"
+        }
+      ],
+      "forced_state": null,
+      "vfx_hint": "metallic_skin_sheen_silver",
+      "icon_hint": "iron_skin_icon",
+      "design_notes": "Buff canónico de referencia. Tier 3 + noCycling + run-duration: da immune a slash y pierce sin ser explotable por cycling. El ácido como vulnerabilidad añadida es el contrajuego natural. Aplicable a jugador (Mago) y a Constructos Golem como rasgo innato."
+    },
+    {
+      "id": "buff_levitation",
+      "name": "Levitación",
+      "type": "buff",
+      "description": "El receptor flota a medio metro del suelo. Deja de interactuar con el terreno bajo sus pies: fluidos, superficies heladas, aceite, ácido en el suelo, trampas de presión. Los vectores de movimiento forzado horizontal pierden eficacia al no haber fricción de suelo.",
+      "source_examples": [
+        "Hechizo del Mago de tier 3 (Levitate: coste alto, duración de combate)",
+        "Poción de Levitación (consumible raro)",
+        "Rasgo racial de Sombra/Espectro (levitación pasiva permanente)"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": 4,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorId": "terrain_fluid_place_water",
+          "level": "immune"
+        },
+        {
+          "vectorId": "terrain_fluid_place_acid",
+          "level": "immune"
+        },
+        {
+          "vectorId": "terrain_fluid_place_oil",
+          "level": "immune"
+        },
+        {
+          "vectorId": "terrain_fluid_spread",
+          "level": "immune"
+        },
+        {
+          "vectorId": "fluid_oil_slick",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_cold_frost_surface",
+          "level": "immune"
+        },
+        {
+          "vectorId": "movement_forced_slip",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "terrain_trap_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "movement_forced_push_",
+          "level": "resist_50"
+        },
+        {
+          "vectorIdPrefix": "movement_forced_pull_",
+          "level": "resist_25"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "movement_forced_launch_up",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_air_vortex",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "exotic_gravity_null",
+          "level": "vulnerable"
+        }
+      ],
+      "forced_state": "levitating",
+      "vfx_hint": "entity_floating_glow_below_feet",
+      "icon_hint": "levitation_icon",
+      "design_notes": "AP-6: subido a tier 3 + noCycling. Justificación: la inmunidad total al terreno de suelo ES la definición de levitar. Bajar a resist_75 vaciaría el concepto narrativo y mecánico. Duración corta (4 turnos de combate) y noCycling previenen el abuso. Las vulnerabilidades aéreas y gravitacionales son el contrajuego natural: sin suelo, cualquier fuerza de desplazamiento aéreo es mucho más efectiva."
+    },
+    {
+      "id": "buff_night_vision",
+      "name": "Visión Nocturna",
+      "type": "buff",
+      "description": "Los ojos del receptor se adaptan a la oscuridad, percibiendo calor, movimiento y contornos en condiciones de luz mínima. La penalización de precisión por zona oscura se elimina. Los ataques de sorpresa desde la oscuridad contra este receptor no obtienen el bonus habitual.",
+      "source_examples": [
+        "Hechizo del Mago de tier 1 (Darksight: barato, duración corta)",
+        "Ítem de rareza media (Gafas de Ónix: pasivo de run)",
+        "Rasgo racial de Goblin (visión nocturna innata parcial)"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": 6,
+      "source_tier": 1,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorId": "light_blind_darkness_veil",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "light_reduce_dim",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "light_reduce_shadow_cloud",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "stealth_shadow_cast",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "stealth_shadow_create",
+          "level": "resist_25"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "light_blind_flash",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "light_increase_flare",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_blinding_damage",
+          "level": "vulnerable"
+        }
+      ],
+      "forced_state": null,
+      "vfx_hint": "eyes_glow_green_subtle",
+      "icon_hint": "night_vision_icon",
+      "design_notes": "AP-6: mantenido en tier 1, todas las immune bajadas a resist_75 o resist_50. Justificación: es un hechizo barato de utilidad; resist_75 a oscuridad sigue siendo muy efectivo para su coste. Darle immune a darkness_veil en tier 1 permitiría ciclarlo trivialmente con pociones comunes, anulando una mecánica central de las Sombras. El tradeoff flash/bengala se mantiene: los ojos adaptados a la oscuridad son hipersensibles a la luz brusca."
+    },
+    {
+      "id": "buff_anchoring",
+      "name": "Anclaje",
+      "type": "buff",
+      "description": "El receptor queda anclado al suelo como si fuera parte de la estructura de la sala. Ningún vector de movimiento forzado puede desplazarlo. Inamovible ante empujes, atracciones, lanzamientos, teletransportes no voluntarios y efectos gravitacionales.",
+      "source_examples": [
+        "Hechizo del Mago de tier 3 (Earthbind: ancla a un aliado o a sí mismo)",
+        "Habilidad pasiva del Guerrero tier 3 (Stance: activa al declarar posición defensiva)",
+        "Rasgo racial del Constructo Golem (anclaje innato por peso estructural)"
+      ],
+      "duration_type": "turns",
+      "default_duration_value": 3,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "movement_forced_push_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "movement_forced_pull_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "movement_forced_launch_up",
+          "level": "immune"
+        },
+        {
+          "vectorId": "movement_forced_throw_arc",
+          "level": "immune"
+        },
+        {
+          "vectorId": "movement_forced_grab_throw",
+          "level": "immune"
+        },
+        {
+          "vectorId": "movement_forced_teleport_random",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_gravity_inversion",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_gravity_null",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "exotic_dimensional_displacement",
+          "level": "resist_75"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "physical_external_blunt_heavy",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "physical_external_blunt_slam",
+          "level": "vulnerable"
+        }
+      ],
+      "forced_state": null,
+      "stat_modifiers": {
+        "dex": -3
+      },
+      "vfx_hint": "chain_of_light_at_feet",
+      "icon_hint": "anchoring_icon",
+      "design_notes": "AP-6: subido a tier 3 + noCycling. Justificación: ser completamente inamovible ES la definición de anclaje. Bajar a resist_75 los empujes convertiría el buff en 'difícil de mover' en vez de 'inamovible', traicionando su identidad. Duración corta (3 turnos) y noCycling + penalización DEX son los limitadores de balance."
+    },
+    {
+      "id": "buff_spectral_form",
+      "name": "Forma Espectral",
+      "type": "buff",
+      "description": "El cuerpo del receptor se vuelve parcialmente etéreo. Los ataques físicos directos lo atraviesan sin efecto completo. Puede moverse a través de obstáculos físicos de hasta 1 casilla de grosor. Visible pero intangible.",
+      "source_examples": [
+        "Hechizo del Mago de tier 3 (Ghost Form: coste alto, tier máximo)",
+        "Rasgo racial de Sombra/Espectro (forma espectral innata parcial)"
+      ],
+      "duration_type": "turns",
+      "default_duration_value": 3,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "physical_external_slash_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_external_pierce_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_external_blunt_",
+          "level": "resist_75"
+        },
+        {
+          "vectorIdPrefix": "physical_external_crush_",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "physical_external_shrapnel",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "physical_external_explosion_wave",
+          "level": "resist_50"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "elemental_light_holy_beam",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_radiant_burst",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_aligned_smite_undead",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_sacred_divine_smite",
+          "level": "extreme_vulnerable"
+        }
+      ],
+      "forced_state": "ethereal",
+      "vfx_hint": "body_translucent_blue_glow",
+      "icon_hint": "spectral_form_icon",
+      "design_notes": "Tier 3 + noCycling desde la primera versión. Sin cambios por AP-6. El contrajuego (luz sagrada extreme_vulnerable) es el limitador de balance principal. Las Sombras tienen una versión permanente innata, lo que define toda su mecánica."
+    },
+    {
+      "id": "buff_stone_blood",
+      "name": "Sangre de Piedra",
+      "type": "buff",
+      "description": "La sangre del receptor se espesa hasta volverse casi mineral. Inmune a sangrados y hemorragias. Las heridas se cierran mecánicamente en vez de biológicamente: el corte no sangra pero tampoco sana por regeneración natural.",
+      "source_examples": [
+        "Hechizo del Mago de tier 3 (Stonify Blood)",
+        "Rasgo racial del Constructo (sangre de aceite mineral: análogo innato)"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": 5,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "status_bleed_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_internal_hemorrhage_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_vascular_rupture",
+          "level": "immune"
+        },
+        {
+          "vectorId": "status_exsanguination",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_wound",
+          "level": "resist_75"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "elemental_cold_cryo_brittle",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_cold_freeze_solid",
+          "level": "vulnerable"
+        }
+      ],
+      "forced_state": null,
+      "stat_modifiers": {
+        "hp": -5
+      },
+      "vfx_hint": "dark_grey_veins_visible_on_skin",
+      "icon_hint": "stone_blood_icon",
+      "design_notes": "AP-6: subido a tier 3 + noCycling. Justificación: inmunidad a sangrado ES la identidad del buff. Bajar a resist_75 el sangrado mayor lo convertiría en 'casi no sangras', perdiendo el nombre y la fantasía. El frío como vulnerabilidad (sangre espesa = más rígida = quebradiza) es el contrajuego. El coste de HP y la restricción de regeneración son los limitadores de abuso."
+    },
+    {
+      "id": "buff_ember_cloak",
+      "name": "Manto de Brasas",
+      "type": "buff",
+      "description": "Una capa de brasas vivas rodea al receptor. Los ataques cuerpo a cuerpo contra él queman al atacante. El receptor resiste bien el frío pero el hielo muy intenso puede apagar las brasas. Emite calor y luz tenue.",
+      "source_examples": [
+        "Hechizo del Mago de tier 2 (Ember Cloak)",
+        "Ítem de rareza alta (Manto del Dragón Menor)"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": 4,
+      "source_tier": 2,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "elemental_cold_freeze_",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_cold_status_chilled",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_cold_cryo_brittle",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "elemental_cold_ambient_hypothermia",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "resist_50"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "elemental_water_hydraulic_impact",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "terrain_fluid_place_water",
+          "level": "vulnerable"
+        }
+      ],
+      "forced_state": "on_fire",
+      "on_melee_contact": {
+        "produces_vector": "elemental_fire_heat_proximity",
+        "magnitude": "low",
+        "target": "attacker"
+      },
+      "vfx_hint": "ember_particles_orbiting_body",
+      "icon_hint": "ember_cloak_icon",
+      "design_notes": "AP-6: mantenido en tier 2, todas las immune bajadas a resist_75. Justificación: las brasas resisten el frío pero no son una barrera absoluta. Hielo muy intenso puede apagarlas (resist_75 en vez de immune). Un buff tier 2 con resist_75 al frío sigue siendo poderoso sin romper el balance. El agua como vulnerable conserva el contrajuego principal."
+    },
+    {
+      "id": "buff_void_shell",
+      "name": "Cáscara de Vacío",
+      "type": "buff",
+      "description": "Un escudo de energía del vacío absorbe los primeros impactos elementales que lleguen al receptor. Los vectores elementales básicos no penetran; los de alta magnitud erosionan el escudo antes de llegar.",
+      "source_examples": [
+        "Hechizo del Mago de tier 2 (Void Shell: escudo elemental de carga fija)",
+        "Ítem de rareza media (Orbe del Vacío: pasivo de equipamiento)"
+      ],
+      "duration_type": "turns",
+      "default_duration_value": 4,
+      "source_tier": 2,
+      "no_cycling": false,
+      "shield_charges": 3,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "elemental_fire_",
+          "level": "resist_75",
+          "condition": {
+            "type": "custom",
+            "value": "void_shell_charges_gt_0"
+          }
+        },
+        {
+          "vectorIdPrefix": "elemental_cold_",
+          "level": "resist_75",
+          "condition": {
+            "type": "custom",
+            "value": "void_shell_charges_gt_0"
+          }
+        },
+        {
+          "vectorIdPrefix": "elemental_electric_",
+          "level": "resist_75",
+          "condition": {
+            "type": "custom",
+            "value": "void_shell_charges_gt_0"
+          }
+        },
+        {
+          "vectorIdPrefix": "elemental_poison_",
+          "level": "resist_50",
+          "condition": {
+            "type": "custom",
+            "value": "void_shell_charges_gt_0"
+          }
+        },
+        {
+          "vectorIdPrefix": "elemental_acid_",
+          "level": "resist_50",
+          "condition": {
+            "type": "custom",
+            "value": "void_shell_charges_gt_0"
+          }
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorIdPrefix": "exotic_dark_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_dark_void_drain",
+          "level": "extreme_vulnerable"
+        }
+      ],
+      "forced_state": null,
+      "vfx_hint": "dark_purple_shell_with_cracks_per_charge_lost",
+      "icon_hint": "void_shell_icon",
+      "design_notes": "Sin cambios por AP-6: ya usaba resist_75 máximo en tier 2. El sistema de cargas introduce gestión de recursos. El VFX muestra grietas progresivas según cargas restantes. El void drain destruye el escudo temáticamente: el vacío consume el vacío."
+    },
+    {
+      "id": "buff_blood_frenzy",
+      "name": "Frenesí de Sangre",
+      "type": "buff",
+      "description": "El receptor entra en un estado de frenesí predatorio al detectar sangre activa. Cada stack de sangrado en el campo de batalla amplifica sus capacidades ofensivas. La defensa se degrada.",
+      "source_examples": [
+        "Habilidad pasiva del Errante tier 3 (Blood Hunger: activa automáticamente al ver sangrado en sala)",
+        "Hechizo de Nigromante enemigo sobre Esqueleto",
+        "Ítem maldito (Hacha Sedienta: activa al primer kill)"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": -1,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorId": "exotic_psychic_terror_major",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "exotic_psychic_terror_minor",
+          "level": "immune"
+        },
+        {
+          "vectorId": "status_panic",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "metabolic_exhaustion",
+          "level": "resist_50"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorIdPrefix": "elemental_cold_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorIdPrefix": "physical_external_slash_",
+          "level": "vulnerable",
+          "condition": {
+            "type": "hp_below_pct",
+            "value": "30"
+          }
+        }
+      ],
+      "stat_modifiers": {
+        "str": 4,
+        "dex": -2
+      },
+      "forced_state": null,
+      "vfx_hint": "red_aura_pulsing_with_heartbeat",
+      "icon_hint": "blood_frenzy_icon",
+      "design_notes": "AP-6: subido a tier 3 + noCycling. Justificación: dura todo el combate sin límite de turnos (default_duration_value -1). Un buff de duración indefinida con immune a terror menor merece tier 3. El noCycling previene activarlo dos veces en el mismo combate. El frío como salida táctica sigue siendo el contrajuego principal."
+    },
+    {
+      "id": "buff_mirage_step",
+      "name": "Paso Espejismo",
+      "type": "buff",
+      "description": "El receptor deja una imagen residual en cada tile que abandona durante 1 turno. Los ataques a la imagen residual no hacen daño. Los enemigos sin stealth_detect_active atacarán la imagen en vez del receptor si está en rango.",
+      "source_examples": [
+        "Habilidad de la Cazadora tier 2 (Mirage Step activo por 3 turnos)",
+        "Ítem de rareza media (Botas del Espejismo)"
+      ],
+      "duration_type": "turns",
+      "default_duration_value": 3,
+      "source_tier": 2,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorId": "physical_external_pierce_ranged",
+          "level": "resist_50",
+          "condition": {
+            "type": "custom",
+            "value": "moved_last_turn"
+          }
+        },
+        {
+          "vectorId": "stealth_detect_active",
+          "level": "resist_25"
+        }
+      ],
+      "vulnerabilities_granted": [],
+      "forced_state": null,
+      "special_mechanic": "leaves_decoy_image_on_previous_tile_each_move",
+      "vfx_hint": "faint_afterimage_on_previous_position",
+      "icon_hint": "mirage_step_icon",
+      "design_notes": "Sin cambios por AP-6: ya usaba resist_50 máximo en tier 2. Incentiva el movimiento activo. Los enemigos con IA avanzada (Esqueleto Mago) tienen stealth_detect_active y no caen en el engaño."
+    },
+    {
+      "id": "buff_cursed_flesh",
+      "name": "Carne Maldita",
+      "type": "curse",
+      "description": "La carne del receptor queda marcada con una maldición activa. Cualquier curación recibida es parcialmente revertida: solo el 50% del HP curado es efectivo. Los buffs de regeneración tienen duración reducida a la mitad.",
+      "source_examples": [
+        "Vector exotic_curse_direct aplicado por Esqueleto Mago",
+        "Trampa de altar profanado en sala",
+        "Boss con aura de maldición persistente"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": 4,
+      "source_tier": 2,
+      "no_cycling": false,
+      "resistances_granted": [],
+      "vulnerabilities_granted": [
+        {
+          "vectorIdPrefix": "heal_hp_",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "healing_halved_by_curse"
+          }
+        },
+        {
+          "vectorIdPrefix": "heal_regen_",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "regen_duration_halved"
+          }
+        }
+      ],
+      "forced_state": null,
+      "special_mechanic": "all_healing_received_reduced_to_50pct_effectiveness",
+      "vfx_hint": "dark_purple_rune_on_skin_pulsing",
+      "icon_hint": "cursed_flesh_icon",
+      "design_notes": "Sin cambios por AP-6: curse sin entradas immune. La vulnerabilidad al healing es mecánica especial, no un ResistanceLevel immune. Purificable con heal_state_cleanse. El Esqueleto Mago debería lanzarla al inicio del combate contra builds de sostenibilidad."
+    },
+    {
+      "id": "buff_phosphor_coat",
+      "name": "Revestimiento de Fósforo",
+      "type": "buff",
+      "description": "El cuerpo del receptor queda recubierto de una sustancia fosforescente que reacciona violentamente al agua. Al contacto con cualquier líquido produce una explosión química local. Protege contra ácido diluido.",
+      "source_examples": [
+        "Hechizo del Mago de tier 2 (Phosphor Coat: riesgo/recompensa)",
+        "Barril de fósforo destruido en sala (aplicado por área al receptor más cercano)"
+      ],
+      "duration_type": "turns",
+      "default_duration_value": 4,
+      "source_tier": 2,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorId": "elemental_acid_splash",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_acid_dissolve_organic",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "elemental_poison_contact_skin",
+          "level": "resist_50"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "terrain_fluid_place_water",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_water_hydraulic_impact",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "fluid_water_conduct",
+          "level": "extreme_vulnerable"
+        }
+      ],
+      "forced_state": null,
+      "on_contact_water": {
+        "produces_vector": "elemental_fire_combustion_flash",
+        "magnitude": "medium",
+        "target": "area",
+        "areaRadius": 1
+      },
+      "vfx_hint": "white_chalky_coating_with_faint_glow",
+      "icon_hint": "phosphor_coat_icon",
+      "design_notes": "Sin cambios por AP-6: ya usaba resist_75 máximo en tier 2. Riesgo/recompensa extremo: protege de ácido pero el agua lo detona. El Mago enemigo que detecta este buff tiene incentivo claro para lanzar agua."
+    },
+    {
+      "id": "buff_iron_will",
+      "name": "Voluntad de Hierro",
+      "type": "buff",
+      "description": "La mente del receptor se fortalece hasta la impenetrabilidad psíquica temporal. Los vectores de influencia, terror y domination rebotan sin efecto. El receptor no puede ser confundido, dominado ni aterrorizado mientras dure.",
+      "source_examples": [
+        "Habilidad del Guerrero tier 3 (activo en combate, 3 turnos)",
+        "Ítem de rareza alta (Medallón de la Voluntad: pasivo de run)",
+        "Estado de meditación pre-combate (habilidad tier 3 del Errante)"
+      ],
+      "duration_type": "turns",
+      "default_duration_value": 3,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "exotic_psychic_terror_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "exotic_psychic_confusion_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "status_confused_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "influence_domination_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "influence_charm_social",
+          "level": "immune"
+        },
+        {
+          "vectorId": "influence_intimidate",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "exotic_psychic_phobia_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_psychic_willpower_crush",
+          "level": "resist_75"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "exotic_psychic_direct_pain",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "pain_bypasses_will_focus"
+          }
+        }
+      ],
+      "forced_state": null,
+      "vfx_hint": "faint_gold_aura_around_head",
+      "icon_hint": "iron_will_icon",
+      "design_notes": "AP-6: subido a tier 3 + noCycling. Justificación: impenetrabilidad mental total ES la identidad del buff. Con 7 entradas immune, bajar todas a resist_75 lo convertiría en 'difícil de influenciar', no en 'inamovible mentalmente'. Duración corta (3 turnos) + noCycling + vulnerabilidad al dolor directo son los limitadores. La concentración extrema amplifica la percepción del dolor físico bruto: el dolor no es influencia psíquica, es sensación pura."
+    },
+    {
+      "id": "buff_rune_of_grounding",
+      "name": "Runa de Tierra",
+      "type": "buff",
+      "description": "Una runa de tierra grabada en el receptor lo conecta a la estabilidad elemental. Absorbe y disipa energía eléctrica con alta eficiencia. El receptor actúa como conductor a tierra: la electricidad pasa a través con daño muy reducido.",
+      "source_examples": [
+        "Hechizo del Mago de tier 1 (Grounding Rune: barato, específico)",
+        "Ítem de rareza baja (Botas con Clavos de Tierra)"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": 5,
+      "source_tier": 1,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "elemental_electric_discharge_",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_electric_status_paralysis",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_electric_status_shocked",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_electric_conduction_metal",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_electric_arc_spread",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "elemental_electric_overload_construct",
+          "level": "resist_50"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorIdPrefix": "elemental_earth_",
+          "level": "vulnerable"
+        }
+      ],
+      "forced_state": null,
+      "special_mechanic": "electric_vectors_conducted_through_receptor_to_ground_hit_adjacent_metallic_entities",
+      "vfx_hint": "earth_rune_glowing_on_chest",
+      "icon_hint": "grounding_rune_icon",
+      "design_notes": "AP-6: mantenido en tier 1, todas las immune bajadas a resist_75. Justificación: una runa básica de tierra de tier 1 da alta resistencia eléctrica, no inmunidad total. Resist_75 a todas las descargas sigue siendo muy efectivo para un hechizo barato. La mecánica especial de conducción a entidades metálicas adyacentes se conserva: la electricidad no desaparece, se redirige."
+    },
+    {
+      "id": "curse_weight_of_sins",
+      "name": "Peso de los Pecados",
+      "type": "curse",
+      "description": "Una maldición acumulativa que se vuelve más pesada con cada acción ofensiva que realiza el receptor. Cada ataque exitoso añade 1 stack. A 5 stacks, el receptor sufre penalización de movimiento grave. A 10 stacks, queda inmovilizado 1 turno.",
+      "source_examples": [
+        "Altar profanado (aplicado al entrar en sala)",
+        "Boss de capítulo final como aura pasiva",
+        "run_curse_conditional basado en kills acumulados"
+      ],
+      "duration_type": "run",
+      "default_duration_value": -1,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [],
+      "vulnerabilities_granted": [
+        {
+          "vectorIdPrefix": "movement_forced_",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "stacks_gte_5"
+          }
+        }
+      ],
+      "stack_thresholds": {
+        "5": {
+          "applies": "stat_debuff_dex_major"
+        },
+        "10": {
+          "applies": "status_immobile_rooted",
+          "duration": 1
+        }
+      },
+      "forced_state": null,
+      "vfx_hint": "dark_chains_appearing_progressively_on_limbs",
+      "icon_hint": "weight_of_sins_icon",
+      "design_notes": "AP-6 (corrección): añadido no_cycling: true. Justificación de coherencia: curses tier 3 con duration run siguen la misma regla que buffs tier 3 para evitar aplicaciones repetidas. La maldición acumulativa castiga la agresividad excesiva del Errante y el Guerrero. Purificable con exotic_sacred_purify o run_corruption_cleanse."
+    },
+    {
+      "id": "buff_void_step",
+      "name": "Paso del Vacío",
+      "type": "buff",
+      "description": "El receptor se mueve parcialmente por el plano del vacío durante su desplazamiento. El movimiento no genera sonido, rastro de pasos ni perturbación de vibración. Solo el punto de llegada es perceptible para los enemigos.",
+      "source_examples": [
+        "Habilidad del Pícaro de tier 3 (Void Step: activo de desplazamiento central)",
+        "Rasgo racial de Sombra (paso del vacío innato permanente)"
+      ],
+      "duration_type": "turns",
+      "default_duration_value": 2,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorId": "stealth_noise_major",
+          "level": "immune"
+        },
+        {
+          "vectorId": "stealth_noise_minor",
+          "level": "immune"
+        },
+        {
+          "vectorId": "stealth_trail_footprint",
+          "level": "immune"
+        },
+        {
+          "vectorId": "sound_vibration_detect",
+          "level": "immune",
+          "condition": {
+            "type": "custom",
+            "value": "during_movement_only"
+          }
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "exotic_dimensional_rift_pull",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_dimensional_displacement",
+          "level": "vulnerable"
+        }
+      ],
+      "forced_state": null,
+      "vfx_hint": "faint_void_shimmer_at_destination_only",
+      "icon_hint": "void_step_icon",
+      "design_notes": "AP-6: subido a tier 3 + noCycling. Justificación: moverse sin generar ningún rastro de detección ES la definición del paso por el vacío. Duración muy corta (2 turnos) + noCycling son los limitadores de abuso. La vulnerabilidad dimensional es temática: moverse por el vacío expone a fuerzas que actúan en ese plano. Combinado con otros buffs de supresión activa el combo Invisibilidad Táctica Perfecta (B1 combo 7)."
+    },
+    {
+      "id": "buff_toxic_skin",
+      "name": "Piel Tóxica",
+      "type": "buff",
+      "description": "La piel del receptor segrega una toxina de contacto. Cualquier entidad que lo golpee con ataque cuerpo a cuerpo recibe una dosis de veneno. Las heridas del receptor también envenenan al que las causa si usa armas sin empuñadura.",
+      "source_examples": [
+        "Hechizo del Mago de tier 3 (Toxic Skin)",
+        "Rasgo racial de Slime ácido (segregación tóxica innata)",
+        "Poción de rareza alta (Ungüento de Serpiente Mayor)"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": 4,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorId": "elemental_poison_contact_skin",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_status_poisoned",
+          "level": "resist_50"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "heal_state_antidote",
+          "level": "heal"
+        }
+      ],
+      "forced_state": null,
+      "on_melee_contact": {
+        "produces_vector": "elemental_poison_contact_skin",
+        "magnitude": "low",
+        "target": "attacker"
+      },
+      "vfx_hint": "green_sheen_on_skin_with_droplets",
+      "icon_hint": "toxic_skin_icon",
+      "design_notes": "AP-6: subido a tier 3 + noCycling. Justificación: ser inmune al propio veneno es identidad temática central del buff. Sin esa immune, el receptor podría envenenarse a sí mismo al recibir un golpe de rebote, lo que rompería la narrativa. El level heal en antidote es un detalle de diseño: la toxina suprimida libera energía curativa. Subir la fuente a rareza alta (poción mayor) equilibra el acceso."
+    },
+    {
+      "id": "curse_hollow_bones",
+      "name": "Huesos Huecos",
+      "type": "curse",
+      "description": "Los huesos del receptor se vuelven porosos y frágiles como cerámica. Los impactos contundentes tienen efecto desproporcionado. Las fracturas internas se producen con umbrales de daño mucho menores. Los vectores de caída son letales.",
+      "source_examples": [
+        "exotic_curse_direct aplicado por Esqueleto Mago (irónico: el esqueleto maldice los huesos ajenos)",
+        "Trampa ambiental de sala (gas óseo corrosivo)",
+        "Maldición de boss de run"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": 5,
+      "source_tier": 2,
+      "no_cycling": false,
+      "resistances_granted": [],
+      "vulnerabilities_granted": [
+        {
+          "vectorIdPrefix": "physical_external_blunt_",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "physical_internal_bone_fracture",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_gravity_fall_forced",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_gravity_slam_terminal",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "movement_forced_grab_slam_ground",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "movement_forced_vertical_slam",
+          "level": "extreme_vulnerable"
+        }
+      ],
+      "forced_state": null,
+      "stat_modifiers": {
+        "str": -2
+      },
+      "vfx_hint": "pale_cracked_texture_on_skin_visible_through_armor",
+      "icon_hint": "hollow_bones_icon",
+      "design_notes": "Sin cambios por AP-6: curse sin entradas immune. Solo vulnerabilidades. El Guerrero o el Constructo con builds de slam ejecutan al receptor casi garantizadamente. La ironía del Esqueleto Mago usándola es intencionada: canon flavor del sistema."
+    },
+    {
+      "id": "buff_acid_immunity_slime_trait",
+      "name": "Inmunidad Ácida (Rasgo Slime)",
+      "type": "buff",
+      "description": "El cuerpo gelatinoso del Slime es completamente inerte ante el ácido. El ácido es absorbido como nutriente y fortalece al Slime. Los pools de ácido son su hábitat natural.",
+      "source_examples": [
+        "Rasgo racial innato permanente de todas las variantes de Slime",
+        "Buff temporal por poción exótica (Esencia de Slime: aplicable al jugador)"
+      ],
+      "duration_type": "permanent",
+      "default_duration_value": -1,
+      "source_tier": null,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "elemental_acid_",
+          "level": "heal"
+        },
+        {
+          "vectorId": "terrain_fluid_place_acid",
+          "level": "heal"
+        },
+        {
+          "vectorId": "fluid_acid_react_organic",
+          "level": "immune"
+        },
+        {
+          "vectorId": "fluid_acid_react_water",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_skin",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_poison_contact_wound",
+          "level": "resist_75"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorIdPrefix": "physical_external_slash_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorIdPrefix": "physical_external_pierce_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_sonic_shatter",
+          "level": "extreme_vulnerable"
+        }
+      ],
+      "forced_state": null,
+      "vfx_hint": "green_translucent_body_absorbing_acid_as_glow",
+      "icon_hint": "acid_immunity_slime_icon",
+      "design_notes": "AP-6 exento: rasgo racial permanente (duration_type permanent, source_tier null). Las inmunidades permanentes de raza no están sujetas a AP-6 según la tabla del buff Piel de Acero. El level heal en ácido implementa el uso más directo del ResistanceLevel heal del catálogo."
+    },
+    {
+      "id": "buff_necrotic_aura_skeleton_trait",
+      "name": "Aura Necrótica (Rasgo Esqueleto)",
+      "type": "buff",
+      "description": "La energía de no-muerto que mantiene unido al esqueleto irradia como aura pasiva. Los vectores de veneno y hemorragia son ineficaces. Los vectores de corrupción oscura lo potencian.",
+      "source_examples": [
+        "Rasgo racial innato permanente de todas las variantes de Esqueleto",
+        "Potenciado por Esqueleto Mago con exotic_dark_corruption_aura activa"
+      ],
+      "duration_type": "permanent",
+      "default_duration_value": -1,
+      "source_tier": null,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "status_bleed_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_internal_hemorrhage_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_status_poisoned",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_skin",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_contact_wound",
+          "level": "immune"
+        },
+        {
+          "vectorId": "elemental_poison_necrosis_spread",
+          "level": "immune"
+        },
+        {
+          "vectorId": "metabolic_dehydration",
+          "level": "immune"
+        },
+        {
+          "vectorId": "metabolic_exhaustion",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_dark_corruption_aura",
+          "level": "heal"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorIdPrefix": "physical_external_blunt_",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "exotic_aligned_smite_undead",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_holy_beam",
+          "level": "extreme_vulnerable"
+        }
+      ],
+      "forced_state": null,
+      "vfx_hint": "faint_green_decay_glow_around_bones",
+      "icon_hint": "necrotic_aura_icon",
+      "design_notes": "AP-6 exento: rasgo racial permanente (duration_type permanent, source_tier null). El perfil definitorio del Esqueleto. El Esqueleto Mago que lanza corruption_aura sobre sus propios aliados esqueleto los cura, no los daña: mecánica de sinergia de grupo con base en el level heal del rasgo."
+    },
+    {
+      "id": "buff_goblin_pack_instinct",
+      "name": "Instinto de Manada (Rasgo Goblin)",
+      "type": "buff",
+      "description": "Los Goblins son exponencialmente más peligrosos en grupo. Mientras haya al menos otro Goblin vivo en la sala, el receptor gana bonificaciones de ataque y resistencia al miedo. Si es el último Goblin en pie, pierde las bonificaciones y gana vulnerabilidad al terror.",
+      "source_examples": [
+        "Rasgo racial innato permanente de todas las variantes de Goblin"
+      ],
+      "duration_type": "permanent",
+      "default_duration_value": -1,
+      "source_tier": null,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorId": "exotic_psychic_terror_minor",
+          "level": "immune",
+          "condition": {
+            "type": "custom",
+            "value": "ally_goblin_alive_in_room"
+          }
+        },
+        {
+          "vectorId": "exotic_psychic_terror_major",
+          "level": "resist_75",
+          "condition": {
+            "type": "custom",
+            "value": "ally_goblin_alive_in_room"
+          }
+        },
+        {
+          "vectorId": "status_panic",
+          "level": "resist_50",
+          "condition": {
+            "type": "custom",
+            "value": "ally_goblin_alive_in_room"
+          }
+        },
+        {
+          "vectorId": "influence_intimidate",
+          "level": "resist_75",
+          "condition": {
+            "type": "custom",
+            "value": "ally_goblin_alive_in_room"
+          }
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "exotic_psychic_terror_major",
+          "level": "extreme_vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "last_goblin_in_room"
+          }
+        },
+        {
+          "vectorId": "status_panic",
+          "level": "extreme_vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "last_goblin_in_room"
+          }
+        }
+      ],
+      "stat_modifiers": {},
+      "forced_state": null,
+      "vfx_hint": "faint_green_tribal_marks_glow_when_allies_near",
+      "icon_hint": "pack_instinct_icon",
+      "design_notes": "AP-6 exento: rasgo racial permanente (source_tier null). Implementa la IA cooperativa de Goblins como mecánica de resistencia condicional. La inversión al quedarse solo es el diseño clave: matar Goblins uno a uno es más arriesgado que parecer; el último Goblin vivo entra en pánico extremo. Incentiva al jugador a hacer AoE o a aislar al líder primero."
+    },
+    {
+      "id": "buff_goblin_scout_ambush_trait",
+      "name": "Especialista en Emboscada (Rasgo Goblin Scout)",
+      "type": "buff",
+      "description": "El Goblin Scout ha perfeccionado el ataque desde las sombras. Su primer ataque en combate desde stealth aplica un multiplicador de daño y genera ruido mínimo. Tiene visión nocturna parcial innata y detecta rastros de olor orgánico automáticamente.",
+      "source_examples": [
+        "Rasgo racial innato del subtipo Goblin Scout"
+      ],
+      "duration_type": "permanent",
+      "default_duration_value": -1,
+      "source_tier": null,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorId": "light_blind_darkness_veil",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "light_reduce_dim",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "stealth_noise_minor",
+          "level": "immune"
+        },
+        {
+          "vectorId": "stealth_smell_suppression",
+          "level": "resist_50"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "light_blind_flash",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_blinding_damage",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "sound_alarm_alert_escalation",
+          "level": "vulnerable"
+        }
+      ],
+      "stat_modifiers": {
+        "ste": 4,
+        "dex": 3
+      },
+      "forced_state": null,
+      "special_mechanic": "first_attack_from_stealth_magnitude_elevated_one_tier",
+      "vfx_hint": "yellow_slit_eyes_glow_in_dark",
+      "icon_hint": "goblin_scout_trait_icon",
+      "design_notes": "AP-6 exento: rasgo racial permanente. Define al Goblin Scout como amenaza de apertura de combate. La immune a ruido menor refleja su entrenamiento en movimiento silencioso. La vulnerabilidad a destellos y alarmas es el contrajuego: forzarlo a revelar su posición antes de atacar."
+    },
+    {
+      "id": "buff_shadow_spectral_trait",
+      "name": "Naturaleza Espectral (Rasgo Sombra/Espectro)",
+      "type": "buff",
+      "description": "La Sombra existe parcialmente en el plano físico y parcialmente en el del vacío. Los ataques físicos la atraviesan con efecto muy reducido. La oscuridad la alimenta. La luz la destruye. Levita permanentemente, sin interactuar con el suelo.",
+      "source_examples": [
+        "Rasgo racial innato permanente de todas las variantes de Sombra y Espectro"
+      ],
+      "duration_type": "permanent",
+      "default_duration_value": -1,
+      "source_tier": null,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "physical_external_slash_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_external_pierce_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_external_blunt_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_external_crush_",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "physical_external_explosion_wave",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_dark_void_drain",
+          "level": "heal"
+        },
+        {
+          "vectorId": "elemental_dark_shadow_strike",
+          "level": "heal"
+        },
+        {
+          "vectorId": "elemental_dark_corruption",
+          "level": "heal"
+        },
+        {
+          "vectorId": "exotic_dark_corruption_aura",
+          "level": "heal"
+        },
+        {
+          "vectorId": "light_blind_darkness_veil",
+          "level": "immune"
+        },
+        {
+          "vectorId": "light_reduce_extinguish",
+          "level": "heal"
+        },
+        {
+          "vectorIdPrefix": "terrain_fluid_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "terrain_trap_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "movement_forced_slip",
+          "level": "immune"
+        },
+        {
+          "vectorId": "stealth_trail_footprint",
+          "level": "immune"
+        },
+        {
+          "vectorId": "stealth_smell_organic",
+          "level": "immune"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "elemental_light_holy_beam",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_radiant_burst",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_light_blinding_damage",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_aligned_smite_undead",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_sacred_divine_smite",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_sacred_holy_aura",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "light_increase_flare",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "light_increase_ambient_create",
+          "level": "vulnerable"
+        }
+      ],
+      "forced_state": "ethereal",
+      "vfx_hint": "dark_translucent_silhouette_with_void_wisps",
+      "icon_hint": "shadow_spectral_trait_icon",
+      "design_notes": "AP-6 exento: rasgo racial permanente. El perfil más extremo del catálogo: inmunidad total al daño físico externo y al terreno, pero extreme_vulnerable a luz sagrada. Define completamente el loop de juego contra Sombras: inútil usar armas físicas, obligatorio usar luz. Los múltiples heal en oscuridad hacen que apagar antorchas sea contraproducente contra este enemigo."
+    },
+    {
+      "id": "buff_shadow_void_feeding_trait",
+      "name": "Alimentación del Vacío (Rasgo Sombra)",
+      "type": "buff",
+      "description": "La Sombra se alimenta de energía vital y de la desesperación de sus presas. Cada turno que una entidad orgánica está dentro de su radio de aura, la Sombra drena una pequeña cantidad de su vitalidad. En oscuridad total, el drenaje se duplica.",
+      "source_examples": [
+        "Rasgo racial innato del subtipo Sombra (no Espectro básico)"
+      ],
+      "duration_type": "permanent",
+      "default_duration_value": -1,
+      "source_tier": null,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorId": "exotic_aligned_blessing_break",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "exotic_psychic_terror_major",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_psychic_terror_minor",
+          "level": "immune"
+        },
+        {
+          "vectorId": "status_panic",
+          "level": "immune"
+        },
+        {
+          "vectorId": "influence_intimidate",
+          "level": "immune"
+        },
+        {
+          "vectorId": "metabolic_exhaustion",
+          "level": "immune"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "exotic_sacred_purify",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "heal_state_cleanse",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "applied_as_aoe_breaking_drain"
+          }
+        }
+      ],
+      "stat_modifiers": {},
+      "forced_state": null,
+      "special_mechanic": "passive_life_drain_aura_1tile_radius_1_damage_per_turn_organic_entities",
+      "vfx_hint": "dark_tendrils_reaching_toward_nearest_organic",
+      "icon_hint": "void_feeding_icon",
+      "design_notes": "AP-6 exento: rasgo racial permanente. La immune al terror es narrativamente perfecta: la entidad que es el terror mismo no puede ser aterrorizada. El aura pasiva de drenaje implementa el concepto de 'la oscuridad consume' mecánicamente: estar cerca de una Sombra cuesta HP sin que ataque. La purificación sagrada es el contrajuego directo."
+    },
+    {
+      "id": "buff_construct_structural_shell",
+      "name": "Carcasa Estructural (Rasgo Constructo/Golem)",
+      "type": "buff",
+      "description": "El Constructo está fabricado de materiales inorgánicos de alta densidad. Es completamente inmune a vectores biológicos, químicos orgánicos y estados mentales. Su masa lo ancla naturalmente. Pero la electricidad y el ácido encuentran grietas estructurales.",
+      "source_examples": [
+        "Rasgo racial innato permanente de todas las variantes de Constructo y Golem"
+      ],
+      "duration_type": "permanent",
+      "default_duration_value": -1,
+      "source_tier": null,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "status_bleed_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "physical_internal_hemorrhage_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_organ_crush",
+          "level": "immune"
+        },
+        {
+          "vectorId": "physical_internal_vascular_rupture",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "elemental_poison_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "metabolic_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "exotic_psychic_terror_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "exotic_psychic_confusion_",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "influence_domination_",
+          "level": "immune"
+        },
+        {
+          "vectorId": "influence_charm_social",
+          "level": "immune"
+        },
+        {
+          "vectorId": "influence_intimidate",
+          "level": "immune"
+        },
+        {
+          "vectorIdPrefix": "movement_forced_push_",
+          "level": "resist_75"
+        },
+        {
+          "vectorIdPrefix": "movement_forced_pull_",
+          "level": "resist_75"
+        },
+        {
+          "vectorIdPrefix": "physical_external_slash_",
+          "level": "resist_50"
+        },
+        {
+          "vectorIdPrefix": "physical_external_pierce_",
+          "level": "resist_50"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "elemental_electric_overload_construct",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_electric_conduction_metal",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "physical_structural_construct_core",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "physical_structural_construct_joint",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "physical_structural_construct_limb",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_acid_corrode_armor",
+          "level": "vulnerable"
+        }
+      ],
+      "forced_state": null,
+      "stat_modifiers": {
+        "str": 4
+      },
+      "vfx_hint": "stone_or_metal_texture_solid_no_organic_fx",
+      "icon_hint": "construct_shell_icon",
+      "design_notes": "AP-6 exento: rasgo racial permanente. El perfil más resistente del catálogo en vectores biológicos y psíquicos, con los puntos débiles estructurales más explotables: electricidad a su núcleo y ácido a sus juntas. El jugador que aprende el Codex descubre que los ataques de veneno y terror son completamente inútiles, y que la Runa de Tierra del Mago lo vuelve inimune incluso a su propio punto débil eléctrico temporalmente."
+    },
+    {
+      "id": "buff_run_fortune_blessed",
+      "name": "Bendición de Fortuna",
+      "type": "buff",
+      "description": "Una bendición cae sobre la run actual del jugador. Los eventos aleatorios se inclinan favorablemente. Los drops de loot tienen probabilidad elevada de tier superior. Las maldiciones condicionales tardan más en activarse.",
+      "source_examples": [
+        "Altar sagrado intacto (interacción de exploración: rezar sin ofrenda)",
+        "Ítem de run de rareza épica (Trébol de Cuatro Hojas Mágico)",
+        "meta_karma_positive alcanzando umbral máximo"
+      ],
+      "duration_type": "run",
+      "default_duration_value": -1,
+      "source_tier": 2,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorId": "run_curse_conditional",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "run_corruption_threshold",
+          "level": "resist_25"
+        },
+        {
+          "vectorId": "meta_luck_negative",
+          "level": "resist_50"
+        }
+      ],
+      "vulnerabilities_granted": [],
+      "stat_modifiers": {},
+      "forced_state": null,
+      "special_mechanic": "random_events_biased_positive_loot_tier_plus_one_probability_20pct",
+      "vfx_hint": "faint_golden_sparkle_on_ui_border",
+      "icon_hint": "fortune_blessed_icon",
+      "design_notes": "Buff de run sin immune: tier 2 con resist_50 máximo. La bendición no elimina la mala suerte, solo la mitiga. Contrajuego elegante: recibir una maldición de boss anula este buff automáticamente (los curses de boss son incompatibles con la bendición activa). Incentiva exploración de altares antes del primer combate."
+    },
+    {
+      "id": "buff_run_death_pact",
+      "name": "Pacto de Muerte",
+      "type": "buff",
+      "description": "El jugador firma un pacto con una fuerza oscura de la mazmorra. Al llegar a 0 HP, en vez de morir, se activa una vez por run la resurrección automática con 1 HP. A cambio, el daño máximo que puede hacer por turno queda limitado permanentemente.",
+      "source_examples": [
+        "Entidad oscura de sala especial (NPC de la mazmorra: oferta de pacto)",
+        "Ítem legendario maldito de run (Contrato Infernal)"
+      ],
+      "duration_type": "run",
+      "default_duration_value": -1,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorId": "run_corruption_progressive",
+          "level": "resist_25"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "exotic_aligned_blessing_break",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_sacred_purify",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "purify_breaks_pact_removing_both_benefit_and_cost"
+          }
+        }
+      ],
+      "stat_modifiers": {},
+      "forced_state": null,
+      "special_mechanic": "one_time_resurrection_at_1hp_per_run_damage_cap_applied_permanently",
+      "vfx_hint": "dark_contract_rune_on_chest_permanent",
+      "icon_hint": "death_pact_icon",
+      "design_notes": "Tier 3 + noCycling: la mecánica de resurrección única es definitoria del buff y justifica el tier. El tradeoff es deliberadamente asimétrico: la resurrección es enorme, el límite de daño duele en runs largas. La purificación sagrada rompe el pacto pero elimina también el beneficio: decisión difícil ante un boss con poca HP."
+    },
+    {
+      "id": "buff_run_runic_augmentation",
+      "name": "Augmento Rúnico",
+      "type": "buff",
+      "description": "Runas de poder antiguo se graban en el cuerpo del receptor al inicio de la run. Cada runa otorga una pequeña resistencia a un tipo de vector. Las runas se activan en cascada si el portador alcanza un umbral de daño recibido en un turno.",
+      "source_examples": [
+        "Altar rúnico de sala de inicio (una vez por run)",
+        "Ítem de run épico (Piedra de Augmento: elige 3 vectores a resistir)"
+      ],
+      "duration_type": "run",
+      "default_duration_value": -1,
+      "source_tier": 2,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorId": "elemental_electric_discharge_direct",
+          "level": "resist_25"
+        },
+        {
+          "vectorId": "elemental_fire_combustion_direct",
+          "level": "resist_25"
+        },
+        {
+          "vectorId": "elemental_cold_freeze_blast",
+          "level": "resist_25"
+        },
+        {
+          "vectorId": "elemental_poison_status_poisoned",
+          "level": "resist_25"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "elemental_sonic_shatter",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "rune_resonance_amplified_by_sonic"
+          }
+        }
+      ],
+      "stat_modifiers": {},
+      "forced_state": null,
+      "special_mechanic": "cascade_activation_at_30pct_hp_loss_in_one_turn_elevates_all_resistances_one_tier_for_1_turn",
+      "vfx_hint": "glowing_runes_carved_on_skin_activate_briefly_on_damage",
+      "icon_hint": "runic_augmentation_icon",
+      "design_notes": "Tier 2 con resist_25: las runas son protección modesta pero consistente de run. La cascada activa la convierte en un escudo de emergencia de 1 turno. El sónico como vulnerabilidad es temático: la resonancia rúnica amplifica la vibración sónica. Pensado para ser apilable con equipo de resistencia específica."
+    },
+    {
+      "id": "buff_run_corruption_scar",
+      "name": "Cicatriz de Corrupción",
+      "type": "curse",
+      "description": "Una cicatriz de energía corrupta queda grabada en el receptor tras sobrevivir a la corrupción oscura. El receptor no puede ser corrompido de nuevo (el daño ya está hecho) pero las entidades que detectan corrupción lo tratan como uno de los suyos.",
+      "source_examples": [
+        "Sobrevivir a run_corruption_threshold sin cleanse",
+        "Ser marcado por exotic_dark_desecrate y no purificarse antes del fin de sala"
+      ],
+      "duration_type": "run",
+      "default_duration_value": -1,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorId": "run_corruption_progressive",
+          "level": "immune",
+          "condition": {
+            "type": "custom",
+            "value": "already_corrupted_cannot_be_more"
+          }
+        },
+        {
+          "vectorId": "exotic_dark_corruption_aura",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "exotic_dark_desecrate",
+          "level": "resist_50"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "exotic_aligned_smite_undead",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "corruption_mark_reads_as_undead_signature"
+          }
+        },
+        {
+          "vectorId": "exotic_sacred_purify",
+          "level": "heal",
+          "condition": {
+            "type": "custom",
+            "value": "purify_cleanses_scar_restoring_1_hp_per_corruption_stack"
+          }
+        }
+      ],
+      "stat_modifiers": {},
+      "forced_state": null,
+      "special_mechanic": "skeleton_and_shadow_entities_do_not_attack_first_if_corruption_scar_visible",
+      "vfx_hint": "dark_scar_mark_visible_on_skin_or_armor",
+      "icon_hint": "corruption_scar_icon",
+      "design_notes": "AP-6: subido a tier 3 + noCycling. La immune condicional (ya corrompido) es la identidad narrativa del buff. Un buff de run que representa sobrevivir a la corrupcion merece tier 3. noCycling previene obtenerlo multiples veces. La mecanica de No-Muertos que no atacan primero abre sigilo ante grupos de Esqueletos."
+    },
+    {
+      "id": "curse_boss_void_consumption",
+      "name": "Consumición del Vacío",
+      "type": "curse",
+      "description": "La maldición de boss que consume la esencia del jugador con cada turno que pasa. El maxHP se reduce 2 puntos por turno. No puede ser curado ni reducida en duración: solo puede ser rota matando al boss que la aplicó. Si el boss muere, se invierte y el jugador recupera todo el maxHP perdido.",
+      "source_examples": [
+        "Boss de sala final (aura pasiva al inicio de fase 2)",
+        "Boss de sala especial con mecánica de presión temporal"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": -1,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "exotic_aligned_life_drain",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "elemental_dark_void_drain",
+          "level": "extreme_vulnerable"
+        }
+      ],
+      "stat_modifiers": {},
+      "forced_state": null,
+      "special_mechanic": "max_hp_reduced_2_per_turn_reversed_on_boss_death_unremovable_until_boss_dead",
+      "vfx_hint": "dark_void_tendrils_slowly_consuming_hp_bar_edges",
+      "icon_hint": "void_consumption_icon",
+      "design_notes": "Tier 3 + noCycling: la maldición de boss definitoria de presión de tiempo. Cada turno que el jugador no mata al boss pierde maxHP potencial. El reversal al matar al boss es el momento de alivio más satisfactorio del diseño: el DPS agresivo es recompensado con todo el HP recuperado. Diseñada para impedir el juego ultra-conservador contra jefes."
+    },
+    {
+      "id": "curse_boss_temporal_unraveling",
+      "name": "Deshilachamiento Temporal",
+      "type": "curse",
+      "description": "El boss fragmenta la línea temporal del receptor. Cada 3 turnos, las acciones del receptor se revierten al estado del turno anterior: el daño hecho se deshace, los buffs aplicados desaparecen, la posición vuelve al punto de hace 3 turnos. El receptor retiene sus acciones pero pierde todos los efectos.",
+      "source_examples": [
+        "Boss con afinidad temporal (futuro: boss de la sala del reloj)",
+        "exotic_temporal_causality_break amplificado a nivel de maldición de boss"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": -1,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "exotic_temporal_compression",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_temporal_dilation_hostile",
+          "level": "extreme_vulnerable"
+        }
+      ],
+      "stat_modifiers": {},
+      "forced_state": null,
+      "special_mechanic": "every_3_turns_revert_all_effects_applied_by_receptor_to_state_3_turns_ago",
+      "vfx_hint": "ghostly_echo_of_previous_position_visible_behind_entity",
+      "icon_hint": "temporal_unraveling_icon",
+      "design_notes": "Tier 3 + noCycling: maldición de boss de diseño disruptivo extremo. Obliga al jugador a cambiar de estrategia: los daños de tick (veneno, sangrado) son especialmente devastados. Los daños instantáneos altos son la única respuesta efectiva. La compresión y dilatación temporal como extreme_vulnerable crean un combate meta: usar el tiempo contra el boss que manipula el tiempo."
+    },
+    {
+      "id": "curse_boss_psychic_brand",
+      "name": "Marca Psíquica",
+      "type": "curse",
+      "description": "El boss graba su presencia en la mente del receptor. El receptor ve una imagen del boss en cada dirección que mire, causando confusión de dirección progresiva. Cada turno sin matar al boss añade 1 stack de desorientación. A 5 stacks, el receptor no puede elegir objetivo conscientemente.",
+      "source_examples": [
+        "Boss con afinidad psíquica (Sombra Mayor, Espectro Antiguo)",
+        "exotic_psychic_mind_blast en magnitud extreme como maldición de combate"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": -1,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [],
+      "vulnerabilities_granted": [
+        {
+          "vectorIdPrefix": "exotic_psychic_confusion_",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorIdPrefix": "status_confused_",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "exotic_psychic_direct_pain",
+          "level": "vulnerable"
+        }
+      ],
+      "stat_modifiers": {},
+      "forced_state": null,
+      "stack_thresholds": {
+        "3": {
+          "applies": "status_confused_direction",
+          "duration": 1
+        },
+        "5": {
+          "applies": "status_confused_target",
+          "duration": -1
+        }
+      },
+      "special_mechanic": "stacks_increase_each_turn_boss_alive_iron_will_buff_pauses_stacking",
+      "vfx_hint": "distorted_vision_edges_boss_face_flickering",
+      "icon_hint": "psychic_brand_icon",
+      "design_notes": "Tier 3 + noCycling: la maldición de boss de presión psíquica. El buff_iron_will pausa el stacking (no lo elimina) convirtiendo ese buff en la respuesta táctica específica. A 5 stacks el jugador literalmente no puede controlar a quién ataca. Diseñada para el enfrentamiento contra la Sombra Mayor como boss de final de zona."
+    },
+    {
+      "id": "buff_temporal_haste_echo",
+      "name": "Eco de Celeridad",
+      "type": "buff",
+      "description": "Un eco temporal permite al receptor actuar con un mínimo de retraso. Su siguiente acción se ejecuta con anticipación: puede reaccionar a vectores de movimiento forzado antes de que completen su efecto. Un solo uso por activación.",
+      "source_examples": [
+        "Hechizo del Mago de tier 2 (Time Echo: duración de 1 uso)",
+        "Ítem de rareza media (Reloj de Arena Partido)"
+      ],
+      "duration_type": "turns",
+      "default_duration_value": 3,
+      "source_tier": 2,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorId": "status_stun_concussion",
+          "level": "resist_75",
+          "condition": {
+            "type": "custom",
+            "value": "echo_charge_available"
+          }
+        },
+        {
+          "vectorIdPrefix": "movement_forced_grab_",
+          "level": "resist_50",
+          "condition": {
+            "type": "custom",
+            "value": "echo_charge_available"
+          }
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "exotic_temporal_dilation_hostile",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "echo_interacts_with_dilation_dissonance"
+          }
+        }
+      ],
+      "stat_modifiers": {
+        "dex": 2
+      },
+      "forced_state": null,
+      "special_mechanic": "one_charge_allows_reaction_to_forced_movement_reducing_effect_by_50pct",
+      "vfx_hint": "faint_after_image_slightly_ahead_of_entity",
+      "icon_hint": "temporal_haste_echo_icon",
+      "design_notes": "Tier 2 con resist_75 condicional (solo con carga disponible). El sistema de carga única evita el abuso de resist_75 continuo. La DEX bonus hace al buff útil incluso sin la carga activa. La dilatación temporal crea una disonancia al interactuar con el eco: dos efectos temporales opuestos se interfieren."
+    },
+    {
+      "id": "buff_gravity_attunement",
+      "name": "Sintonía Gravitacional",
+      "type": "buff",
+      "description": "El receptor desarrolla una afinidad con los vectores gravitacionales. Los campos de gravedad aumentada lo fortalecen en vez de aplastarlo. Los saltos y caídas controladas son su herramienta de combate. Los vectores de inversión gravitacional los ejecuta con ventaja.",
+      "source_examples": [
+        "Hechizo del Mago de tier 2 (Gravity Sync)",
+        "Rasgo de mutación positiva de run (run_mutation_positive: sintonía gravitacional)"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": 5,
+      "source_tier": 2,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorId": "exotic_gravity_crush_field",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "exotic_gravity_crush_increased",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "exotic_gravity_fall_forced",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "exotic_gravity_slam_terminal",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "movement_forced_vertical_slam",
+          "level": "resist_50"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "exotic_gravity_null",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "gravity_null_removes_attunement_disorientation"
+          }
+        }
+      ],
+      "stat_modifiers": {
+        "str": 2
+      },
+      "forced_state": null,
+      "special_mechanic": "gravity_vectors_produced_by_receptor_elevated_one_magnitude_tier",
+      "vfx_hint": "heavy_footstep_ground_cracks_subtle_gravity_distortion",
+      "icon_hint": "gravity_attunement_icon",
+      "design_notes": "Tier 2 con resist_75 máximo. La mecánica especial es el diseño clave: los vectores gravitacionales propios del receptor ganan un tier de magnitud. El Constructo Golem con sintonía gravitacional y su slam innato se vuelve devastadoramente más peligroso. La gravedad nula como vulnerable es el contrajuego: sin gravedad, la sintonía pierde su referencia."
+    },
+    {
+      "id": "buff_metabolic_surge",
+      "name": "Explosión Metabólica",
+      "type": "buff",
+      "description": "El metabolismo del receptor se acelera al límite. Regenera HP por turno, actúa con mayor rapidez, y resiste los efectos de veneno y agotamiento. Al final del buff, sufre un crash metabólico que aplica agotamiento y hambre.",
+      "source_examples": [
+        "Poción de Adrenalina (consumible de rareza media)",
+        "Habilidad del Errante tier 2 (Surge: activa en combate)"
+      ],
+      "duration_type": "turns",
+      "default_duration_value": 4,
+      "source_tier": 2,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorId": "elemental_poison_status_poisoned",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_poison_paralysis_motor",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "metabolic_exhaustion",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "status_slow_major",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "status_slow_minor",
+          "level": "resist_75"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "elemental_cold_ambient_hypothermia",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "overheated_metabolism_more_sensitive_to_cold_shock"
+          }
+        }
+      ],
+      "stat_modifiers": {
+        "dex": 3,
+        "str": 1
+      },
+      "forced_state": null,
+      "special_mechanic": "on_buff_expiry_applies_metabolic_exhaustion_and_metabolic_hunger_medium_magnitude",
+      "vfx_hint": "heat_shimmer_around_body_rapid_breathing_vfx",
+      "icon_hint": "metabolic_surge_icon",
+      "design_notes": "Tier 2 con resist_75 máximo a veneno/ralentización. El crash al expirar es el coste diferido: el jugador gana 4 turnos de rendimiento superior a cambio de 2-3 turnos de penalización posterior. Obliga a planificar cuándo usar la Explosión: al inicio del combate para terminar rápido, o al final cuando el crash ya no importa."
+    },
+    {
+      "id": "buff_dimensional_anchor_field",
+      "name": "Campo de Anclaje Dimensional",
+      "type": "buff",
+      "description": "Un campo de anclaje dimensional envuelve al receptor, estabilizando su posición en el plano físico. Ninguna fuerza dimensional puede desplazarlo o acceder a él desde otro plano. Las Sombras no pueden atravesarlo con su forma espectral.",
+      "source_examples": [
+        "Hechizo del Mago de tier 3 (Dimensional Lock: costoso, crítico contra Sombras)",
+        "Ítem de rareza épica (Cristal de Anclaje: pasivo de run)"
+      ],
+      "duration_type": "turns",
+      "default_duration_value": 4,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorId": "exotic_dimensional_displacement",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_dimensional_rift_pull",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_temporal_phase_shift",
+          "level": "immune"
+        },
+        {
+          "vectorId": "movement_forced_teleport_random",
+          "level": "immune"
+        },
+        {
+          "vectorId": "movement_forced_teleport_targeted",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_gravity_null",
+          "level": "resist_75"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "elemental_earth_seismic_wave",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "anchor_amplifies_ground_vibration_transfer"
+          }
+        }
+      ],
+      "forced_state": null,
+      "vfx_hint": "geometric_anchor_rune_hovering_around_entity",
+      "icon_hint": "dimensional_anchor_icon",
+      "design_notes": "Tier 3 + noCycling: immune a todo desplazamiento dimensional es su identidad. Contramedida directa y necesaria contra Sombras (que usan phase_shift innato) y el Mago enemigo con desplazamiento. La vulnerabilidad sísmica es consecuente: estar anclado al suelo transfiere toda la vibración sísmica sin amortiguación."
+    },
+    {
+      "id": "buff_holy_consecration_aura",
+      "name": "Aura de Consagración",
+      "type": "buff",
+      "description": "El receptor emana un aura sagrada que purifica el terreno en su radio inmediato. Los vectores oscuros y de corrupción se debilitan en el aura. Los No-Muertos en el radio sufren penalización continua. El terreno bajo el receptor se consagra permanentemente.",
+      "source_examples": [
+        "Hechizo del Mago de tier 3 (Holy Aura: alta rareza, requiere INT máxima)",
+        "Ítem legendario (Reliquia Consagrada: pasivo de run de rareza mítica)"
+      ],
+      "duration_type": "combat",
+      "default_duration_value": 5,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "exotic_dark_",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "exotic_dark_corruption_aura",
+          "level": "immune"
+        },
+        {
+          "vectorId": "exotic_curse_direct",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "exotic_curse_doom",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "run_corruption_progressive",
+          "level": "resist_50"
+        },
+        {
+          "vectorId": "elemental_dark_void_drain",
+          "level": "resist_75"
+        },
+        {
+          "vectorId": "elemental_dark_shadow_strike",
+          "level": "resist_75"
+        }
+      ],
+      "vulnerabilities_granted": [],
+      "stat_modifiers": {},
+      "forced_state": null,
+      "special_mechanic": "undead_entities_in_2tile_radius_receive_minor_holy_damage_per_turn_terrain_under_bearer_consecrated_permanent",
+      "vfx_hint": "golden_light_radiating_from_ground_under_entity",
+      "icon_hint": "holy_consecration_icon",
+      "design_notes": "Tier 3 + noCycling: immune a corrupción oscura como identidad. El daño continuo a No-Muertos en radio convierte al portador en una zona de peligro pasiva para Esqueletos y Sombras. El terreno consagrado permanente tiene valor estratégico post-combate: la sala queda levemente purificada para las run_corruption future checks."
+    },
+    {
+      "id": "buff_shadow_meld",
+      "name": "Fusión con las Sombras",
+      "type": "buff",
+      "description": "El receptor se funde completamente con la oscuridad circundante. En zonas de luz reducida o nula, se vuelve prácticamente invisible: su silueta se disuelve en las sombras. Solo perceptible por entidades con visión nocturna o detección activa.",
+      "source_examples": [
+        "Habilidad del Pícaro de tier 2 (Shadow Meld: requiere zona oscura para activar)",
+        "Rasgo racial de Sombra (forma pasiva en oscuridad)"
+      ],
+      "duration_type": "turns",
+      "default_duration_value": 4,
+      "source_tier": 2,
+      "no_cycling": false,
+      "resistances_granted": [
+        {
+          "vectorId": "stealth_detect_active",
+          "level": "resist_50",
+          "condition": {
+            "type": "terrain_tag",
+            "value": "dark_zone"
+          }
+        },
+        {
+          "vectorId": "stealth_break",
+          "level": "resist_75",
+          "condition": {
+            "type": "terrain_tag",
+            "value": "dark_zone"
+          }
+        },
+        {
+          "vectorId": "light_mark_reveal_hidden",
+          "level": "resist_50",
+          "condition": {
+            "type": "terrain_tag",
+            "value": "dark_zone"
+          }
+        },
+        {
+          "vectorId": "stealth_smell_organic",
+          "level": "resist_25"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "light_increase_flare",
+          "level": "extreme_vulnerable"
+        },
+        {
+          "vectorId": "light_increase_ambient_create",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "elemental_fire_flame_persistent",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "light_from_fire_breaks_meld"
+          }
+        }
+      ],
+      "stat_modifiers": {
+        "ste": 5
+      },
+      "forced_state": null,
+      "special_mechanic": "buff_only_activates_in_dark_zone_terrain_tag_deactivates_in_lit_areas",
+      "vfx_hint": "entity_silhouette_blends_with_shadow_edges_blurry",
+      "icon_hint": "shadow_meld_icon",
+      "design_notes": "Tier 2 con resist_75 máximo condicional (solo en dark_zone). La dependencia de terreno es el balance: el Pícaro con Shadow Meld necesita apagar antorchas antes de activarlo, creando una secuencia de preparación táctica. Una sola bengala destruye el meld completamente (extreme_vulnerable a flare). Interactúa con el combo Invisibilidad Táctica Perfecta como uno de sus ingredientes."
+    },
+    {
+      "id": "curse_stat_erosion",
+      "name": "Erosión de Atributos",
+      "type": "curse",
+      "description": "Una maldición persistente que erosiona los atributos del receptor con el tiempo. Cada 5 turnos de combate, uno de los atributos base del receptor se reduce en 1 punto de forma permanente para el resto de la run. El atributo afectado rota aleatoriamente.",
+      "source_examples": [
+        "run_curse_stat_permanent amplificado por run_curse_chain activo",
+        "Boss de zona final como efecto de aura de combate largo"
+      ],
+      "duration_type": "run",
+      "default_duration_value": -1,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "stat_debuff_str_major",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "stat_debuff_dex_major",
+          "level": "vulnerable"
+        },
+        {
+          "vectorId": "stat_debuff_int_major",
+          "level": "vulnerable"
+        }
+      ],
+      "stat_modifiers": {},
+      "forced_state": null,
+      "special_mechanic": "every_5_combat_turns_reduce_random_stat_by_1_permanent_for_run",
+      "vfx_hint": "stat_numbers_in_ui_flickering_with_red_tint_every_5_turns",
+      "icon_hint": "stat_erosion_icon",
+      "design_notes": "Tier 3 + noCycling: maldición de run de presión acumulada. No mata en un combate pero destruye el build del jugador a lo largo de múltiples salas. Incentiva el ritmo rápido de run: el jugador que alarga los combates pierde sus stats permanentemente. Purificable únicamente con run_corruption_cleanse de magnitud extreme o ítem de rareza mítica. Diseñada para el late-run como maldición de boss acumulada."
+    },
+    {
+      "id": "buff_berserk_immunity",
+      "name": "Cuerpo de Batalla",
+      "type": "buff",
+      "description": "El receptor ha endurecido su cuerpo a través del combate constante. Durante la run activa, cada kill aumenta su resistencia a daño físico en un pequeño porcentaje, acumulando hasta un máximo. El primer impacto físico de cada combate falla automáticamente.",
+      "source_examples": [
+        "Habilidad pasiva del Guerrero de tier 3 (Battle Hardened: se activa al inicio de run)",
+        "Ítem legendario del Guerrero (Armadura de los Caídos: absorbe kills como resistencia)"
+      ],
+      "duration_type": "run",
+      "default_duration_value": -1,
+      "source_tier": 3,
+      "no_cycling": true,
+      "resistances_granted": [
+        {
+          "vectorIdPrefix": "physical_external_slash_",
+          "level": "resist_25"
+        },
+        {
+          "vectorIdPrefix": "physical_external_blunt_",
+          "level": "resist_25"
+        },
+        {
+          "vectorIdPrefix": "physical_external_pierce_",
+          "level": "resist_25"
+        }
+      ],
+      "vulnerabilities_granted": [
+        {
+          "vectorId": "exotic_psychic_memory_drain",
+          "level": "vulnerable",
+          "condition": {
+            "type": "custom",
+            "value": "battle_memories_make_psychic_drain_more_effective"
+          }
+        }
+      ],
+      "stat_modifiers": {},
+      "forced_state": null,
+      "special_mechanic": "first_physical_attack_per_combat_automatically_negated_kill_stacks_increase_resist_cap_at_10_stacks",
+      "vfx_hint": "battle_scars_glowing_faintly_on_armor",
+      "icon_hint": "battle_body_icon",
+      "design_notes": "Tier 3 + noCycling: el buff de run definitorio del Guerrero. Resist_25 base es modesto pero el primer golpe negado automáticamente por combate es enormemente valioso en combate por turnos: absorber el primer ataque de sorpresa del enemigo. Los kills como stacks de acumulación incentivan el estilo agresivo del Guerrero. La vulnerabilidad a drenaje de memoria es el contrajuego temático: sus recuerdos de batalla son el recurso que puede ser robado."
+    }
+  ],
   "additional_proposals": []
 }
