@@ -67,7 +67,9 @@ export class Dungeon {
   // --- Config -------------------------------------------------
 
   private readonly _scene:        Scene;
-  private readonly _assetManager: AssetManager;
+  // TODO A2-b4.2: assetManager sera usado cuando Dungeon construya salas programaticamente.
+  // @ts-expect-error TS6133 -- campo reservado para A2-b4.2, intencionalmente no leido ahora.
+  private readonly __assetManager: AssetManager;
   private readonly _playerBody:   PhysicsBody;
 
   // --- Estado -------------------------------------------------
@@ -85,7 +87,7 @@ export class Dungeon {
 
   constructor(config: DungeonConfig) {
     this._scene        = config.scene;
-    this._assetManager = config.assetManager;
+    this.__assetManager = config.assetManager;
     this._playerBody   = config.playerBody;
 
     // Escuchar room:enter del bus para actualizar currentRoomId

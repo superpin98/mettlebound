@@ -129,7 +129,7 @@ export class AssetManager {
     }
 
     return {
-      rootNode,
+      rootNode: rootNode as TransformNode,
       animationGroups: entries.animationGroups,
       dispose: () => {
         entries.animationGroups.forEach((ag) => ag.dispose());

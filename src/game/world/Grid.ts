@@ -68,7 +68,7 @@ export class Grid {
    */
   getTile(col: number, row: number): Tile | null {
     if (!this.isInBounds(col, row)) { return null; }
-    return this.tiles[row][col] ?? null;
+    return this.tiles[row]?.[col] ?? null;
   }
 
   /**

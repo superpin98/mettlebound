@@ -6,7 +6,6 @@ import {
   MeshBuilder,
   PhysicsAggregate,
   PhysicsShapeType,
-  TransformNode,
 } from '@babylonjs/core';
 import type { Scene, AssetContainer } from '@babylonjs/core';
 

@@ -31,33 +31,33 @@ describe('Grid', () => {
       expect(grid.cols).toBe(4);
       expect(grid.rows).toBe(6);
       expect(grid.tiles.length).toBe(6);       // filas (rows)
-      expect(grid.tiles[0].length).toBe(4);    // columnas (cols)
+      expect(grid.tiles[0]!.length).toBe(4);    // columnas (cols)
     });
 
     it('todos los tiles se crean como no bloqueados por defecto', () => {
       const grid = makeGrid();
       for (let r = 0; r < grid.rows; r++) {
         for (let c = 0; c < grid.cols; c++) {
-          expect(grid.tiles[r][c].blocked).toBe(false);
+          expect(grid.tiles[r]![c]!.blocked).toBe(false);
         }
       }
     });
 
     it('todos los tiles tienen temperatura neutral por defecto', () => {
       const grid = makeGrid();
-      expect(grid.tiles[0][0].temperature).toBe('neutral');
+      expect(grid.tiles[0]![0]!.temperature).toBe('neutral');
     });
 
     it('todos los tiles tienen baseTerrain stone por defecto', () => {
       const grid = makeGrid();
-      expect(grid.tiles[2][3].baseTerrain).toBe('stone');
+      expect(grid.tiles[2]![3]!.baseTerrain).toBe('stone');
     });
 
     it('los gridCoord de cada tile son correctos', () => {
       const grid = makeGrid({ cols: 4, rows: 4 });
-      expect(grid.tiles[2][1].gridCoord).toEqual({ col: 1, row: 2 });
-      expect(grid.tiles[0][0].gridCoord).toEqual({ col: 0, row: 0 });
-      expect(grid.tiles[3][3].gridCoord).toEqual({ col: 3, row: 3 });
+      expect(grid.tiles[2]![1]!.gridCoord).toEqual({ col: 1, row: 2 });
+      expect(grid.tiles[0]![0]!.gridCoord).toEqual({ col: 0, row: 0 });
+      expect(grid.tiles[3]![3]!.gridCoord).toEqual({ col: 3, row: 3 });
     });
 
     it('respeta el tileSize asignado', () => {

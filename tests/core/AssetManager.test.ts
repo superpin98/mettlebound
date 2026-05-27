@@ -42,7 +42,7 @@ const FILENAME = 'Knight.glb';
 // ============================================================
 
 describe('AssetManager', () => {
-  let mockLoader: ReturnType<typeof vi.fn>;
+  let mockLoader: (baseUrl: string, filename: string, scene: Scene) => Promise<AssetContainer>;
   let mockContainer: AssetContainer;
   let manager: AssetManager;
 
