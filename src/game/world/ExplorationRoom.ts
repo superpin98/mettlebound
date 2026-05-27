@@ -97,7 +97,13 @@ export abstract class ExplorationRoom extends Room {
    */
   protected _lightSources: PointLight[] = [];
 
-  // ─── API de construccion de planta ───────────────────────────
+  // --- Constructor ---------------------------------------------
+
+  constructor(config: RoomConfig) {
+    super(config);
+  }
+
+  // --- API de construccion de planta ---------------------------
 
   /**
    * Anade un rectangulo navegable a la planta de la sala.
@@ -132,16 +138,23 @@ export abstract class ExplorationRoom extends Room {
     this._connectionPoints.push(point);
   }
 
-  // ─── Hook de geometria ────────────────────────────────────────
+  // --- Override de getLightSources -----------------------------
+
+  /**
+   * Devuelve las PointLight de esta sala para las transiciones de iluminacion.
+   * Vacio hasta A2-b3, cuando _buildGeometry() popule _lightSources.
+   */
+  override getLightSources(): readonly PointLight[] {
+    return this._lightSources;
+  }
+
+  // --- Hook de geometria ---------------------------------------
 
   /**
    * Construye los meshes de suelo y paredes a partir de _areas, _cuts y _pillars.
    *
    * No-op en A2-b1. Se implementara en A2-b3 con MeshBuilder cuando
    * la sala de exploracion real sustituya a TestRoom.
-   *
-   * Las subclases pueden sobreescribir este metodo si necesitan geometria
-   * propia antes de A2-b3 (raro, pero posible en tests de integracion).
    *
    * future A2-b3: crear GroundMesh para cada RoomRect en _areas,
    * aplicar _cuts como huecos, colocar pilares y construir paredes perimetrales.

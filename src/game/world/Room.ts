@@ -1,6 +1,6 @@
 // Imports externos (Babylon.js)
 import { TransformNode } from '@babylonjs/core';
-import type { Scene } from '@babylonjs/core';
+import type { Scene, PointLight } from '@babylonjs/core';
 
 // Imports internos
 import type { Vec3 } from '@/types/spatial.types';
@@ -51,7 +51,7 @@ export interface RoomConfig {
  */
 export abstract class Room {
 
-  // ─── Identidad ────────────────────────────────────────────────
+  // --- Identidad -----------------------------------------------
 
   /** Identificador unico de esta instancia de sala. */
   readonly id: string;
@@ -76,7 +76,7 @@ export abstract class Room {
    */
   abstract readonly shape: RoomShape;
 
-  // ─── Babylon ──────────────────────────────────────────────────
+  // --- Babylon -------------------------------------------------
 
   /**
    * Escena Babylon. Accesible en subclases para crear meshes, luces, etc.
@@ -97,7 +97,7 @@ export abstract class Room {
    */
   protected readonly rootNode: TransformNode;
 
-  // ─── Estado ───────────────────────────────────────────────────
+  // --- Estado --------------------------------------------------
 
   private _isBuilt = false;
 
@@ -109,7 +109,7 @@ export abstract class Room {
     return this._isBuilt;
   }
 
-  // ─── Puntos de conexion ───────────────────────────────────────
+  // --- Puntos de conexion --------------------------------------
 
   /**
    * Puertas y pasajes de esta sala hacia otras.
@@ -118,7 +118,7 @@ export abstract class Room {
    */
   protected _connectionPoints: ConnectionPoint[] = [];
 
-  // ─── Constructor ──────────────────────────────────────────────
+  // --- Constructor ---------------------------------------------
 
   constructor(config: RoomConfig) {
     this.id           = config.id;
@@ -130,7 +130,7 @@ export abstract class Room {
     this.rootNode = new TransformNode(`room_${config.id}`, config.scene);
   }
 
-  // ─── Template method: build ───────────────────────────────────
+  // --- Template method: build ----------------------------------
 
   /**
    * Construye la sala: geometria, luces y props.
@@ -157,7 +157,7 @@ export abstract class Room {
    */
   protected abstract _buildImpl(): Promise<void>;
 
-  // ─── Metodos abstractos ───────────────────────────────────────
+  // --- Metodos abstractos --------------------------------------
 
   /**
    * Punto de spawn del jugador al entrar en esta sala.
@@ -166,7 +166,7 @@ export abstract class Room {
    */
   abstract getSpawnPoint(): Vec3;
 
-  // ─── Metodos comunes ──────────────────────────────────────────
+  // --- Metodos comunes -----------------------------------------
 
   /**
    * Devuelve los puntos de conexion (puertas/salidas) de la sala.
@@ -182,7 +182,23 @@ export abstract class Room {
     return [...this._connectionPoints];
   }
 
-  // ─── Hooks de ciclo de vida ───────────────────────────────────
+  /**
+   * Devuelve las fuentes de luz (PointLight) de esta sala.
+   * Implementacion por defecto: array vacio.
+   *
+   * ExplorationRoom sobreescribe con _lightSources para que
+   * Dungeon pueda animar su intensidad en las transiciones.
+   * CombatRoom hereda el default (no tiene luces propias;
+   * la iluminacion de combate se gestionara en A3+).
+   *
+   * future A2-b3: las salas de exploracion reales poblaran
+   * _lightSources al construir su geometria.
+   */
+  getLightSources(): readonly PointLight[] {
+    return [];
+  }
+
+  // --- Hooks de ciclo de vida ----------------------------------
 
   /**
    * Llamado cuando el jugador entra en esta sala.
