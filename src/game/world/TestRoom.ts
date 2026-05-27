@@ -14,9 +14,12 @@ import type { Scene, AssetContainer } from '@babylonjs/core';
 
 // Imports internos
 import type { AssetManager } from '@/core/AssetManager';
+import type { Vec3 } from '@/types/spatial.types';
 import { FlameEffect } from '@/game/world/FlameEffect';
 import { FlameSprite } from '@/game/world/FlameSprite';
 import { TargetDummy } from '@/game/world/TargetDummy';
+import { Grid } from '@/game/world/Grid';
+import { GridRenderer } from '@/game/world/GridRenderer';
 import { logger } from '@/core/Logger';
 
 // ============================================================
@@ -104,15 +107,23 @@ export class TestRoom {
   private static _isBuilt = false;
 
   /**
+   * GridRenderer de debug creado en build().
+   * Accesible desde DevTools via window.__mb.gridRenderer.
+   * null antes de que build() se complete.
+   */
+  static gridRenderer: GridRenderer | null = null;
+
+  /**
    * Construye la sala de prueba en la escena.
    * Llamar una sola vez tras playerController.loadModel().
    * Si se llama de nuevo, registra una advertencia y retorna sin hacer nada.
    */
-  static async build(scene: Scene, assetManager: AssetManager): Promise<TargetDummy> {
+  static async build(
+    scene: Scene,
+    assetManager: AssetManager,
+  ): Promise<{ dummy: TargetDummy; grid: Grid }> {
     if (TestRoom._isBuilt) {
       logger.warn('TestRoom: build() llamado mas de una vez -- ignorado.');
-      // Devolver un dummy de emergencia nunca ocurre en uso normal,
-      // pero TypeScript requiere un retorno explicito.
       throw new Error('TestRoom.build() llamado mas de una vez');
     }
     TestRoom._isBuilt = true;
@@ -204,7 +215,65 @@ export class TestRoom {
       nombresLuces: scene.lights.map((l) => l.name),
     });
 
-    return dummy;
+    // ── Grid tactico (10x10, 1 unidad Babylon = 1 tile) ──────────────────────
+    // El grid cubre paredes + interior: de -(half+1) a +(half+1) en X y Z.
+    // Con half=4: origin=(-5,0,-5), 10 cols x 10 rows.
+    //
+    // Perimetro (col/row 0 y 9): zona de paredes, bloqueado.
+    // Pilares: posiciones +-tileSize_visual (+-2u) → cols/rows 3 y 7.
+    //
+    // IMPORTANTE: tileSize aqui es el tamano VISUAL del tile KayKit (~2u).
+    // El grid tactico usa su propio tileSize=1 (1 Babylon unit = 1 tile).
+    const TACTICAL_TILE = 1.0;
+    const TACTICAL_COLS = 10;
+    const TACTICAL_ROWS = 10;
+
+    const gridOrigin: Vec3 = {
+      x: -(half + TACTICAL_TILE),
+      y: 0,
+      z: -(half + TACTICAL_TILE),
+    };
+
+    const grid = new Grid({
+      cols:     TACTICAL_COLS,
+      rows:     TACTICAL_ROWS,
+      origin:   gridOrigin,
+      tileSize: TACTICAL_TILE,
+    });
+
+    // Perimetro bloqueado (paredes N/S/E/O)
+    for (let c = 0; c < TACTICAL_COLS; c++) {
+      grid.setTileBlocked(c, 0,                  true);
+      grid.setTileBlocked(c, TACTICAL_ROWS - 1,  true);
+    }
+    for (let r = 1; r < TACTICAL_ROWS - 1; r++) {
+      grid.setTileBlocked(0,                 r, true);
+      grid.setTileBlocked(TACTICAL_COLS - 1, r, true);
+    }
+
+    // Pilares bloqueados (1 tile por pilar, KISS -- A2/A3 puede expandir a 2x2)
+    for (const wx of [-tileSize, tileSize]) {
+      for (const wz of [-tileSize, tileSize]) {
+        const coord = grid.worldToGrid(wx, wz);
+        if (coord !== null) {
+          grid.setTileBlocked(coord.col, coord.row, true);
+        }
+      }
+    }
+
+    // GridRenderer invisible por defecto.
+    // Activar desde DevTools: __mb.toggleGrid() o __mb.gridRenderer.show()
+    const gridRenderer = new GridRenderer(scene, grid);
+    TestRoom.gridRenderer = gridRenderer;
+
+    logger.debug('TestRoom: grid tactico creado', {
+      cols:    TACTICAL_COLS,
+      rows:    TACTICAL_ROWS,
+      origin:  gridOrigin,
+      tileSize: TACTICAL_TILE,
+    });
+
+    return { dummy, grid };
   }
 
   // ----------------------------------------------------------

@@ -92,7 +92,7 @@ playerController.setCamera(cameraController.camera);
   // IMPORTANTE: build() crea los colliders de suelo y paredes (B2B).
   // initPhysics() debe llamarse DESPUES para que la capsula del player
   // no caiga al vacio antes de que exista el suelo.
-  const dummy = await TestRoom.build(scene, assetManager);
+  const { dummy, grid } = await TestRoom.build(scene, assetManager);
 
   // -- Activar fisica del player (colliders de sala ya existen) --------------
   playerController.initPhysics();
@@ -258,6 +258,18 @@ playerController.setCamera(cameraController.camera);
 
     devPanel.appendChild(devRow);
     document.body.appendChild(devPanel);
+
+    // Exponer helpers de debug en window.__mb (solo en DEV).
+    // Uso desde DevTools (F12 > Console):
+    //   __mb.toggleGrid()         -- alterna visibilidad del grid tactico
+    //   __mb.gridRenderer.show()  -- fuerza visible
+    //   __mb.gridRenderer.hide()  -- fuerza invisible
+    //   __mb.grid                 -- instancia Grid (cols, rows, tiles[][])
+    (window as unknown as Record<string, unknown>)['__mb'] = {
+      grid,
+      gridRenderer:  TestRoom.gridRenderer,
+      toggleGrid:    () => TestRoom.gridRenderer?.toggle(),
+    };
 
     // Suprimir advertencia de variable no usada
     void actionBar;
