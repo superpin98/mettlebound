@@ -169,6 +169,29 @@ export abstract class Room {
   // --- Metodos comunes -----------------------------------------
 
   /**
+   * Mueve el rootNode de la sala a la posicion world indicada.
+   * Toda la geometria hijo se desplaza automaticamente.
+   * Puede llamarse antes o despues de build().
+   * Anadido en A2-b4.2 para el factory MettleboundDungeon.
+   */
+  placeAt(pos: Vec3): void {
+    this.rootNode.position.set(pos.x, pos.y, pos.z);
+  }
+
+  /**
+   * Vincula un ConnectionPoint con la sala contigua.
+   * Busca la puerta por doorId y actualiza su linkedRoomId.
+   * No-op silencioso si el doorId no existe.
+   * Anadido en A2-b4.2 para el factory MettleboundDungeon.
+   */
+  linkConnection(doorId: string, linkedRoomId: string): void {
+    const cp = this._connectionPoints.find((p) => p.id === doorId);
+    if (cp !== undefined) {
+      cp.linkedRoomId = linkedRoomId;
+    }
+  }
+
+  /**
    * Devuelve los puntos de conexion (puertas/salidas) de la sala.
    *
    * Implementacion por defecto: copia defensiva de _connectionPoints.

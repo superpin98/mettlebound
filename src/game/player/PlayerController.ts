@@ -9,12 +9,13 @@ import {
   PhysicsAggregate,
   PhysicsShapeType,
 } from '@babylonjs/core';
-import type { Mesh, ArcRotateCamera, AnimationGroup } from '@babylonjs/core';
+import type { Mesh, ArcRotateCamera, AnimationGroup, PhysicsBody } from '@babylonjs/core';
 
 // Imports internos
 import type { InputManager } from '@/core/InputManager';
 import type { AssetManager, AssetInstance } from '@/core/AssetManager';
 import type { ClassId } from '@/types/game.types';
+import type { Vec3 } from '@/types/spatial.types';
 import { getClassById, isBodyPart } from '@/config/classes.config';
 import { logger } from '@/core/Logger';
 
@@ -118,6 +119,18 @@ export class PlayerController {
   }
 
   /**
+   * PhysicsBody de la capsula Havok del player.
+   * Solo disponible despues de llamar initPhysics().
+   * Anadido en A2-b4.2 para pasarlo a Dungeon (RoomTrigger).
+   */
+  get physicsBody(): PhysicsBody {
+    if (this._capsuleAggregate === null) {
+      throw new Error('PlayerController.physicsBody: llamar initPhysics() antes de acceder.');
+    }
+    return this._capsuleAggregate.body;
+  }
+
+  /**
    * Inyecta la camara tras crear CameraController.
    * Sin camara el personaje no puede moverse.
    */
@@ -130,8 +143,7 @@ export class PlayerController {
    * Conecta la capsula invisible al motor Havok y bloquea la inercia angular.
    *
    * CUANDO llamar: desde main.ts, DESPUES de scene.enablePhysics() (B2A)
-   * y DESPUES de TestRoom.build() (para que los colliders de suelo y paredes
-   * ya existan y la capsula no caiga al vacio durante la carga).
+   * y DESPUES de que el suelo/sala ya existan y la capsula no caiga al vacio.
    *
    * Por que no en el constructor: PhysicsAggregate requiere que
    * scene.enablePhysics() ya haya sido llamado, pero el constructor de
@@ -154,6 +166,23 @@ export class PlayerController {
     });
 
     logger.info('PlayerController: capsula fisica Havok activada.');
+  }
+
+  /**
+   * Teletransporta al jugador a la posicion world indicada.
+   * Mueve tanto la capsula fisica como el pivot para que no haya
+   * desincronizacion en el primer frame.
+   * pos.y = 0 equivale al nivel del suelo; la capsula se eleva
+   * automaticamente a CAPSULE_HEIGHT/2 para quedar apoyada.
+   * Anadido en A2-b4.2 para el spawn inicial en el dungeon.
+   */
+  teleportTo(pos: Vec3): void {
+    // La capsula tiene su centro geometrico en y = CAPSULE_HEIGHT/2 cuando
+    // los pies estan a y=0. Sumamos esa mitad para que el jugador quede
+    // apoyado en el suelo indicado por pos.y.
+    this._capsule.position.set(pos.x, pos.y + CAPSULE_HEIGHT / 2, pos.z);
+    this._pivot.position.copyFrom(this._capsule.position);
+    logger.debug('PlayerController: teleportTo', pos);
   }
 
   /**
