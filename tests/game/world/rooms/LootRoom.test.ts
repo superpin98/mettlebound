@@ -25,7 +25,7 @@ vi.mock('@babylonjs/core', () => ({
     constructor(r = 0, g = 0, b = 0) { void r; void g; void b; }
   },
   MeshBuilder: {
-    CreateBox:    vi.fn().mockReturnValue({ position: { x: 0, y: 0, z: 0 }, parent: null, material: null, dispose: vi.fn() }),
+    CreateBox:    vi.fn().mockReturnValue({ position: { x: 0, y: 0, z: 0, set: vi.fn() }, parent: null, material: null, dispose: vi.fn() }),
     CreateGround: vi.fn().mockReturnValue({ position: { x: 0, y: 0, z: 0 }, parent: null, dispose: vi.fn() }),
   },
   StandardMaterial: vi.fn().mockImplementation(function() {
@@ -103,19 +103,24 @@ describe('LootRoom', () => {
   });
 
   describe('getConnectionPoints()', () => {
-    it('tiene 1 puerta tras build() (sala sin salida norte)', async () => {
+    it('tiene 1 puerta tras build() (norte, bloqueada)', async () => {
       await room.build();
       expect(room.getConnectionPoints()).toHaveLength(1);
     });
 
-    it('la puerta es al sur', async () => {
+    it('la puerta es al norte (hacia HubRoom)', async () => {
       await room.build();
-      expect(room.getConnectionPoints()[0]?.direction).toBe('south');
+      expect(room.getConnectionPoints()[0]?.direction).toBe('north');
     });
 
-    it('la puerta tiene isOpen=true', async () => {
+    it('la puerta tiene isOpen=false (bloqueada con llave)', async () => {
       await room.build();
-      expect(room.getConnectionPoints()[0]?.isOpen).toBe(true);
+      expect(room.getConnectionPoints()[0]?.isOpen).toBe(false);
+    });
+
+    it('la puerta tiene isLocked=true', async () => {
+      await room.build();
+      expect(room.getConnectionPoints()[0]?.isLocked).toBe(true);
     });
   });
 

@@ -1,8 +1,10 @@
 // Imports externos (Babylon.js)
 import {
   Vector3,
-  PBRMaterial,
+  MeshBuilder,
+  Color3,
   StandardMaterial,
+  PBRMaterial,
 } from '@babylonjs/core';
 
 // Imports internos
@@ -35,6 +37,9 @@ const WALL_THICK  = 0.3;
 const HALF_X = 7;
 const HALF_Z = 6;
 
+// Color del placeholder de puerta bloqueada (dorado emissive)
+const LOCKED_DOOR_COLOR = new Color3(1, 0.8, 0.1);
+
 // ============================================================
 // HubRoom -- sala hub irregular (14x12 + 2 alcobas laterales)
 // ============================================================
@@ -49,9 +54,10 @@ const HALF_Z = 6;
  *   - 4 antorchas montadas en paredes (N, S, E, O).
  *   - SpawnAltar placeholder en el centro.
  *
- * Salidas:
- *   - Sur:   z = -(HALF_Z + 1)
- *   - Norte: z =   HALF_Z + 1
+ * Salidas (hub estrella):
+ *   - Norte: z = +(HALF_Z + 1) -- hacia CombatTriggerRoom.
+ *   - Este:  x = +(HALF_X + 1) -- hacia InteractablesRoom.
+ *   - Sur:   z = -(HALF_Z + 1) -- hacia LootRoom (bloqueada, placeholder dorado).
  */
 export class HubRoom extends ExplorationRoom {
 
@@ -74,13 +80,7 @@ export class HubRoom extends ExplorationRoom {
     this.addPillar({ x: -3, y: 0, z:  3 });
     this.addPillar({ x:  3, y: 0, z:  3 });
 
-    this.addDoor({
-      id:            `${this.id}_door_south`,
-      direction:     'south',
-      worldPosition: { x: 0, y: 0, z: -(HALF_Z + 1) },
-      isOpen:        true,
-      linkedRoomId:  null,
-    });
+    // Puerta Norte -> CombatTriggerRoom
     this.addDoor({
       id:            `${this.id}_door_north`,
       direction:     'north',
@@ -89,7 +89,26 @@ export class HubRoom extends ExplorationRoom {
       linkedRoomId:  null,
     });
 
-    // 2. Geometria sincronica
+    // Puerta Este -> InteractablesRoom
+    this.addDoor({
+      id:            `${this.id}_door_east`,
+      direction:     'east',
+      worldPosition: { x: HALF_X + 1, y: 0, z: 0 },
+      isOpen:        true,
+      linkedRoomId:  null,
+    });
+
+    // Puerta Sur -> LootRoom (bloqueada)
+    this.addDoor({
+      id:            `${this.id}_door_south`,
+      direction:     'south',
+      worldPosition: { x: 0, y: 0, z: -(HALF_Z + 1) },
+      isOpen:        false,
+      linkedRoomId:  null,
+      isLocked:      true,
+    });
+
+    // 2. Geometria sincronica (incluye placeholder de puerta bloqueada)
     this._buildGeometry();
 
     // 3. Props asincronos
@@ -116,6 +135,23 @@ export class HubRoom extends ExplorationRoom {
     buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_N`, 0,        WALL_HEIGHT / 2,  HALF_Z,  side,            WALL_HEIGHT, WALL_THICK);
     buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_W`, -HALF_X,  WALL_HEIGHT / 2,  0,       WALL_THICK,      WALL_HEIGHT, HALF_Z * 2);
     buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_E`,  HALF_X,  WALL_HEIGHT / 2,  0,       WALL_THICK,      WALL_HEIGHT, HALF_Z * 2);
+
+    // Placeholder puerta bloqueada (sur): cubo dorado emissive
+    // Sera reemplazado por un asset real en Sprint 6.
+    const lockedMesh = MeshBuilder.CreateBox(
+      `${this.id}_locked_door_S`,
+      { width: 0.6, height: 1.2, depth: 0.2 },
+      this.scene,
+    );
+    lockedMesh.position.x = 0;
+    lockedMesh.position.y = 0.6;
+    lockedMesh.position.z = -(HALF_Z + 1);
+    lockedMesh.parent = this.rootNode;
+
+    const mat = new StandardMaterial(`${this.id}_locked_door_mat`, this.scene);
+    mat.emissiveColor = LOCKED_DOOR_COLOR;
+    mat.disableLighting = true;
+    lockedMesh.material = mat;
 
     logger.debug(`HubRoom '${this.id}': geometria construida.`);
   }

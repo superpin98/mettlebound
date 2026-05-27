@@ -55,8 +55,7 @@ const ARM_ZMAX  = MAIN_HZ + 4;   // 9
  *     pared Norte del brazo.
  *
  * Salidas:
- *   - Sur:   z = -(MAIN_HZ + 1)
- *   - Norte: z =   ARM_ZMAX + 1
+ *   - Sur:   z = -(MAIN_HZ + 1) -- hacia HubRoom (unica salida).
  *
  * El nombre "CombatTrigger" indica que esta sala tiene un trigger que
  * puede desencadenar combate al entrar (implementacion en A3+).
@@ -76,6 +75,7 @@ export class CombatTriggerRoom extends ExplorationRoom {
     this.addArea({ x: -MAIN_HX, z: -MAIN_HZ, width: MAIN_HX * 2, depth: MAIN_HZ * 2 });
     this.addArea({ x: -ARM_HX,  z: ARM_ZMIN,  width: ARM_HX * 2,  depth: ARM_ZMAX - ARM_ZMIN });
 
+    // Puerta Sur -> HubRoom (unica salida)
     this.addDoor({
       id:            `${this.id}_door_south`,
       direction:     'south',
@@ -83,13 +83,7 @@ export class CombatTriggerRoom extends ExplorationRoom {
       isOpen:        true,
       linkedRoomId:  null,
     });
-    this.addDoor({
-      id:            `${this.id}_door_north`,
-      direction:     'north',
-      worldPosition: { x: 0, y: 0, z: ARM_ZMAX + 1 },
-      isOpen:        true,
-      linkedRoomId:  null,
-    });
+    // La puerta norte (brazo) fue eliminada en A2-b4.1 -- hub estrella.
 
     // 2. Geometria sincronica
     this._buildGeometry();

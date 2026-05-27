@@ -33,7 +33,7 @@ vi.mock('@babylonjs/core', () => ({
     constructor(r = 0, g = 0, b = 0) { void r; void g; void b; }
   },
   MeshBuilder: {
-    CreateBox:    vi.fn().mockReturnValue({ position: { x: 0, y: 0, z: 0 }, parent: null, material: null, dispose: vi.fn() }),
+    CreateBox:    vi.fn().mockReturnValue({ position: { x: 0, y: 0, z: 0, set: vi.fn() }, parent: null, material: null, dispose: vi.fn() }),
     CreateGround: vi.fn().mockReturnValue({ position: { x: 0, y: 0, z: 0 }, parent: null, dispose: vi.fn() }),
   },
   StandardMaterial: vi.fn().mockImplementation(function() {
@@ -121,24 +121,42 @@ describe('HubRoom', () => {
   });
 
   describe('getConnectionPoints()', () => {
-    it('tiene 2 puertas tras build()', async () => {
+    it('tiene 3 puertas tras build() (hub estrella)', async () => {
       await room.build();
-      expect(room.getConnectionPoints()).toHaveLength(2);
+      expect(room.getConnectionPoints()).toHaveLength(3);
     });
 
-    it('tiene puerta al sur', async () => {
-      await room.build();
-      expect(room.getConnectionPoints().map((p) => p.direction)).toContain('south');
-    });
-
-    it('tiene puerta al norte', async () => {
+    it('tiene puerta al norte (hacia Combat)', async () => {
       await room.build();
       expect(room.getConnectionPoints().map((p) => p.direction)).toContain('north');
     });
 
-    it('todas las puertas tienen isOpen=true', async () => {
+    it('tiene puerta al este (hacia Interactables)', async () => {
       await room.build();
-      expect(room.getConnectionPoints().every((p) => p.isOpen)).toBe(true);
+      expect(room.getConnectionPoints().map((p) => p.direction)).toContain('east');
+    });
+
+    it('tiene puerta al sur (hacia Loot)', async () => {
+      await room.build();
+      expect(room.getConnectionPoints().map((p) => p.direction)).toContain('south');
+    });
+
+    it('la puerta sur tiene isLocked=true', async () => {
+      await room.build();
+      const southDoor = room.getConnectionPoints().find((p) => p.direction === 'south');
+      expect(southDoor?.isLocked).toBe(true);
+    });
+
+    it('la puerta sur tiene isOpen=false (bloqueada)', async () => {
+      await room.build();
+      const southDoor = room.getConnectionPoints().find((p) => p.direction === 'south');
+      expect(southDoor?.isOpen).toBe(false);
+    });
+
+    it('las puertas N y E tienen isOpen=true', async () => {
+      await room.build();
+      const open = room.getConnectionPoints().filter((p) => p.direction !== 'south');
+      expect(open.every((p) => p.isOpen)).toBe(true);
     });
   });
 

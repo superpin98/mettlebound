@@ -7,7 +7,7 @@ import type { Vec3 } from '@/types/spatial.types';
 // Importables en tests de logica pura sin necesidad de DOM ni WebGL.
 // ============================================================
 
-// ─── Modo de sala ─────────────────────────────────────────────────
+// --- Modo de sala ----------------------------------------------------
 
 /**
  * Modo de funcionamiento de una sala.
@@ -16,7 +16,7 @@ import type { Vec3 } from '@/types/spatial.types';
  */
 export type RoomMode = 'exploration' | 'combat';
 
-// ─── Forma geometrica ─────────────────────────────────────────────
+// --- Forma geometrica ------------------------------------------------
 
 /**
  * Planta geometrica de la sala.
@@ -38,10 +38,23 @@ export type RoomShape =
   | 'U_shape'
   | 'irregular';
 
-// ─── Puntos de conexion (puertas / salidas) ───────────────────────
+// --- Puntos de conexion (puertas / salidas) ---------------------------
 
-/** Las cuatro direcciones cardinales de conexion entre salas. */
-export type ConnectionDirection = 'north' | 'south' | 'east' | 'west';
+/**
+ * Ocho direcciones de conexion entre salas.
+ * Las diagonales (northeast, southeast, southwest, northwest) se reservan
+ * para el generador procedural del Sprint 6. En A2-b4.1 solo se usan
+ * las cardinales (north, east, south, west).
+ */
+export type ConnectionDirection =
+  | 'north'
+  | 'northeast'
+  | 'east'
+  | 'southeast'
+  | 'south'
+  | 'southwest'
+  | 'west'
+  | 'northwest';
 
 /**
  * Puerta o pasaje que conecta esta sala con otra.
@@ -69,7 +82,14 @@ export interface ConnectionPoint {
   /**
    * ID de la sala destino.
    * null si la puerta aun no esta vinculada a ninguna sala
-   * (placeholder durante construccion de la dungeons) o es un muro ciego.
+   * (placeholder durante construccion de la dungeon) o es un muro ciego.
    */
   linkedRoomId: string | null;
+
+  /**
+   * true si la puerta esta bloqueada con cerradura (requiere llave o evento).
+   * undefined equivale a false.
+   * Una puerta puede estar cerrada (isOpen=false) sin estar bloqueada.
+   */
+  isLocked?: boolean;
 }

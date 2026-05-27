@@ -133,13 +133,18 @@ export class Corridor extends ExplorationRoom {
 
   // ─── Helpers privados ────────────────────────────────────────
 
-  /** Devuelve la direccion opuesta a la dada. */
+  /** Devuelve la direccion opuesta a la dada. Solo soporta cardinales en A2-b4.1. */
   private _oppositeDirection(dir: ConnectionDirection): ConnectionDirection {
     const opposites: Record<ConnectionDirection, ConnectionDirection> = {
-      north: 'south',
-      south: 'north',
-      east:  'west',
-      west:  'east',
+      north:     'south',
+      south:     'north',
+      east:      'west',
+      west:      'east',
+      // Diagonales reservadas para Sprint 6 (generador procedural).
+      northeast: 'southwest',
+      southwest: 'northeast',
+      southeast: 'northwest',
+      northwest: 'southeast',
     };
     return opposites[dir];
   }
@@ -160,6 +165,12 @@ export class Corridor extends ExplorationRoom {
       case 'south': return { x:   0, y: 0, z: -hd };
       case 'east':  return { x:  hw, y: 0, z:   0 };
       case 'west':  return { x: -hw, y: 0, z:   0 };
+      // Diagonales reservadas para Sprint 6; Corridor recto no las soporta.
+      case 'northeast':
+      case 'southeast':
+      case 'southwest':
+      case 'northwest':
+        throw new Error(`Corridor._doorPosition: diagonal direction '${dir}' not supported in A2-b4.1 — implement in Sprint 6`);
     }
   }
 

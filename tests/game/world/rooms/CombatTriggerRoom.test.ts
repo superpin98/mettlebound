@@ -103,24 +103,19 @@ describe('CombatTriggerRoom', () => {
   });
 
   describe('getConnectionPoints()', () => {
-    it('tiene 2 puertas tras build()', async () => {
+    it('tiene 1 puerta tras build() (solo sur, hub estrella)', async () => {
       await room.build();
-      expect(room.getConnectionPoints()).toHaveLength(2);
+      expect(room.getConnectionPoints()).toHaveLength(1);
     });
 
-    it('tiene puerta al sur', async () => {
+    it('la unica puerta es al sur (hacia HubRoom)', async () => {
       await room.build();
-      expect(room.getConnectionPoints().map((p) => p.direction)).toContain('south');
+      expect(room.getConnectionPoints()[0]?.direction).toBe('south');
     });
 
-    it('tiene puerta al norte (brazo)', async () => {
+    it('la puerta sur tiene isOpen=true', async () => {
       await room.build();
-      expect(room.getConnectionPoints().map((p) => p.direction)).toContain('north');
-    });
-
-    it('todas las puertas tienen isOpen=true', async () => {
-      await room.build();
-      expect(room.getConnectionPoints().every((p) => p.isOpen)).toBe(true);
+      expect(room.getConnectionPoints()[0]?.isOpen).toBe(true);
     });
   });
 
