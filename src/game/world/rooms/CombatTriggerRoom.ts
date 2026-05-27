@@ -12,12 +12,13 @@ import type { RoomConfig } from '@/game/world/Room';
 import { ExplorationRoom } from '@/game/world/ExplorationRoom';
 import {
   buildMountedTorch,
-  buildFloorMesh,
-  buildWallMesh,
+  buildFloorTiles,
+  buildWallSegments,
   TORCH_Y,
   TORCH_WALL_INSET,
 } from '@/game/world/rooms/RoomGeometry';
-import type { TorchDef } from '@/game/world/rooms/RoomGeometry';
+import type { TorchDef, WallSegment } from '@/game/world/rooms/RoomGeometry';
+import { measureTileSize } from '@/game/world/utils/measureTile';
 import { logger } from '@/core/Logger';
 
 // ============================================================
@@ -25,10 +26,12 @@ import { logger } from '@/core/Logger';
 // ============================================================
 
 const DUNGEON_BASE_URL = '/assets/models/dungeon/';
+const FLOOR_FILE       = 'floor_tile_large.gltf.glb';
+const WALL_FILE        = 'wall.gltf.glb';
+const CORNER_FILE      = 'wall_corner.gltf.glb';
+const DOORWAY_FILE     = 'wall_doorway.glb';
+const GATED_FILE       = 'wall_gated.gltf.glb';
 const TORCH_FILE       = 'torch_mounted.gltf.glb';
-
-const WALL_HEIGHT = 3;
-const WALL_THICK  = 0.3;
 
 // Sala principal: 10u x 10u
 const MAIN_HX = 5;
@@ -38,6 +41,8 @@ const MAIN_HZ = 5;
 const ARM_HX    = 3;
 const ARM_ZMIN  = MAIN_HZ;        // 5
 const ARM_ZMAX  = MAIN_HZ + 4;   // 9
+
+const DOOR_THRESHOLD = 1.5;
 
 // ============================================================
 // CombatTriggerRoom -- sala L-shape (10x10 + brazo 6x4)
@@ -50,15 +55,13 @@ const ARM_ZMAX  = MAIN_HZ + 4;   // 9
  *   - Area principal: 10u (X) x 10u (Z), centrada en origen.
  *   - Brazo Norte:    6u (X) x 4u (Z), x=[-3,3], z=[5,9].
  *
- * Props de A2-b3:
- *   - 3 antorchas: pared Sur, pared Oeste del area principal,
- *     pared Norte del brazo.
+ * Geometria Visual (A2-b4-VISUAL-FIX):
+ *   - Suelos de tiles KayKit floor_tile_large.gltf.glb.
+ *   - Paredes KayKit con colliders Havok por segmento.
+ *   - Antorchas con withFlame=false.
  *
  * Salidas:
  *   - Sur:   z = -(MAIN_HZ + 1) -- hacia HubRoom (unica salida).
- *
- * El nombre "CombatTrigger" indica que esta sala tiene un trigger que
- * puede desencadenar combate al entrar (implementacion en A3+).
  */
 export class CombatTriggerRoom extends ExplorationRoom {
 
@@ -75,7 +78,7 @@ export class CombatTriggerRoom extends ExplorationRoom {
     this.addArea({ x: -MAIN_HX, z: -MAIN_HZ, width: MAIN_HX * 2, depth: MAIN_HZ * 2 });
     this.addArea({ x: -ARM_HX,  z: ARM_ZMIN,  width: ARM_HX * 2,  depth: ARM_ZMAX - ARM_ZMIN });
 
-    // Puerta Sur -> HubRoom (unica salida)
+    // Puerta Sur -> HubRoom
     this.addDoor({
       id:            `${this.id}_door_south`,
       direction:     'south',
@@ -83,12 +86,11 @@ export class CombatTriggerRoom extends ExplorationRoom {
       isOpen:        true,
       linkedRoomId:  null,
     });
-    // La puerta norte (brazo) fue eliminada en A2-b4.1 -- hub estrella.
 
-    // 2. Geometria sincronica
+    // 2. Geometria (no-op sincrono)
     this._buildGeometry();
 
-    // 3. Props asincronos
+    // 3. Props asincronos (incluye geometria KayKit)
     await this._buildProps();
   }
 
@@ -98,38 +100,136 @@ export class CombatTriggerRoom extends ExplorationRoom {
     return { x: 0, y: 0, z: -(MAIN_HZ - 2) };
   }
 
-  // --- Geometria -----------------------------------------------
+  // --- Geometria (no-op: todo en _buildProps) ------------------
 
   protected override _buildGeometry(): void {
-    // Suelos
-    buildFloorMesh(this.scene, this.rootNode, `${this.id}_floor_main`, 0,                  0, MAIN_HX * 2, MAIN_HZ * 2);
-    buildFloorMesh(this.scene, this.rootNode, `${this.id}_floor_arm`,  0, (ARM_ZMIN + ARM_ZMAX) / 2, ARM_HX * 2, ARM_ZMAX - ARM_ZMIN);
+    // geometria KayKit colocada en _buildProps() (requiere async)
+  }
 
-    // Paredes
-    buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_S`, 0,        WALL_HEIGHT / 2, -MAIN_HZ,     MAIN_HX * 2,  WALL_HEIGHT, WALL_THICK);
-    buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_W`, -MAIN_HX, WALL_HEIGHT / 2,  0,            WALL_THICK,   WALL_HEIGHT, MAIN_HZ * 2);
-    buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_E`,  MAIN_HX, WALL_HEIGHT / 2,  0,            WALL_THICK,   WALL_HEIGHT, MAIN_HZ * 2);
-    buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_arm_N`, 0,    WALL_HEIGHT / 2,  ARM_ZMAX,    ARM_HX * 2,   WALL_HEIGHT, WALL_THICK);
-    buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_arm_W`, -ARM_HX, WALL_HEIGHT / 2, (ARM_ZMIN + ARM_ZMAX) / 2, WALL_THICK, WALL_HEIGHT, ARM_ZMAX - ARM_ZMIN);
-    buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_arm_E`,  ARM_HX, WALL_HEIGHT / 2, (ARM_ZMIN + ARM_ZMAX) / 2, WALL_THICK, WALL_HEIGHT, ARM_ZMAX - ARM_ZMIN);
+  // --- _computeWallSegments ------------------------------------
 
-    logger.debug(`CombatTriggerRoom '${this.id}': geometria construida.`);
+  /**
+   * Genera segmentos de pared para la forma L-shape:
+   *   - Perimetro del area principal (10x10), con puerta Sur.
+   *   - Perimetro del brazo norte (6x4), sin pared Sur (conecta al principal).
+   *   - Esquinas del perimetro externo.
+   */
+  private _computeWallSegments(tileSize: number): WallSegment[] {
+    const segs: WallSegment[] = [];
+    const T = DOOR_THRESHOLD;
+
+    // -- Area principal: pared Sur (z=-MAIN_HZ, 10u) -----------
+    const nColsMain = Math.round((MAIN_HX * 2) / tileSize);
+    for (let c = 0; c < nColsMain; c++) {
+      const x = (-MAIN_HX + tileSize / 2) + c * tileSize;
+      const isSouthDoor = Math.abs(x - 0) < T;
+      segs.push({
+        x, z: -MAIN_HZ, rotY: 0, axis: 'x',
+        type:  isSouthDoor ? 'doorway' : 'wall',
+        label: `mS_${c}`,
+      });
+    }
+
+    // -- Area principal: pared Oeste (x=-MAIN_HX, 10u) --------
+    const nRowsMain = Math.round((MAIN_HZ * 2) / tileSize);
+    for (let r = 0; r < nRowsMain; r++) {
+      const z = (-MAIN_HZ + tileSize / 2) + r * tileSize;
+      segs.push({
+        x: -MAIN_HX, z, rotY: Math.PI / 2, axis: 'z',
+        type: 'wall', label: `mW_${r}`,
+      });
+    }
+
+    // -- Area principal: pared Este (x=+MAIN_HX, 10u) ---------
+    for (let r = 0; r < nRowsMain; r++) {
+      const z = (-MAIN_HZ + tileSize / 2) + r * tileSize;
+      segs.push({
+        x: MAIN_HX, z, rotY: -Math.PI / 2, axis: 'z',
+        type: 'wall', label: `mE_${r}`,
+      });
+    }
+
+    // -- Brazo norte: pared Norte (z=ARM_ZMAX, 6u) -------------
+    const nColsArm = Math.round((ARM_HX * 2) / tileSize);
+    for (let c = 0; c < nColsArm; c++) {
+      const x = (-ARM_HX + tileSize / 2) + c * tileSize;
+      segs.push({
+        x, z: ARM_ZMAX, rotY: Math.PI, axis: 'x',
+        type: 'wall', label: `aN_${c}`,
+      });
+    }
+
+    // -- Brazo norte: pared Oeste (x=-ARM_HX, 4u) --------------
+    const nRowsArm = Math.round((ARM_ZMAX - ARM_ZMIN) / tileSize);
+    for (let r = 0; r < nRowsArm; r++) {
+      const z = (ARM_ZMIN + tileSize / 2) + r * tileSize;
+      segs.push({
+        x: -ARM_HX, z, rotY: Math.PI / 2, axis: 'z',
+        type: 'wall', label: `aW_${r}`,
+      });
+    }
+
+    // -- Brazo norte: pared Este (x=+ARM_HX, 4u) ---------------
+    for (let r = 0; r < nRowsArm; r++) {
+      const z = (ARM_ZMIN + tileSize / 2) + r * tileSize;
+      segs.push({
+        x: ARM_HX, z, rotY: -Math.PI / 2, axis: 'z',
+        type: 'wall', label: `aE_${r}`,
+      });
+    }
+
+    // -- Esquinas externas del perimetro L-shape ----------------
+    // Esquinas del area principal (4 basicas, las interiores del brazo son internas)
+    segs.push({ x: -MAIN_HX, z: -MAIN_HZ, rotY: 0,             axis: 'corner', type: 'corner', label: 'SO' });
+    segs.push({ x:  MAIN_HX, z: -MAIN_HZ, rotY: Math.PI / 2,   axis: 'corner', type: 'corner', label: 'SE' });
+    // Esquinas del brazo
+    segs.push({ x: -ARM_HX,  z:  ARM_ZMAX, rotY: -Math.PI / 2, axis: 'corner', type: 'corner', label: 'aNO' });
+    segs.push({ x:  ARM_HX,  z:  ARM_ZMAX, rotY: Math.PI,       axis: 'corner', type: 'corner', label: 'aNE' });
+
+    return segs;
   }
 
   // --- Props asincronos ----------------------------------------
 
   private async _buildProps(): Promise<void> {
-    const torchContainer = await this.assetManager.loadAsset(DUNGEON_BASE_URL, TORCH_FILE);
+    const [floorC, wallC, cornerC, doorwayC, gatedC, torchC] = await Promise.all([
+      this.assetManager.loadAsset(DUNGEON_BASE_URL, FLOOR_FILE),
+      this.assetManager.loadAsset(DUNGEON_BASE_URL, WALL_FILE),
+      this.assetManager.loadAsset(DUNGEON_BASE_URL, CORNER_FILE),
+      this.assetManager.loadAsset(DUNGEON_BASE_URL, DOORWAY_FILE),
+      this.assetManager.loadAsset(DUNGEON_BASE_URL, GATED_FILE),
+      this.assetManager.loadAsset(DUNGEON_BASE_URL, TORCH_FILE),
+    ]);
 
+    const tileSize = measureTileSize(floorC, this.assetManager);
+
+    // -- Suelos KayKit ------------------------------------------
+    buildFloorTiles(this.assetManager, floorC, this.rootNode,
+      0, 0, MAIN_HX * 2, MAIN_HZ * 2, tileSize);  // area principal
+    const armCZ = (ARM_ZMIN + ARM_ZMAX) / 2;
+    buildFloorTiles(this.assetManager, floorC, this.rootNode,
+      0, armCZ, ARM_HX * 2, ARM_ZMAX - ARM_ZMIN, tileSize);  // brazo norte
+
+    // -- Paredes KayKit ------------------------------------------
+    const segments = this._computeWallSegments(tileSize);
+    buildWallSegments(
+      this.scene, this.assetManager, this.rootNode,
+      wallC, cornerC, doorwayC, gatedC,
+      segments, tileSize, this.id,
+    );
+
+    // -- Antorchas (sin FlameSprite) ----------------------------
     const INS = TORCH_WALL_INSET;
     const torchDefs: TorchDef[] = [
-      { pos: new Vector3(0,              TORCH_Y, -(MAIN_HZ - INS)),  rotY: 0,           inward: new Vector3(0, 0,  1), label: `${this.id}_Sur`      },
-      { pos: new Vector3(-(MAIN_HX - INS), TORCH_Y, 0),               rotY: Math.PI / 2, inward: new Vector3(1, 0,  0), label: `${this.id}_Oeste`    },
-      { pos: new Vector3(0,              TORCH_Y,  ARM_ZMAX - INS),   rotY: Math.PI,     inward: new Vector3(0, 0, -1), label: `${this.id}_NorteBrazo` },
+      { pos: new Vector3(0,                TORCH_Y, -(MAIN_HZ - INS)),  rotY: 0,           inward: new Vector3(0, 0,  1), label: `${this.id}_Sur`       },
+      { pos: new Vector3(-(MAIN_HX - INS), TORCH_Y,  0),                rotY: Math.PI / 2, inward: new Vector3(1, 0,  0), label: `${this.id}_Oeste`     },
+      { pos: new Vector3(0,                TORCH_Y,  ARM_ZMAX - INS),   rotY: Math.PI,     inward: new Vector3(0, 0, -1), label: `${this.id}_NorteBrazo` },
     ];
 
     for (const def of torchDefs) {
-      const light = buildMountedTorch(this.scene, this.assetManager, torchContainer, def, this.rootNode);
+      const light = buildMountedTorch(
+        this.scene, this.assetManager, torchC, def, this.rootNode, false,
+      );
       this._lightSources.push(light);
     }
 

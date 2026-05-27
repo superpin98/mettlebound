@@ -13,12 +13,13 @@ import type { RoomConfig } from '@/game/world/Room';
 import { ExplorationRoom } from '@/game/world/ExplorationRoom';
 import {
   buildMountedTorch,
-  buildFloorMesh,
-  buildWallMesh,
+  buildFloorTiles,
+  buildWallSegments,
   TORCH_Y,
   TORCH_WALL_INSET,
 } from '@/game/world/rooms/RoomGeometry';
-import type { TorchDef } from '@/game/world/rooms/RoomGeometry';
+import type { TorchDef, WallSegment } from '@/game/world/rooms/RoomGeometry';
+import { measureTileSize } from '@/game/world/utils/measureTile';
 import { logger } from '@/core/Logger';
 
 // ============================================================
@@ -26,34 +27,30 @@ import { logger } from '@/core/Logger';
 // ============================================================
 
 const DUNGEON_BASE_URL = '/assets/models/dungeon/';
+const FLOOR_FILE       = 'floor_tile_large.gltf.glb';
+const WALL_FILE        = 'wall.gltf.glb';
+const CORNER_FILE      = 'wall_corner.gltf.glb';
+const DOORWAY_FILE     = 'wall_doorway.glb';
+const GATED_FILE       = 'wall_gated.gltf.glb';
 const TORCH_FILE       = 'torch_mounted.gltf.glb';
 
-const WALL_HEIGHT = 3;
-const WALL_THICK  = 0.3;
+// Sala 14u (X) x 10u (Z) -- reorientada en A2-b4.1
+const HALF_X = 7;
+const HALF_Z = 5;
 
-// Sala reorientada en A2-b4.1: 14u (X) x 10u (Z).
-// La puerta Oeste esta en la pared larga (14u), lo que resulta natural
-// al entrar desde el Hub (al oeste).
-const HALF_X = 7;   // antes: 5 (sala era 10x14)
-const HALF_Z = 5;   // antes: 7
+const DOOR_THRESHOLD = 1.5;
 
 // ============================================================
 // InteractablesRoom -- sala rectangular con props interactuables
 // ============================================================
 
 /**
- * Sala rectangular 14u x 10u con bariles y scaffolding como props
- * interactuables (placeholders para el VectorSystem de A3+).
+ * Sala rectangular 14u x 10u.
+ * Puerta Oeste -> HubRoom.
  *
- * Reorientada en A2-b4.1 de 10x14 a 14x10 para que la puerta Oeste
- * quede en la pared larga (14u), que es la mas natural para la entrada.
- *
- * Props de A2-b3:
- *   - 4 antorchas en las 4 paredes.
- *   - 3 InteractableProp placeholder (bariles) en posiciones fijas.
- *
- * Salidas:
- *   - Oeste: x = -(HALF_X + 1) -- hacia HubRoom (unica salida).
+ * Geometria Visual (A2-b4-VISUAL-FIX):
+ *   - Suelos tiles KayKit, paredes KayKit, colliders Havok.
+ *   - Antorchas sin FlameSprite.
  */
 export class InteractablesRoom extends ExplorationRoom {
 
@@ -69,7 +66,7 @@ export class InteractablesRoom extends ExplorationRoom {
     // 1. Planta
     this.addArea({ x: -HALF_X, z: -HALF_Z, width: HALF_X * 2, depth: HALF_Z * 2 });
 
-    // Puerta Oeste -> HubRoom (unica salida)
+    // Puerta Oeste -> HubRoom
     this.addDoor({
       id:            `${this.id}_door_west`,
       direction:     'west',
@@ -78,10 +75,10 @@ export class InteractablesRoom extends ExplorationRoom {
       linkedRoomId:  null,
     });
 
-    // Interactables placeholder (future A3: carga modelos KayKit barrel, scaffold, etc.)
+    // Interactables placeholder
     this._buildInteractables();
 
-    // 2. Geometria sincronica
+    // 2. Geometria (no-op sincrono)
     this._buildGeometry();
 
     // 3. Props asincronos
@@ -90,7 +87,6 @@ export class InteractablesRoom extends ExplorationRoom {
 
   // --- Spawn point ---------------------------------------------
 
-  /** Punto de entrada cerca de la pared oeste (jugador llega desde el Hub). */
   getSpawnPoint(): Vec3 {
     return { x: -(HALF_X - 2), y: 0, z: 0 };
   }
@@ -146,35 +142,103 @@ export class InteractablesRoom extends ExplorationRoom {
     );
   }
 
-  // --- Geometria -----------------------------------------------
+  // --- Geometria (no-op: todo en _buildProps) ------------------
 
   protected override _buildGeometry(): void {
-    buildFloorMesh(this.scene, this.rootNode, `${this.id}_floor`, 0, 0, HALF_X * 2, HALF_Z * 2);
+    // geometria KayKit colocada en _buildProps() (requiere async)
+  }
 
-    // Las paredes N y S son las largas (14u); E y O son las cortas (10u).
-    buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_S`, 0,        WALL_HEIGHT / 2, -HALF_Z,  HALF_X * 2, WALL_HEIGHT, WALL_THICK);
-    buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_N`, 0,        WALL_HEIGHT / 2,  HALF_Z,  HALF_X * 2, WALL_HEIGHT, WALL_THICK);
-    buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_W`, -HALF_X,  WALL_HEIGHT / 2,  0,       WALL_THICK, WALL_HEIGHT, HALF_Z * 2);
-    buildWallMesh(this.scene, this.rootNode, `${this.id}_wall_E`,  HALF_X,  WALL_HEIGHT / 2,  0,       WALL_THICK, WALL_HEIGHT, HALF_Z * 2);
+  // --- _computeWallSegments ------------------------------------
 
-    logger.debug(`InteractablesRoom '${this.id}': geometria construida.`);
+  /**
+   * Sala rectangular 14x10. Puerta en pared Oeste (x=-HALF_X) a z=0.
+   *
+   * N/S walls: 7 segmentos (14u/2u) -> puerta no aplica
+   * E/W walls: 5 segmentos (10u/2u) -> puerta Oeste en z=0 -> segmento central
+   */
+  private _computeWallSegments(tileSize: number): WallSegment[] {
+    const segs: WallSegment[] = [];
+    const T = DOOR_THRESHOLD;
+
+    // -- Pared Sur (z=-HALF_Z, 14u) ----------------------------
+    const nColsNS = Math.round((HALF_X * 2) / tileSize);
+    for (let c = 0; c < nColsNS; c++) {
+      const x = (-HALF_X + tileSize / 2) + c * tileSize;
+      segs.push({ x, z: -HALF_Z, rotY: 0, axis: 'x', type: 'wall', label: `S_${c}` });
+    }
+
+    // -- Pared Norte (z=+HALF_Z, 14u) --------------------------
+    for (let c = 0; c < nColsNS; c++) {
+      const x = (-HALF_X + tileSize / 2) + c * tileSize;
+      segs.push({ x, z: HALF_Z, rotY: Math.PI, axis: 'x', type: 'wall', label: `N_${c}` });
+    }
+
+    // -- Pared Oeste (x=-HALF_X, 10u) -- puerta a z=0 ---------
+    const nRowsEW = Math.round((HALF_Z * 2) / tileSize);
+    for (let r = 0; r < nRowsEW; r++) {
+      const z = (-HALF_Z + tileSize / 2) + r * tileSize;
+      const isWestDoor = Math.abs(z - 0) < T;
+      segs.push({
+        x: -HALF_X, z, rotY: Math.PI / 2, axis: 'z',
+        type:  isWestDoor ? 'doorway' : 'wall',
+        label: `W_${r}`,
+      });
+    }
+
+    // -- Pared Este (x=+HALF_X, 10u) ---------------------------
+    for (let r = 0; r < nRowsEW; r++) {
+      const z = (-HALF_Z + tileSize / 2) + r * tileSize;
+      segs.push({ x: HALF_X, z, rotY: -Math.PI / 2, axis: 'z', type: 'wall', label: `E_${r}` });
+    }
+
+    // -- Esquinas -----------------------------------------------
+    segs.push({ x: -HALF_X, z: -HALF_Z, rotY: 0,             axis: 'corner', type: 'corner', label: 'SO' });
+    segs.push({ x:  HALF_X, z: -HALF_Z, rotY: Math.PI / 2,   axis: 'corner', type: 'corner', label: 'SE' });
+    segs.push({ x:  HALF_X, z:  HALF_Z, rotY: Math.PI,        axis: 'corner', type: 'corner', label: 'NE' });
+    segs.push({ x: -HALF_X, z:  HALF_Z, rotY: -Math.PI / 2,  axis: 'corner', type: 'corner', label: 'NO' });
+
+    return segs;
   }
 
   // --- Props asincronos ----------------------------------------
 
   private async _buildProps(): Promise<void> {
-    const torchContainer = await this.assetManager.loadAsset(DUNGEON_BASE_URL, TORCH_FILE);
+    const [floorC, wallC, cornerC, doorwayC, gatedC, torchC] = await Promise.all([
+      this.assetManager.loadAsset(DUNGEON_BASE_URL, FLOOR_FILE),
+      this.assetManager.loadAsset(DUNGEON_BASE_URL, WALL_FILE),
+      this.assetManager.loadAsset(DUNGEON_BASE_URL, CORNER_FILE),
+      this.assetManager.loadAsset(DUNGEON_BASE_URL, DOORWAY_FILE),
+      this.assetManager.loadAsset(DUNGEON_BASE_URL, GATED_FILE),
+      this.assetManager.loadAsset(DUNGEON_BASE_URL, TORCH_FILE),
+    ]);
 
+    const tileSize = measureTileSize(floorC, this.assetManager);
+
+    // -- Suelos KayKit ------------------------------------------
+    buildFloorTiles(this.assetManager, floorC, this.rootNode,
+      0, 0, HALF_X * 2, HALF_Z * 2, tileSize);
+
+    // -- Paredes KayKit ------------------------------------------
+    const segments = this._computeWallSegments(tileSize);
+    buildWallSegments(
+      this.scene, this.assetManager, this.rootNode,
+      wallC, cornerC, doorwayC, gatedC,
+      segments, tileSize, this.id,
+    );
+
+    // -- Antorchas (sin FlameSprite) ----------------------------
     const INS = TORCH_WALL_INSET;
     const torchDefs: TorchDef[] = [
       { pos: new Vector3(0,               TORCH_Y, -(HALF_Z - INS)), rotY: 0,            inward: new Vector3(0, 0,  1), label: `${this.id}_Sur`   },
       { pos: new Vector3(0,               TORCH_Y,   HALF_Z - INS),  rotY: Math.PI,      inward: new Vector3(0, 0, -1), label: `${this.id}_Norte` },
-      { pos: new Vector3(-(HALF_X - INS), TORCH_Y, 0),               rotY: Math.PI / 2,  inward: new Vector3(1, 0,  0), label: `${this.id}_Oeste` },
-      { pos: new Vector3(  HALF_X - INS,  TORCH_Y, 0),               rotY: -Math.PI / 2, inward: new Vector3(-1, 0, 0), label: `${this.id}_Este`  },
+      { pos: new Vector3(-(HALF_X - INS), TORCH_Y,  0),              rotY: Math.PI / 2,  inward: new Vector3(1, 0,  0), label: `${this.id}_Oeste` },
+      { pos: new Vector3(  HALF_X - INS,  TORCH_Y,  0),              rotY: -Math.PI / 2, inward: new Vector3(-1, 0, 0), label: `${this.id}_Este`  },
     ];
 
     for (const def of torchDefs) {
-      const light = buildMountedTorch(this.scene, this.assetManager, torchContainer, def, this.rootNode);
+      const light = buildMountedTorch(
+        this.scene, this.assetManager, torchC, def, this.rootNode, false,
+      );
       this._lightSources.push(light);
     }
 

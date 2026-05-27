@@ -18,6 +18,7 @@ import {
   TORCH_WALL_INSET,
 } from '@/game/world/rooms/RoomGeometry';
 import type { TorchDef } from '@/game/world/rooms/RoomGeometry';
+import { measureTileSize } from '@/game/world/utils/measureTile';
 import { TargetDummy } from '@/game/world/TargetDummy';
 import { Grid } from '@/game/world/Grid';
 import { GridRenderer } from '@/game/world/GridRenderer';
@@ -53,9 +54,9 @@ const PLACE_PILLARS = true;
 //                  * Sprite billboard FlameSprite (llama pixel art animada)
 //   - Pilares  : 4 interiores (controlados por PLACE_PILLARS)
 //
-// Antorchas: construidas via buildMountedTorch (RoomGeometry).
+// Antorchas: construidas via buildMountedTorch (RoomGeometry, withFlame=true).
 // _isBuilt previene doble llamada a build() (guard anti-duplicacion).
-// El tamano de tile se mide dinamicamente con getBoundingInfo().
+// El tamano de tile se mide dinamicamente con measureTileSize() (utils/measureTile).
 // markAllMaterialsAsDirty fuerza recompilacion de shaders con las 4 PointLights.
 // ============================================================
 
@@ -107,8 +108,8 @@ export class TestRoom {
       assetManager.loadAsset(DUNGEON_BASE_URL, PILLAR_FILE),
     ]);
 
-    // Medir el tamano real del tile (instancia temporal, descartada tras medir)
-    const tileSize = TestRoom._measureTileSize(floorContainer, assetManager);
+    // Medir el tamano real del tile via util compartido
+    const tileSize = measureTileSize(floorContainer, assetManager);
 
     // half = distancia del centro al borde exterior del suelo
     const half = (GRID_SIZE / 2) * tileSize;
@@ -209,29 +210,6 @@ export class TestRoom {
 
   // ----------------------------------------------------------
 
-  private static _measureTileSize(
-    container: AssetContainer,
-    assetManager: AssetManager,
-  ): number {
-    const probe = assetManager.instantiate(container);
-    probe.rootNode.computeWorldMatrix(true);
-    const meshes = probe.rootNode.getChildMeshes(false);
-    let size = 2;
-
-    const firstMesh = meshes[0];
-    if (firstMesh !== undefined) {
-      const bb = firstMesh.getBoundingInfo().boundingBox;
-      const w = bb.maximum.x - bb.minimum.x;
-      const d = bb.maximum.z - bb.minimum.z;
-      size = Math.max(w, d);
-    }
-
-    probe.dispose();
-    return size;
-  }
-
-  // ----------------------------------------------------------
-
   private static _buildFloor(
     assetManager: AssetManager,
     container: AssetContainer,
@@ -314,7 +292,7 @@ export class TestRoom {
 
   /**
    * Coloca 1 antorcha por pared (N, S, E, O) usando buildMountedTorch.
-   * Las constantes de posicion, luz y sprite se definen en RoomGeometry.
+   * withFlame=true (defecto): TestRoom muestra llamas completas.
    */
   private static _buildTorches(
     scene: Scene,
@@ -333,6 +311,7 @@ export class TestRoom {
     ];
 
     for (const def of torchDefs) {
+      // withFlame=true (defecto) -- TestRoom mantiene llamas completas
       buildMountedTorch(scene, assetManager, container, def);
     }
 
