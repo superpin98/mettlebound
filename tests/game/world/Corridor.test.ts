@@ -4,17 +4,48 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 vi.mock('@babylonjs/core', () => ({
   TransformNode: class MockTransformNode {
     name: string;
+    position = { x: 0, y: 0, z: 0 };
     dispose = vi.fn();
     constructor(name: string) { this.name = name; }
   },
+  Vector3: class MockVector3 {
+    x: number; y: number; z: number;
+    constructor(x = 0, y = 0, z = 0) { this.x = x; this.y = y; this.z = z; }
+    static Zero() { return { x: 0, y: 0, z: 0 }; }
+  },
+  MeshBuilder: {
+    CreateBox: vi.fn().mockReturnValue({
+      position: { x: 0, y: 0, z: 0 },
+      isVisible: true, isPickable: true,
+    }),
+  },
+  PhysicsAggregate: vi.fn(),
+  PhysicsShapeType: { BOX: 2 },
+}));
+
+vi.mock('@/game/world/rooms/RoomGeometry', () => ({
+  buildFloorTiles: vi.fn(),
+}));
+
+vi.mock('@/game/world/utils/measureTile', () => ({
+  measureTileSize: vi.fn().mockReturnValue(2),
 }));
 
 import { Corridor } from '@/game/world/Corridor';
 import type { Scene } from '@babylonjs/core';
 import type { AssetManager } from '@/core/AssetManager';
 
-const MOCK_SCENE         = {} as unknown as Scene;
-const MOCK_ASSET_MANAGER = {} as unknown as AssetManager;
+const MOCK_SCENE = {} as unknown as Scene;
+
+function makeMockAssetManager(): AssetManager {
+  return {
+    loadAsset:   vi.fn().mockResolvedValue({}),
+    instantiate: vi.fn().mockReturnValue({
+      rootNode: { parent: null, position: { x: 0, y: 0, z: 0 }, rotation: { x: 0, y: 0, z: 0 } },
+      dispose: vi.fn(),
+    }),
+  } as unknown as AssetManager;
+}
 
 // ============================================================
 // Tests
@@ -27,7 +58,7 @@ describe('Corridor', () => {
     corridor = new Corridor({
       id:             'corridor_01',
       scene:          MOCK_SCENE,
-      assetManager:   MOCK_ASSET_MANAGER,
+      assetManager:   makeMockAssetManager(),
       length:         12,
       startDirection: 'north',
     });
@@ -64,7 +95,7 @@ describe('Corridor', () => {
       const wide = new Corridor({
         id:             'corridor_wide',
         scene:          MOCK_SCENE,
-        assetManager:   MOCK_ASSET_MANAGER,
+        assetManager:   makeMockAssetManager(),
         length:         10,
         width:          5,
         startDirection: 'east',
@@ -142,7 +173,7 @@ describe('Corridor', () => {
       const ewCorridor = new Corridor({
         id:             'corridor_ew',
         scene:          MOCK_SCENE,
-        assetManager:   MOCK_ASSET_MANAGER,
+        assetManager:   makeMockAssetManager(),
         length:         10,
         startDirection: 'east',
       });
@@ -162,7 +193,7 @@ describe('Corridor', () => {
       const sCorridor = new Corridor({
         id:             'corridor_south',
         scene:          MOCK_SCENE,
-        assetManager:   MOCK_ASSET_MANAGER,
+        assetManager:   makeMockAssetManager(),
         length:         8,
         startDirection: 'south',
       });

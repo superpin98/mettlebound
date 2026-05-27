@@ -35,13 +35,19 @@ vi.mock('@babylonjs/core', () => ({
 }));
 
 vi.mock('@/game/world/rooms/RoomGeometry', () => ({
-  TORCH_Y:           1.0,
-  TORCH_WALL_INSET:  0.25,
-  buildMountedTorch: vi.fn().mockImplementation(() => ({
+  TORCH_Y:            1.0,
+  TORCH_WALL_INSET:   0.25,
+  buildMountedTorch:  vi.fn().mockImplementation(() => ({
     diffuse: {}, intensity: 1.2, range: 6, parent: null,
   })),
-  buildFloorMesh: vi.fn().mockReturnValue({ position: { x: 0, y: 0, z: 0 }, parent: null }),
-  buildWallMesh:  vi.fn().mockReturnValue({ position: { x: 0, y: 0, z: 0 }, parent: null }),
+  buildFloorMesh:     vi.fn().mockReturnValue({ position: { x: 0, y: 0, z: 0 }, parent: null }),
+  buildWallMesh:      vi.fn().mockReturnValue({ position: { x: 0, y: 0, z: 0 }, parent: null }),
+  buildFloorTiles:    vi.fn(),
+  buildWallSegments:  vi.fn(),
+}));
+
+vi.mock('@/game/world/utils/measureTile', () => ({
+  measureTileSize: vi.fn().mockReturnValue(2),
 }));
 
 import { InteractablesRoom } from '@/game/world/rooms/InteractablesRoom';
