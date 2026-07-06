@@ -30,3 +30,10 @@ dist-ssr
 # Backups locales pre-inyección
 *.before_*.bak
 *.md.bak
+
+# Assets WIP (FBX crudos de Meshy/Mixamo, material de staging â€” NO versionar)
+assets_wip/
+
+# Archivos Blender (se guardan en local, el GLB cocinado va al repo)
+*.blend
+*.blend1

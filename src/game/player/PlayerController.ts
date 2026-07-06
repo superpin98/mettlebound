@@ -228,9 +228,16 @@ export class PlayerController {
     // Solucion: convertir cada PBRMaterial a StandardMaterial preservando
     // la diffuseTexture (albedoTexture del PBR).
     if (classDef.isMixamo === true) {
-      const scale = classDef.modelScale ?? 0.01;
-      instance.rootNode.scaling = new Vector3(scale, scale, scale);
-      logger.info('PlayerController: modelo Mixamo — escala aplicada', { scale });
+      // Aplicar escala solo si modelScale esta definido y != 1.
+      // GLBs cocinados en Blender ya vienen a escala metros correcta (no necesitan 0.01).
+      // GLBs crudos de Mixamo (sin Blender) siguen necesitando modelScale: 0.01.
+      const scale = classDef.modelScale ?? 1;
+      if (scale !== 1) {
+        instance.rootNode.scaling = new Vector3(scale, scale, scale);
+        logger.info('PlayerController: modelo Mixamo — escala aplicada', { scale });
+      } else {
+        logger.debug('PlayerController: modelo Mixamo — sin escala adicional (GLB a metros)');
+      }
 
       const allMeshes = this._getAllMeshesFromInstance(instance.rootNode);
       for (const mesh of allMeshes) {
@@ -247,8 +254,13 @@ export class PlayerController {
 
     this._currentInstance = instance;
 
-    // Ocultar armas/accesorios que no corresponden a esta clase
-    this._applyAttachmentVisibility(instance, classId);
+    // Ocultar armas/accesorios que no corresponden a esta clase.
+    // Modelos Mixamo: malla integrada sin nodos de arma separados.
+    // Los nombres Mixamo no pasan isBodyPart() y visibleAttachments:[]
+    // deshabilitaria toda la malla. Saltar el pase para estos modelos.
+    if (classDef.isMixamo !== true) {
+      this._applyAttachmentVisibility(instance, classId);
+    }
 
     // Garantizar maxSimultaneousLights = 4 en los materiales del personaje.
     for (const mesh of instance.rootNode.getChildMeshes(false)) {
@@ -266,17 +278,48 @@ export class PlayerController {
       names: instance.animationGroups.map((g) => g.name),
     });
 
-    const findAnim = (baseName: string): AnimationGroup | null =>
-      instance.animationGroups.find(
-        (g) => g.name.replace(/_inst\d+$/, '') === baseName
-      ) ?? null;
+    // Mapeo flexible de AnimationGroups a nombres canonicos.
+    // Usa inclusion en minusculas sobre el nombre limpio (sin sufijo _instN).
+    // Cubre nombres sucios de Mixamo (Knight_unarmed_idle, etc.) y nombres
+    // canonicos limpios (Idle, Run, Attack_A...) sin mapear a mano por personaje.
+    // 'mixamo.com' es la bind pose basura que Mixamo siempre incluye — se descarta.
+    const ANIM_RULES: Array<{ key: string; test: (n: string) => boolean }> = [
+      { key: 'Idle',     test: (n) => n.includes('idle') },
+      { key: 'Run',      test: (n) => n.includes('run') || n.includes('walk') },
+      { key: 'Attack_A', test: (n) => n.includes('attack') },
+      { key: 'Hit',      test: (n) => n.includes('hit') },
+      { key: 'Death_A',  test: (n) => n.includes('death') || n.includes('dying') },
+    ];
 
-    this._idleAnim = findAnim('Idle');
-    this._walkAnim = findAnim('Walking_A');
+    const resolveAnimMap = (): Map<string, AnimationGroup> => {
+      const map = new Map<string, AnimationGroup>();
+      for (const rule of ANIM_RULES) {
+        const matches = instance.animationGroups.filter((g) => {
+          const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
+          if (clean === 'mixamo.com') { return false; }
+          return rule.test(clean);
+        });
+        if (matches.length === 0) {
+          logger.warn('PlayerController: animacion no encontrada', { key: rule.key, filename });
+        } else {
+          // matches.length > 0 garantizado por el else; ! es seguro aqui
+          const first = matches[0]!;
+          map.set(rule.key, first);
+          if (matches.length > 1) {
+            logger.debug('PlayerController: multiples groups para misma categoria, usando primero', {
+              key:       rule.key,
+              used:      first.name,
+              discarded: matches.slice(1).map((g) => g.name),
+            });
+          }
+        }
+      }
+      return map;
+    };
 
-    if (!this._idleAnim) {
-      logger.warn('PlayerController: animacion Idle no encontrada', { filename });
-    }
+    const animMap = resolveAnimMap();
+    this._idleAnim = animMap.get('Idle') ?? null;
+    this._walkAnim = animMap.get('Run')  ?? null;
 
     // Arrancar Idle en loop como estado por defecto
     this._idleAnim?.start(
@@ -286,6 +329,7 @@ export class PlayerController {
       /* to       */ this._idleAnim.to,
       /* additive */ false
     );
+
 
     logger.info('PlayerController: modelo listo', { classId });
   }
@@ -449,7 +493,7 @@ export class PlayerController {
 
   // ——————————————————————————————————————————
   // Visibilidad de armas y accesorios
-  // ——————————————————————————————————————————
+  // ——————————————————————
 
   /**
    * Muestra solo los nodos de arma/accesorio permitidos por la clase.
