@@ -100,8 +100,20 @@ export interface ClassDefinition {
   freePoints: number;
   /** ID del template de item inicial. Omitido en Errante (empieza sin item). */
   startingItemId?: string;
-  /** Nombre del archivo GLB del personaje, p.ej. 'Knight.glb'. */
+  /** Nombre del archivo GLB del personaje, p.ej. 'unarmed_knight.glb'. */
   modelAssetId?: string;
+  /**
+   * Si true, el modelo viene de Mixamo (exportado en centimetros).
+   * PlayerController aplicara scale=0.01 al rootNode y convertira
+   * los materiales PBR a StandardMaterial para evitar overflow de
+   * uniform blocks en WebGL (GL_MAX_VERTEX_UNIFORM_BUFFERS=12).
+   */
+  isMixamo?: boolean;
+  /**
+   * Factor de escala a aplicar al rootNode del modelo.
+   * Solo se usa si isMixamo=true. Valor tipico: 0.01 (Mixamo en cm).
+   */
+  modelScale?: number;
   /**
    * Nombres de nodo de arma/accesorio que deben quedar visibles.
    * Todos los demas accesorios se ocultan tras cargar el modelo.

@@ -1,246 +1,348 @@
 # Estado Actual — METTLEBOUND
 
-**Última actualización:** Sprint 3.5 completado (2026-05-20)
-**Tests:** 211 pasando (9 archivos de test)
+**Última actualización:** Sprint 4-EXT Fase A cerrada + inicio pipeline assets propios (julio 2026)
+**Tests:** 508 pasando (28 archivos de test)
 **TypeScript:** `tsc --noEmit` limpio, 0 null bytes
-**Rama git:** `sprint-3.5` mergeada a `main`
+**Rama git:** `sprint-4-combate`, HEAD `bee070f`
+**Build:** `npm run build` limpio (solo warning chunk size Babylon — normal)
 
 ---
 
 ## Qué funciona ahora mismo
 
-Al arrancar `npm run dev` el jugador ve:
+### Modo Dungeon (default al arrancar `npm run dev`)
+
+Al arrancar, `main.ts` carga `MettleboundDungeon` (layout hardcoded, se refactorizará en Sprint 6):
 
 1. **Modal de selección de clase** — elige entre Guerrero, Cazadora, Mago, Pícaro o Errante.
-2. **HUD** (esquina superior izquierda) — nombre de clase, nivel, barras HP/MP/XP, stats primarios (FUE/DES/INT/STE) y derivados (CRIT/ESQV/VEL). Badge dorado cuando hay puntos de stat pendientes.
-3. **Action Bar** (centro inferior) — botones 🎒 MOCHILA [I] y 📜 PERSONAJE [C]. Solo un panel abierto a la vez.
-4. **Inventario** (panel derecho, tecla I) — slots de equipado (10 ranuras) y bolsa (16 huecos). Slots ocupados muestran emoji + nombre truncado del item. Bordes de color y glow según rareza. Clic derecho para equipar/desequipar. Tooltip rico al pasar el ratón.
-5. **Hoja de personaje** (panel izquierdo, tecla C) — identidad (clase/nivel/XP), stats base repartibles, vitales (HP/MP/derivados), stats de combate activos y bonificaciones de conjunto activas.
-6. **Modal de subida de nivel** — al subir de nivel (o al elegir Errante) aparece el modal para repartir puntos de stat y elegir upgrades de pasiva.
-7. **Panel DEV** (esquina inferior derecha, solo en desarrollo):
-   - Botón `+100 XP` — añade XP y activa el modal si hay nivel.
-   - Selector `+Item ▾` — dropdown con 5 opciones de rareza (Común/Poco Común/Raro/Épico/Legendario), cada una en su color. Genera un item de esa rareza exacta y lo añade a la bolsa.
-   - Botón `Clase` — permite cambiar de clase en caliente sin recargar.
-8. **Selector de escala UI** (esquina inferior izquierda, solo en desarrollo) — AUTO/100%/125%/150%/175%/200%, persiste en localStorage.
-9. **TestRoom 3D** — sala de prueba centrada en (0,0,0) con suelo, paredes, esquinas, 4 columnas decorativas y 4 antorchas (modelo físico + luz cálida + partículas + sprite de llama animado). El personaje 3D del jugador aparece en el centro con animaciones Idle/Walking_A funcionales.
+2. **Dungeon 3D completo** — hub estrella con 4 salas + 3 corredores, todo con geometría KayKit.
+3. **HubRoom** (14×12u + 2 alcobas lat.) — suelo tiles, paredes, esquinas, puertas, antorchas. SpawnAltar central.
+4. **CombatTriggerRoom** (norte) — sala L-shape 16×10 + brazo 6×4.
+5. **InteractablesRoom** (este) — sala 14×10.
+6. **LootRoom** (sur) — antesala 4×6 + cámara 6×6. Puerta norte cerrada con llave (placeholder dorado).
+7. **3 corredores** de 8u de largo × 3u de ancho, con geometría KayKit.
+8. **Iluminación Grimspire** — clearColor `#080612`, niebla lineal 18-35, HemisphericLight morada, DirectionalLight azul, PointLights de antorchas ambar intensity 1.2 range 6.
+9. **HUD** — nombre de clase, nivel, barras HP/MP/XP, stats primarios y derivados. Badge dorado si hay puntos pendientes.
+10. **Action Bar** — botones 🎒 MOCHILA [I] y 📜 PERSONAJE [C].
+11. **Inventario** — slots de equipado + bolsa 16 huecos, tooltip, rareza visual.
+12. **Hoja de personaje** — stats base repartibles, derivados, sets activos.
+13. **Modal de subida de nivel** — repartir puntos + elegir upgrade.
+14. **Personaje jugador 3D** — modelo KayKit según clase, animaciones Idle/Walking_A, WASD + cámara orbital.
+15. **Física Havok** — suelo universal 300×300u, cápsula del jugador.
+16. **Panel DEV** (solo dev) — +100 XP, +Item rareza, Clase, botones Dungeon/TestRoom.
+17. **DEV — KnightValidation** — `unarmed_knight.glb` (asset propio pre-Blender) cargado en (3,0,0) del hub con idle animando. Controlado por flag `DEV_KNIGHT_VALIDATION` en `MettleboundDungeon.ts`.
+
+### Modo TestRoom (botón DEV → "TestRoom" → recarga)
+
+Sala estática original con suelo 4×4 tiles KayKit, 16 paredes, 4 esquinas, 4 columnas y 4 antorchas completas (modelo físico + PointLight + FlameEffect partículas + FlameSprite billboard animado). Accesible vía `localStorage.getItem('mb_mode') === 'testroom'`. DevTools: `__mb.mode`.
 
 ---
 
-## Archivos creados / modificados en Sprint 3
+## Layout del dungeon actual
 
-### Tipos y configuración
-| Archivo | Descripción |
-|---|---|
-| `src/types/items.types.ts` | Tipos Item, ItemTemplate, Affix, AffixStatKey (22 stats), EquipmentSlot, InventorySnapshot… |
-| `src/config/balance.ts` | Constantes de balance: XP, stats base por clase, fórmulas HP/MP, rareza, affixes |
-| `src/config/items.config.ts` | 23 templates de items, 4 definiciones de set, helpers getItemTemplate/getSetDefinition |
+**Hub estrella** — HubRoom en origen (0,0,0):
 
-### Sistemas de juego
-| Archivo | Descripción |
-|---|---|
-| `src/game/items/RaritySystem.ts` | Cálculo de rareza al hacer drop según LCK y tier del piso |
-| `src/game/items/AffixPool.ts` | Pool de affixes por rareza; genera lista aleatoria con valores escalados |
-| `src/game/items/UniqueEffectPool.ts` | Pool de efectos únicos para items legendarios |
-| `src/game/items/ItemGenerator.ts` | `generateItem`, `generateRandomItem`, `generateItemOfRarity(rarity, iLevel)` |
-| `src/game/items/ItemStatModifiers.ts` | `calcTotalItemDeltas(equipped)` — suma todos los affixes de items equipados |
-| `src/game/items/SetBonuses.ts` | Detecta conjuntos activos y calcula sus bonificaciones |
-| `src/game/items/Inventory.ts` | Gestiona bolsa (16 huecos) y equipamiento; emite eventos al EventBus |
-| `src/game/stats/StatCalculator.ts` | `calcDerivedStats(coreStats, level)` → 22 campos DerivedStats |
-| `src/game/player/PlayerStats.ts` | Estado del jugador: nivel, XP, stats base + items; getSnapshot, addXp, spendStatPoint |
-| `src/game/progression/XPSystem.ts` | xpForLevel, xpToNextLevel, xpFromEnemy, levelFromTotalXp, xpProgressInCurrentLevel |
+```
+         [CombatTriggerRoom] (0,0,21)  L-shape 16×10+brazo
+                  ↕ corredor (0,0,11) len=8
+                  N
+                  ↕
+[Interactables] ← E ← [HubRoom] → S → [corredor] → [LootRoom] (0,0,-22)
+(24,0,0) 14×10     (12,0,0) len=8         (0,0,-11)       10×6 locked
+```
 
-### Interfaz de usuario
-| Archivo | Descripción |
-|---|---|
-| `src/ui/HUD.ts` | Cabecera HTML con HP/MP/XP/stats; se actualiza vía EventBus |
-| `src/ui/InventoryUI.ts` | Panel inventario: slots emoji+nombre, bordes rareza, tooltip en hover |
-| `src/ui/ItemTooltip.ts` | Tooltip rico con nombre, rareza, slot, affixes, comparación equipado |
-| `src/ui/CharacterSheet.ts` | Hoja de personaje: identidad, stats base, derivados, sets activos |
-| `src/ui/LevelUpModal.ts` | Modal de subida de nivel: repartir stats + elegir upgrade de pasiva |
-| `src/ui/ClassSelectionModal.ts` | Modal de selección de clase al arrancar |
-| `src/ui/PanelManager.ts` | Garantiza un solo panel abierto a la vez |
-| `src/ui/ActionBar.ts` | Barra inferior fija; dueño único de atajos I/C/Escape |
-| `src/ui/UIScale.ts` | Escala de UI vía CSS variable --ui-scale; selector persistido en localStorage |
-
-### Tests — 196 en total (9 archivos)
-| Archivo | Tests |
-|---|---|
-| `tests/items/RaritySystem.test.ts` | 24 |
-| `tests/items/ItemGenerator.test.ts` | 30 |
-| `tests/items/SetBonuses.test.ts` | 20 |
-| `tests/items/Inventory.test.ts` | 30 |
-| `tests/stats/StatCalculator.test.ts` | 22 |
-| `tests/progression/XPSystem.test.ts` | 18 |
-| `tests/progression/UpgradePool.test.ts` | 8 |
-| `tests/integration/StatsFromItems.test.ts` | 24 (incluye 10 de stats exóticos) |
-| `tests/items/AffixPool.test.ts` | 20 |
+**Puertas:**
+- HubRoom Norte → CombatTriggerRoom (abierta)
+- HubRoom Este → InteractablesRoom (abierta)
+- HubRoom Sur → LootRoom (`isLocked: true`, placeholder dorado flotante — bug conocido)
 
 ---
 
-## Archivos creados / modificados en Sprint 3.5
+## Estructura de código (`src/`)
 
-### Assets
-| Recurso | Descripción |
-|---|---|
-| `public/assets/models/characters/` | Pack KayKit Adventurers — modelos glb de personajes jugables |
-| `public/assets/models/dungeon/` | Pack KayKit Dungeon — tiles de suelo, paredes, esquinas, antorchas, columnas |
-| `public/assets/sprites/flame.png` | Spritesheet de llama pixel art CC0 (BenHickling) — 640×384 px, grid 10×6, 60 frames de 64×64 |
-| **Total assets:** | 216 archivos, ~27 MB |
-
-### Motor y cámara
-| Archivo | Descripción |
-|---|---|
-| `src/core/Engine.ts` | Iluminación Grimspire: clearColor `#080612`, niebla lineal 18-35, HemisphericLight `grimAmbient` morada intensity 0.12, DirectionalLight `grimMoon` azul intensity 0.05 |
-| `src/core/AssetManager.ts` | Sistema de carga de assets con AssetContainer, caché por URL y mock loader para tests |
-
-### Mundo 3D
-| Archivo | Descripción |
-|---|---|
-| `src/game/world/TestRoom.ts` | Sala estática de prueba: suelo 4×4 tiles, 16 paredes perimetrales, 4 esquinas, 4 columnas decorativas, 4 antorchas completas |
-| `src/game/world/FlameEffect.ts` | ParticleSystem de partículas ascendentes naranjas con textura DynamicTexture procedural y BLENDMODE_ADD |
-| `src/game/world/FlameSprite.ts` | Plane 3D billboard con spritesheet flame.png, UV scrolling animado a ~16 fps, NEAREST_SAMPLINGMODE para pixel art limpio |
-
-### Personaje jugador
-| Archivo | Descripción |
-|---|---|
-| `src/game/player/PlayerController.ts` | Modelo 3D glb del personaje según clase, animaciones Idle/Walking_A, whitelist de visibilidad de meshes de armas por clase en classes.config |
-| `src/config/classes.config.ts` | Mapeo clase → modelo KayKit (Guerrero→Knight, Cazadora→Rogue, Mago→Mage, Pícaro→Rogue_Hooded, Errante→Barbarian), whitelist de armas, nombre display femenino para Cazadora |
-
-### Tests — 211 en total (mismos 9 archivos, 15 tests nuevos en AssetManager)
-| Incremento | Detalle |
-|---|---|
-| +15 tests | `tests/core/AssetManager.test.ts` — mock loader, caché, instanciación |
+```
+src/
+├── core/
+│   ├── Engine.ts                    (iluminación Grimspire, cámara, HavokPlugin)
+│   ├── AssetManager.ts              (loadAsset + caché + instantiate → AssetInstance)
+│   └── Logger.ts
+├── game/
+│   ├── items/                       (sistema de items completo Sprint 3)
+│   │   ├── RaritySystem.ts
+│   │   ├── AffixPool.ts
+│   │   ├── UniqueEffectPool.ts
+│   │   ├── ItemGenerator.ts
+│   │   ├── ItemStatModifiers.ts
+│   │   ├── SetBonuses.ts
+│   │   └── Inventory.ts
+│   ├── player/
+│   │   ├── PlayerController.ts      (modelo 3D, animaciones, WASD, physicsBody getter, teleportTo)
+│   │   └── PlayerStats.ts           (nivel, XP, stats base + items, getSnapshot, addXp)
+│   ├── progression/
+│   │   ├── XPSystem.ts
+│   │   └── UpgradePool.ts
+│   ├── stats/
+│   │   └── StatCalculator.ts        (calcDerivedStats → 22 campos)
+│   └── world/
+│       ├── Room.ts                  (clase abstracta + placeAt + linkConnection)
+│       ├── ExplorationRoom.ts
+│       ├── CombatRoom.ts            (ÚNICA con Grid táctico)
+│       ├── Corridor.ts              (con _buildKayKitGeometry, 8 directions declaradas)
+│       ├── Dungeon.ts               (registerRoom, transitionToRoom, eventBus)
+│       ├── RoomTrigger.ts           (Havok trigger volumes)
+│       ├── RoomEventBus.ts          (pub/sub tipado)
+│       ├── LightingTransition.ts    (fade in/out de luces)
+│       ├── MettleboundDungeon.ts    (factory hardcoded — refactor en Sprint 6)
+│       │                             flag DEV_KNIGHT_VALIDATION al principio
+│       ├── TestRoom.ts              (sala estática original — INTACTA)
+│       ├── TargetDummy.ts
+│       ├── FlameEffect.ts           (ParticleSystem partículas ascendentes)
+│       ├── FlameSprite.ts           (plane 3D billboard, UV scrolling, NEAREST)
+│       ├── Tile.ts, Grid.ts, GridRenderer.ts
+│       ├── dev/
+│       │   └── KnightValidation.ts  (DEV — carga unarmed_knight.glb en hub)
+│       ├── utils/
+│       │   └── measureTile.ts
+│       ├── types/
+│       │   └── room.types.ts        (ConnectionDirection 8 valores + isLocked)
+│       ├── rooms/
+│       │   ├── RoomGeometry.ts      (buildMountedTorch, buildFloorTiles, buildWallSegments)
+│       │   ├── HubRoom.ts           (hub principal 14×12 + alcobas)
+│       │   ├── CombatTriggerRoom.ts
+│       │   ├── InteractablesRoom.ts
+│       │   └── LootRoom.ts
+│       └── props/
+│           └── SpawnAltar.ts
+├── stats/
+├── ui/
+│   ├── HUD.ts
+│   ├── InventoryUI.ts
+│   ├── ItemTooltip.ts
+│   ├── CharacterSheet.ts
+│   ├── LevelUpModal.ts
+│   ├── ClassSelectionModal.ts
+│   ├── PanelManager.ts
+│   ├── ActionBar.ts
+│   └── UIScale.ts
+├── config/
+│   ├── classes.config.ts            (mapeo clase→modelo, whitelist armas, display names)
+│   ├── items.config.ts
+│   └── balance.ts
+└── types/
+    ├── items.types.ts
+    ├── interaction.types.ts
+    └── spatial.types.ts
+```
 
 ---
 
-## Decisiones de arquitectura
+## Estructura de assets (`public/assets/`)
 
-### Z-index hierarchy
+```
+public/assets/
+├── models/
+│   ├── characters/
+│   │   ├── Knight.glb               (KayKit placeholder — Guerrero)
+│   │   ├── Rogue.glb                (KayKit placeholder — Cazadora)
+│   │   ├── Mage.glb                 (KayKit placeholder — Mago)
+│   │   ├── Rogue_Hooded.glb         (KayKit placeholder — Pícaro)
+│   │   ├── Barbarian.glb            (KayKit placeholder — Errante)
+│   │   ├── unarmed_knight.glb       (PRIMER ASSET PROPIO — validación pre-Blender)
+│   │   │                             4698 tris, rig Mixamo, set unarmed
+│   │   │                             scale=0.01 (Mixamo cm→metros)
+│   │   │                             PBRMaterial reemplazado por StandardMaterial
+│   │   └── skeletons/               (KayKit Skeletons CC0 — Rusty)
+│   └── dungeon/
+│       ├── floor_tile_large.gltf.glb
+│       ├── wall.gltf.glb
+│       ├── wall_corner.gltf.glb
+│       ├── wall_doorway.glb
+│       └── wall_gated.gltf.glb
+├── sprites/
+│   └── flame.png                    (CC0 BenHickling, 640×384, grid 10×6, 60 frames)
+└── textures/
+```
+
+**Staging assets propios (FUERA del repo):**
+`C:\Users\dconde\Desktop\mettlebound-assets-wip\knight\`
+- `unarmed/` — Run (con skin), Idle, Hit, Death_A (sin skin)
+- `sword-and-shield/` — Idle, Run, Attack_A, Hit (sin skin)
+- `Death_A.fbx` — compartida entre sets
+
+---
+
+## Tests — 508 en total (28 archivos)
+
+| Bloque | Tests |
+|---|---|
+| items/RaritySystem | 24 |
+| items/ItemGenerator | 30 |
+| items/SetBonuses | 20 |
+| items/Inventory | 30 |
+| items/AffixPool | 20 |
+| stats/StatCalculator | 22 |
+| progression/XPSystem | 18 |
+| progression/UpgradePool | 8 |
+| progression/LevelUp | 16 |
+| integration/StatsFromItems | 24 |
+| core/AssetManager | 15 |
+| player/PlayerStatsHp | 11 |
+| game/world/RoomTrigger | 11 |
+| game/world/LightingTransition | 17 |
+| combat/Combatant | 12 |
+| config/classModel | 4 |
+| …resto world/dungeon | ~226 |
+
+---
+
+## Pipeline de assets propios — Estado julio 2026
+
+### Guerrero (Knight) — EN PROGRESO
+
+Pipeline (sección 2.11 del handoff):
+
+| Paso | Herramienta | Estado |
+|---|---|---|
+| 4 vistas ortogonales | Copilot Image Creator | ✅ hecho |
+| Image to 3D | Meshy (low-poly, quads, T-pose) | ✅ hecho — 2601 quads |
+| Texturizado | Meshy (texto, eliminar iluminación ON, PBR ON) | ✅ hecho — acero/óxido Grimspire |
+| Auto-rig | Meshy | ❌ DESCARTADO — colapsa modelo armadura 2 veces |
+| Rig + animaciones | Mixamo | ✅ hecho — aguanta bien |
+| Sets descargados | Mixamo | ✅ unarmed (Idle/Run/Hit/Death_A) + sword-and-shield (Idle/Run/Attack_A/Hit) |
+| Blender | Fusionar malla+anims, pivote pies, export GLB | ⏳ PENDIENTE (en casa) |
+| Validación dungeon | Babylon + Grimspire | 🔄 EN CURSO (unarmed_knight.glb DEV tool) |
+| Armas iniciales | Espada 1H + escudo redondo (Meshy) | 🔄 EN GENERACIÓN |
+
+### Nombres exactos de animaciones en unarmed_knight.glb
+
+| Nombre en GLB | Mapeo canónico futuro |
+|---|---|
+| `mixamo.com` | T-pose/bind pose — IGNORAR |
+| `Knight_unarmed_idle` | → `Idle` |
+| `Knight_unarmed_run_forward` | → `Run` |
+| `Knight_unarmed_attack` | → `Attack_A` |
+| `Knight_unarmed_hit` | → `Hit` |
+| `Knight_death` | → `Death_A` |
+
+> **Nota**: la normalización de nombres (Knight_unarmed_idle → Idle) se hace en
+> Blender al fusionar. No tocar hasta esa sesión.
+
+### Lección crítica: Mixamo GLB en Babylon
+
+- **Scale obligatorio: 0.01** — Mixamo exporta en centímetros. El nodo mesh
+  tiene `scale=[100,100,100]` internamente; la jerarquía de huesos está en cm
+  (Hips a Y=104.784). Babylon lee GLTF en metros → sin corrección, el personaje
+  mide 170 metros.
+- **PBRMaterial de Meshy incompatible con WebGL limit**: Meshy activa clearcoat,
+  IBL, sheen, spherical harmonics y subSurface aunque el asset no los use.
+  Excede `GL_MAX_VERTEX_UNIFORM_BUFFERS (12)`. Solución en `KnightValidation.ts`:
+  desactivar todas las features, luego reemplazar PBR → StandardMaterial con
+  albedoTexture como diffuseTexture. Esto es un workaround DEV; en producción
+  habrá que o bien re-exportar desde Blender con material Simple/Unlit o usar
+  este mismo stripping.
+- **`useTextureToStoreBoneMatrices = true`**: aplicar en el skeleton para evitar
+  contribución adicional de uniform blocks de huesos.
+- **`PBRSubSurfaceConfiguration` no tiene `isEnabled`** — desactivar con
+  `isRefractionEnabled`, `isTranslucencyEnabled`, `isScatteringEnabled`.
+- **`useSphericalHarmonics` no existe en PBRMaterial de Babylon 9** — usar
+  `forceIrradianceInFragment = false`.
+
+---
+
+## Deuda visual conocida (Fase A — NO arreglada aún)
+
+1. **Antorchas mal posicionadas en doorways** — aparecen pegadas al marco.
+2. **Salas con paredes incompletas** — huecos donde debería haber muro.
+3. **Candado dorado flotante** — placeholder de puerta sur del hub fuera de posición.
+4. **Alineación fina entre tiles** — hexágonos KayKit no casan perfectamente en bordes.
+
+---
+
+## Deuda técnica NO bloqueante
+
+- **Suelo físico universal 300×300u provisional** en `MettleboundDungeon.ts`.
+  Refinar en Fase B con colliders por sala.
+- **Trigger volumes Havok** — TODOs abiertos desde A2-b2. Validar `isTrigger` +
+  `COLLISION_FINISHED` en navegador.
+- **Diagonales Corridor.ts** — lanza `Error` en los 4 cardinales diagonales.
+  Implementación real en Sprint 6.
+- **Flag `DEV_KNIGHT_VALIDATION = true`** en `MettleboundDungeon.ts` — poner a
+  `false` cuando se termine la validación visual.
+- **Nombres de animación sucios** (`Knight_unarmed_idle` en vez de `Idle`) —
+  normalizar en la sesión Blender.
+
+---
+
+## Arquitectura y patrones canónicos
+
+### AssetManager — patrón de instanciación
+
+```typescript
+const container = await assetManager.loadAsset(baseUrl, filename);
+const instance  = assetManager.instantiate(container); // → AssetInstance
+// instance.rootNode  → TransformNode
+// instance.animationGroups → AnimationGroup[]
+// instance.dispose() → limpieza completa
+```
+
+### Sprites 2D — NUNCA SpriteManager
+
+`MeshBuilder.CreatePlane` + `billboardMode_Y` + `NEAREST_SAMPLINGMODE` +
+`transparencyMode ALPHATEST` + `disableLighting=true` + UV scrolling.
+Ref: `FlameSprite.ts`.
+
+### Prop con luz emergente
+
+`PointLight` pertenece al prop. Si el prop se destruye, la luz también.
+Ref: `buildMountedTorch()` en `RoomGeometry.ts`.
+
+### Prop montado en pared
+
+`TransformNode` wrapper con `rotation.y = atan2(N.x, N.z) + PI`.
+Ref: antorchas en `HubRoom._buildProps()`.
+
+### Z-index UI
+
 ```
 1000  HUD
 2000  Action Bar
-3000  DEV panel + UIScale selector
+3000  DEV panel + UIScale
 4000  Panels (InventoryUI, CharacterSheet)
 8000  Modals (LevelUpModal, ClassSelectionModal)
 9999  Tooltips (ItemTooltip)
 ```
 
-### PanelManager — un solo panel activo
-`PanelManager` registra paneles como `PanelHandle { show, hide, isOpen }`. `toggle(id)` hace swap limpio entre paneles. `ActionBar` se suscribe a `onActiveChange` para actualizar el resaltado visual.
+### maxSimultaneousLights = 8
 
-### Atajos de teclado centralizados
-`ActionBar` es el único dueño de los atajos I/C/Escape. `InventoryUI` y `CharacterSheet` no tienen listeners de teclado propios.
-
-### XP relativa al nivel — fuente canónica
-`xpProgressInCurrentLevel(totalXp, level)` en `XPSystem.ts` compartida entre HUD y CharacterSheet. Devuelve `{ current, needed }` donde `current = totalXp - xpForLevel(level)`.
-
-### DerivedStats — 22 campos siempre presentes
-`StatCalculator.calcDerivedStats()` inicializa a 0 los campos de combate. `PlayerStats.getSnapshot()` los sobreescribe con los deltas de items.
-
-### generateItemOfRarity — rareza exacta
-Omite el cálculo probabilístico para poder generar items de rareza forzada (botón DEV, cofres especiales futuros).
-
-### Antorchas — arquitectura por capas
-Cada antorcha es independiente y se compone de tres capas apiladas en el mismo punto:
-1. **PointLight** — ilumina la geometría circundante (ambar `Color3(1, 0.5, 0.15)`, intensity 1.2, range 6)
-2. **FlameEffect** — ParticleSystem de partículas ascendentes (volumen y movimiento)
-3. **FlameSprite** — plane 3D billboard con sprite animado (silueta reconocible de llama)
-
-El wrapper `TransformNode` con `rotation.y` calculada según la pared hace que el modelo KayKit quede orientado correctamente sin transformaciones adicionales en el hijo.
-
-### maxSimultaneousLights = 8 en todos los materiales
-El límite por defecto de Babylon es 4. Con 2 luces globales + 4 PointLights de antorchas = 6 luces totales, el límite de 4 truncaba 2 PointLights. Se aplica a todos los materiales con `scene.markAllMaterialsAsDirty(2)` tras instanciar la sala.
+Aplicar en TODOS los materiales KayKit + `scene.markAllMaterialsAsDirty(2)`.
+Con 2 globales + 4 antorchas = 6 → el límite por defecto de Babylon (4) truncaría 2 PointLights.
 
 ---
 
-## Pilares de identidad del juego
+## Modo dual TestRoom / Dungeon
 
-- **"Todo lo que se pueda hacer interactuable, sea interactuable"** — antorchas, barriles, cofres, mesas, puertas, paredes frágiles. Cada prop del mundo tiene potencial de mecánica.
-- **Sistema de iluminación como mecánica jugable (Sprint 8+)** — visión por entidad, accuracy modulado por visibilidad, IA reactiva al entorno lumínico. Las PointLights de las antorchas son el primer ladrillo de este sistema.
-- **"Producto serio, primogénito, no laboratorio"** — cada sprint cierra con algo jugable y visualmente coherente.
-- **Filosofía visual: 3D low-poly + 2D pixel art solo para VFX** — la geometría del mundo y los personajes son 3D. Las llamas, hechizos y partículas son sprites 2D billboard anclados en el espacio 3D.
+`main.ts` — `localStorage.getItem('mb_mode')`:
+- `'dungeon'` (default): carga `buildMettleboundDungeon` + `KnightValidation` si flag activo.
+- `'testroom'`: carga `TestRoom` original con llamas completas.
 
----
-
-## Patrones reutilizables descubiertos en Sprint 3.5
-
-### "Prop con luz emergente"
-Cada `PointLight` pertenece a un prop iluminante. Si el prop se destruye, su luz también desaparece. Reutilizable en Sprint 6 para candelabros, hogueras, runas mágicas y cristales. Implementación de referencia: antorchas en `TestRoom._buildTorches`.
-
-### "Prop montado en pared"
-`TransformNode` wrapper con `rotation.y = atan2(N.x, N.z) + PI` calculada desde la normal de la pared. El modelo KayKit se instancia como hijo sin transformaciones extra. Reutilizable para banners, candelabros de pared y repisas. Implementación de referencia: antorchas en `TestRoom.ts`.
-
-### "Sprite 2D con plane 3D billboard"
-**Nunca usar `SpriteManager`** de Babylon — su pase 2D ignora el depth buffer y el sprite aparece por delante de paredes y geometría. Patrón correcto:
-- `MeshBuilder.CreatePlane` con `billboardMode = BILLBOARDMODE_ALL`
-- `NEAREST_SAMPLINGMODE` para pixel art sin blur
-- `transparencyMode = MATERIAL_ALPHATEST` para corte duro de alpha
-- `disableLighting = true` para brillo autoiluminado
-- `backFaceCulling = false` por si la cámara pasa al otro lado
-- UV scrolling manual con `uOffset/vOffset` sobre una textura compartida
-
-Implementación de referencia: `FlameSprite.ts`. Reutilizable para todos los VFX 2D del juego (hechizos, impactos, runas, auras).
-
-### Constantes de offset relativo para props procedurales
-Las posiciones de elementos visuales ligados a un prop (luz, partículas, sprite) se expresan siempre como offsets relativos a `wrapper.position` más un vector direccional (`inward`, `lateral`). Nunca posiciones absolutas hardcodeadas. Esto garantiza que el mismo código funciona en la sala de prueba y en generación procedural sin modificaciones.
+Botones DEV "Dungeon" y "TestRoom" → `localStorage.setItem` + `window.location.reload()`.
+DevTools: `__mb.mode`, `__mb.dungeon`, `__mb.hub`.
 
 ---
 
-## Bugs resueltos en Sprint 3.5
+## Siguiente bloque de trabajo
 
-| Bug | Causa | Solución |
-|---|---|---|
-| Solo 2 de 4 PointLights visibles al inicio | Límite por defecto de Babylon de 4 luces simultáneas (2 globales + 4 de antorchas = 6 > 4) | `mat.maxSimultaneousLights = 8` en todos los materiales + `markAllMaterialsAsDirty(2)` |
-| Antorchas orientadas hacia dentro de la pared | El modelo KayKit necesita `rotation.y` según la normal de cada pared | Wrapper TransformNode con rotY calculado por pared (Sur=0, Norte=PI, Oeste=PI/2, Este=-PI/2) |
-| Sprite de llama por delante de geometría 3D | `SpriteManager` usa un pase 2D separado que ignora el depth buffer | Cambio a `MeshBuilder.CreatePlane` con `billboardMode_ALL` — geometría 3D real que respeta depth |
+En orden de prioridad:
 
----
+1. **David valida visualmente el Guerrero** en el navegador (escala, pivote, idle, textura).
+2. **Visual polish Fase A** (4 bugs de deuda visual listados arriba). ~1-2 sesiones Cowork.
+   Se puede paralelizar: David en Meshy generando armas / Cowork arreglando bugs.
+3. **Sesión Blender** (en casa): pivote a pies, fusionar malla + animaciones en GLB único,
+   renombrar anims a canónicos (Idle/Run/Attack_A/Hit/Death_A), ajustar PBR, export.
+4. **Validación final del Guerrero** en dungeon con GLB cocinado.
+5. **Fase B Sprint 4-EXT** — motor de combate por turnos:
+   - Decisión primera: modelo de movimiento (BG3 vs 1-acción)
+   - Sistema de turnos DEX + encadenamiento
+   - Snapshot/clonado de sala para transición exploración→combate
 
-## Lecciones aprendidas (protocolo para futuras sesiones)
-
-### Mount-freeze (CRÍTICO)
-El sandbox Linux cachea los archivos del filesystem Windows. Cuando el Edit tool modifica un archivo, el sandbox puede no ver el cambio.
-**Regla:** Siempre usar `python3` en bash para escribir archivos directamente en el sandbox con `open(..., 'wb').write(data.encode())`. Verificar con bash después de cualquier cambio crítico.
-
-### Null bytes del Edit tool
-Si Edit borra un bloque grande de código puede dejar bytes nulos que TypeScript reporta como `TS1127: Invalid character`.
-**Regla:** Después de cualquier Edit que elimine contenido: `data = open(f,'rb').read().replace(b'\x00',b''); open(f,'wb').write(data)`.
-
-### CSS truncado
-Los rewrites grandes de style.css pueden quedar truncados.
-**Regla:** Después de escribir style.css verificar con Python que `data.count(b'{') == data.count(b'}')`.
-
-### Calibración visual iterativa
-Para ajustes de posición/tamaño de elementos visuales, exponer constantes con nombre semántico claro en la zona de constantes del archivo (no valores inline). El desarrollador itera a ojo directamente sin necesidad de logs de diagnóstico.
-
----
-
-## Wishlist / deuda técnica
-
-### Deuda de Sprint 3
-- Animación visual al subir de nivel (flash en HUD).
-- Drag & drop en el inventario.
-- Filtros y ordenación de items en la bolsa.
-- Persistencia del inventario entre recargas (localStorage).
-- Sonidos UI básicos (hover, clic, equipar).
-- Preview de stats al comparar item de bolsa con equipado del mismo slot.
-
-### Deuda de Sprint 3.5
-- **Bug pre-existente (mini-fix antes Sprint 4):** FUE sube HP máximo pero no rellena HP actual al subir stat.
-- Blending suave entre animaciones Idle ↔ Walking ↔ Running (Sprint polish).
-- Drag & drop inventario e iconos pixel art reales (Sprint UI Pass).
-- Sustituir sprite 2D billboard de antorchas por modelo 3D pequeño de fuego (Sprint polish visual, no bloqueante).
-- Asset pack Animated Effects de Stealthix $3 — candidato para Sprint UI Pass / VFX.
-- Colisiones físicas de paredes en TestRoom (se implementan en Sprint 4).
-
----
-
-## Siguiente sprint
-
-**Sprint 4 — Combate básico**
-
-Objetivo: input de ataque, animaciones de combate, hitbox, sistema de daño, colisiones de pared en TestRoom y target dummy. Mini bug-fix de FUE/HP antes de empezar.
-
-Archivos clave a crear: sistema de combate en `src/game/combat/`, colisiones en `src/game/world/`.
-
-*Actualizado al cerrar el Sprint 3.5 — 2026-05-20.*
+*Actualizado al cerrar sesión de julio 2026 — pipeline assets + KnightValidation DEV tool.*

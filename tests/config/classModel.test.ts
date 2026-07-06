@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { CLASS_DEFINITIONS } from '@/config/classes.config';
 import type { ClassId } from '@/types/game.types';
 
-// Mapeo canónico clase → modelo (fuente de verdad: assets/README.md)
+// Mapeo canonico clase -> modelo (fuente de verdad: assets/README.md)
 const EXPECTED_MODELS: Record<ClassId, string> = {
-  guerrero: 'Knight.glb',
+  guerrero: 'unarmed_knight.glb',
   cazador: 'Rogue.glb',
   mago: 'Mage.glb',
   picaro: 'Rogue_Hooded.glb',
@@ -24,15 +24,15 @@ describe('CLASS_DEFINITIONS — campo modelAssetId', () => {
     }
   });
 
-  it('cada clase apunta al modelo correcto segun el mapeo canónico', () => {
+  it('cada clase apunta al modelo correcto segun el mapeo canonico', () => {
     for (const cls of CLASS_DEFINITIONS) {
       expect(cls.modelAssetId).toBe(EXPECTED_MODELS[cls.id]);
     }
   });
 
   it('no hay dos clases apuntando al mismo modelo (excepto errante como placeholder)', () => {
-    // Errante usa Barbarian.glb como placeholder documentado — es el único duplicado
-    // permitido: ningún otro par de clases debe compartir modelo.
+    // Errante usa Barbarian.glb como placeholder documentado — es el unico duplicado
+    // permitido: ningun otro par de clases debe compartir modelo.
     const nonErrante = CLASS_DEFINITIONS.filter((c) => c.id !== 'errante');
     const models = nonErrante.map((c) => c.modelAssetId);
     const unique = new Set(models);

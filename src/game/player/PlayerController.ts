@@ -4,12 +4,13 @@ import {
   MeshBuilder,
   Vector3,
   Quaternion,
+  Color3,
   PBRMaterial,
   StandardMaterial,
   PhysicsAggregate,
   PhysicsShapeType,
 } from '@babylonjs/core';
-import type { Mesh, ArcRotateCamera, AnimationGroup, PhysicsBody } from '@babylonjs/core';
+import type { AbstractMesh, Mesh, ArcRotateCamera, AnimationGroup, PhysicsBody } from '@babylonjs/core';
 
 // Imports internos
 import type { InputManager } from '@/core/InputManager';
@@ -121,7 +122,6 @@ export class PlayerController {
   /**
    * PhysicsBody de la capsula Havok del player.
    * Solo disponible despues de llamar initPhysics().
-   * Anadido en A2-b4.2 para pasarlo a Dungeon (RoomTrigger).
    */
   get physicsBody(): PhysicsBody {
     if (this._capsuleAggregate === null) {
@@ -142,13 +142,8 @@ export class PlayerController {
   /**
    * Conecta la capsula invisible al motor Havok y bloquea la inercia angular.
    *
-   * CUANDO llamar: desde main.ts, DESPUES de scene.enablePhysics() (B2A)
+   * CUANDO llamar: desde main.ts, DESPUES de scene.enablePhysics()
    * y DESPUES de que el suelo/sala ya existan y la capsula no caiga al vacio.
-   *
-   * Por que no en el constructor: PhysicsAggregate requiere que
-   * scene.enablePhysics() ya haya sido llamado, pero el constructor de
-   * PlayerController se ejecuta de forma sincrona antes del bloque async
-   * donde Havok se inicializa.
    */
   initPhysics(): void {
     this._capsuleAggregate = new PhysicsAggregate(
@@ -170,16 +165,10 @@ export class PlayerController {
 
   /**
    * Teletransporta al jugador a la posicion world indicada.
-   * Mueve tanto la capsula fisica como el pivot para que no haya
-   * desincronizacion en el primer frame.
    * pos.y = 0 equivale al nivel del suelo; la capsula se eleva
    * automaticamente a CAPSULE_HEIGHT/2 para quedar apoyada.
-   * Anadido en A2-b4.2 para el spawn inicial en el dungeon.
    */
   teleportTo(pos: Vec3): void {
-    // La capsula tiene su centro geometrico en y = CAPSULE_HEIGHT/2 cuando
-    // los pies estan a y=0. Sumamos esa mitad para que el jugador quede
-    // apoyado en el suelo indicado por pos.y.
     this._capsule.position.set(pos.x, pos.y + CAPSULE_HEIGHT / 2, pos.z);
     this._pivot.position.copyFrom(this._capsule.position);
     logger.debug('PlayerController: teleportTo', pos);
@@ -189,9 +178,6 @@ export class PlayerController {
    * Carga el modelo 3D de la clase indicada y lo instancia en escena.
    * Si ya habia un modelo, lo dispone antes de cargar el nuevo.
    * Tras cargar, inicia la animacion Idle en loop automaticamente.
-   *
-   * La escena no se pasa como parametro porque AssetManager ya la
-   * tiene almacenada desde su constructor.
    */
   async loadModel(classId: ClassId): Promise<void> {
     // Liberar el modelo anterior (cambio de clase en caliente)
@@ -217,7 +203,6 @@ export class PlayerController {
     const container = await this._assetManager.loadAsset(CHAR_BASE_URL, filename);
 
     // Neutralizar luces que el loader GLTF pudo haber extraido del GLB al container.
-    // Sin esto, cada loadModel() de un modelo nuevo acumula luces extra en la escena.
     if (container.lights.length > 0) {
       logger.debug('PlayerController: luces embebidas en GLB eliminadas', {
         count: container.lights.length,
@@ -235,23 +220,43 @@ export class PlayerController {
     // (pivot esta a PIVOT_HEIGHT=1, asi que offset local = MODEL_Y_OFFSET=-1)
     instance.rootNode.position = new Vector3(0, MODEL_Y_OFFSET, 0);
 
+    // ---- Modelos Mixamo: correccion de escala y materiales ---------------
+    // Mixamo exporta en centimetros. En Babylon (GLTF = metros) el personaje
+    // aparece 100x demasiado grande. Aplicar scale=0.01 al rootNode lo corrige.
+    // Ademas, los GLBs de Meshy/Mixamo activan clearcoat, IBL y subSurface en
+    // sus PBRMaterials, lo que desborda GL_MAX_VERTEX_UNIFORM_BUFFERS (12).
+    // Solucion: convertir cada PBRMaterial a StandardMaterial preservando
+    // la diffuseTexture (albedoTexture del PBR).
+    if (classDef.isMixamo === true) {
+      const scale = classDef.modelScale ?? 0.01;
+      instance.rootNode.scaling = new Vector3(scale, scale, scale);
+      logger.info('PlayerController: modelo Mixamo — escala aplicada', { scale });
+
+      const allMeshes = this._getAllMeshesFromInstance(instance.rootNode);
+      for (const mesh of allMeshes) {
+        if (mesh.material instanceof PBRMaterial) {
+          mesh.material = this._pbrToStandard(mesh.material, mesh.name);
+        } else if (mesh.material instanceof StandardMaterial) {
+          mesh.material.maxSimultaneousLights = 4;
+        }
+      }
+      logger.info('PlayerController: materiales Mixamo convertidos a Standard', {
+        meshCount: allMeshes.length,
+      });
+    }
+
     this._currentInstance = instance;
 
     // Ocultar armas/accesorios que no corresponden a esta clase
     this._applyAttachmentVisibility(instance, classId);
 
-    // Garantizar maxSimultaneousLights = 8 en los materiales del personaje.
-    // En el arranque inicial, TestRoom.build() (que se ejecuta despues) aplica
-    // este limite globalmente y llama markAllMaterialsAsDirty(2).
-    // En cambio de clase (loadModel llamado despues de TestRoom), los materiales
-    // del nuevo modelo son frescos: al asignar el limite antes del primer frame
-    // los shaders compilan directamente para las 6 luces de la sala.
+    // Garantizar maxSimultaneousLights = 4 en los materiales del personaje.
     for (const mesh of instance.rootNode.getChildMeshes(false)) {
       if (
         mesh.material instanceof PBRMaterial ||
         mesh.material instanceof StandardMaterial
       ) {
-        mesh.material.maxSimultaneousLights = 8;
+        mesh.material.maxSimultaneousLights = 4;
       }
     }
 
@@ -261,9 +266,6 @@ export class PlayerController {
       names: instance.animationGroups.map((g) => g.name),
     });
 
-    // instantiateModelsToScene aplica el nameFn tambien a los AnimationGroups,
-    // convirtiendo 'Idle' -> 'Idle_inst1', 'Walking_A' -> 'Walking_A_inst1', etc.
-    // Buscamos ignorando el sufijo _instN, igual que _applyAttachmentVisibility con meshes.
     const findAnim = (baseName: string): AnimationGroup | null =>
       instance.animationGroups.find(
         (g) => g.name.replace(/_inst\d+$/, '') === baseName
@@ -321,20 +323,14 @@ export class PlayerController {
 
     // --- Movimiento ---
     if (this._capsuleAggregate) {
-      // Con fisica Havok: setLinearVelocity para X/Z, preservar Y (gravedad).
-      // setLinearVelocity sobreescribe la velocidad directamente cada frame
-      // (no es una fuerza acumulativa), lo que da control preciso e inmediato.
       const vel = this._capsuleAggregate.body.getLinearVelocity();
       this._capsuleAggregate.body.setLinearVelocity(new Vector3(
         isMovingNow ? moveDir.x * PLAYER_SPEED : 0,
-        vel.y,  // Y gestionado por Havok (gravedad + colisiones)
+        vel.y,
         isMovingNow ? moveDir.z * PLAYER_SPEED : 0,
       ));
-      // Sincronizar pivot con la posicion real de la capsula (incluye Y de gravedad).
-      // El modelo hijo del pivot sigue al pivot exactamente igual que antes.
       this._pivot.position.copyFrom(this._capsule.position);
     } else {
-      // Fallback sin fisica (no deberia ocurrir en juego normal, solo pre-initPhysics)
       if (!isMovingNow) { return; }
       this._pivot.position.addInPlace(moveDir.scale(PLAYER_SPEED * deltaTime));
     }
@@ -347,7 +343,6 @@ export class PlayerController {
 
   /**
    * Calcula el vector de movimiento en world space a partir del input y la camara.
-   * El resultado esta normalizado (diagonal no es mas rapida que recta).
    */
   private _computeMoveDirection(camera: ArcRotateCamera): Vector3 {
     const camForward = camera.getDirection(Vector3.Forward());
@@ -368,8 +363,7 @@ export class PlayerController {
   }
 
   /**
-   * Rota el pivot (y el modelo hijo) hacia la direccion de movimiento
-   * mediante Quaternion.Slerp para evitar wrap-around de angulos.
+   * Rota el pivot hacia la direccion de movimiento mediante Quaternion.Slerp.
    */
   private _applyRotation(moveDir: Vector3): void {
     const targetAngle = Math.atan2(moveDir.x, moveDir.z);
@@ -390,11 +384,6 @@ export class PlayerController {
   // Creacion del pivot y de la capsula fisica
   // ——————————————————————————————————————————
 
-  /**
-   * Crea un Mesh invisible de tamano infimo.
-   * Usamos Mesh (no TransformNode) porque rotationQuaternion
-   * es necesario para el Slerp de rotacion y es mas estable en Mesh.
-   */
   private _createPivot(scene: Scene): Mesh {
     const pivot = MeshBuilder.CreateBox('playerPivot', { size: 0.001 }, scene);
     pivot.isVisible = false;
@@ -403,17 +392,6 @@ export class PlayerController {
     return pivot;
   }
 
-  /**
-   * Crea la capsula invisible que actua como cuerpo fisico del player.
-   *
-   * Geometria: altura total = CAPSULE_HEIGHT (2u = KayKit player), radio CAPSULE_RADIUS.
-   * Posicion inicial: Y = CAPSULE_HEIGHT/2 = 1u, igual que PIVOT_HEIGHT.
-   *   -> fondo de la capsula en Y=0 (suelo), tope en Y=2 (cabeza del modelo).
-   *
-   * El PhysicsAggregate se asigna en initPhysics() (llamado desde main.ts),
-   * no aqui, porque PhysicsAggregate requiere scene.enablePhysics() previo
-   * y el constructor se ejecuta antes de que Havok este inicializado.
-   */
   private _createPhysicsCapsule(scene: Scene): Mesh {
     const capsule = MeshBuilder.CreateCapsule(
       'playerCapsule',
@@ -424,6 +402,49 @@ export class PlayerController {
     capsule.isPickable = false;
     capsule.position   = new Vector3(0, CAPSULE_HEIGHT / 2, 0);
     return capsule;
+  }
+
+  // ——————————————————————————————————————————
+  // Helpers para modelos Mixamo
+  // ——————————————————————————————————————————
+
+  /**
+   * Recoge TODOS los AbstractMesh descendientes del rootNode,
+   * fusionando getChildMeshes() y getDescendants() para no perder
+   * ninguno (Mixamo puede tener jerarquias mixtas de Transform+Mesh).
+   * Deduplica por uniqueId.
+   */
+  private _getAllMeshesFromInstance(rootNode: {
+    getChildMeshes: (d: boolean) => AbstractMesh[];
+    getDescendants: (d: boolean) => { uniqueId: number }[];
+  }): AbstractMesh[] {
+    const fromHierarchy   = rootNode.getChildMeshes(false);
+    const fromDescendants = rootNode
+      .getDescendants(false)
+      .filter((n): n is AbstractMesh => 'material' in n);
+    const seen   = new Set<number>();
+    const result: AbstractMesh[] = [];
+    for (const m of [...fromHierarchy, ...fromDescendants]) {
+      if (!seen.has(m.uniqueId)) {
+        seen.add(m.uniqueId);
+        result.push(m);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Convierte un PBRMaterial en StandardMaterial preservando la textura difusa.
+   * Elimina el specular y limita maxSimultaneousLights a 4.
+   */
+  private _pbrToStandard(pbr: PBRMaterial, meshName: string): StandardMaterial {
+    const std = new StandardMaterial(`${meshName}_std`, pbr.getScene());
+    if (pbr.albedoTexture !== null) {
+      std.diffuseTexture = pbr.albedoTexture;
+    }
+    std.specularColor         = new Color3(0, 0, 0);
+    std.maxSimultaneousLights = 4;
+    return std;
   }
 
   // ——————————————————————————————————————————
@@ -439,22 +460,16 @@ export class PlayerController {
    *      alguna entrada de la whitelist, o empieza por "entrada." (variantes
    *      Blender tipo Knife.001), se muestra.
    *   3. El resto se oculta con setEnabled(false).
-   *
-   * Usamos getChildMeshes(false) en lugar de getDescendants() para evitar
-   * tocar los TransformNodes del esqueleto, que romperian las animaciones.
    */
   private _applyAttachmentVisibility(instance: AssetInstance, classId: ClassId): void {
     const whitelist = getClassById(classId).visibleAttachments ?? [];
     const allMeshes = instance.rootNode.getChildMeshes(false);
 
     for (const mesh of allMeshes) {
-      // Quitar sufijo _instN que anade instantiateModelsToScene
       const baseName = mesh.name.replace(/_inst\d+$/, '');
 
-      // Las partes del cuerpo nunca se tocan
       if (isBodyPart(baseName)) { continue; }
 
-      // Mostrar si el nombre base coincide (exacto o con sufijo ".NNN" de Blender)
       const shouldShow = whitelist.some(
         (w) => baseName === w || baseName.startsWith(w + '.'),
       );
