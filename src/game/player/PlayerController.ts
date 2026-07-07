@@ -9,6 +9,8 @@ import {
   StandardMaterial,
   PhysicsAggregate,
   PhysicsShapeType,
+  TransformNode,
+  PointerEventTypes,
 } from '@babylonjs/core';
 import type { AbstractMesh, Mesh, ArcRotateCamera, AnimationGroup, PhysicsBody } from '@babylonjs/core';
 
@@ -19,6 +21,7 @@ import type { ClassId } from '@/types/game.types';
 import type { Vec3 } from '@/types/spatial.types';
 import { getClassById, isBodyPart } from '@/config/classes.config';
 import { logger } from '@/core/Logger';
+import { eventBus } from '@/core/EventBus';
 
 // ============================================================
 // Constantes de configuracion
@@ -50,6 +53,40 @@ const CAPSULE_RADIUS = 0.5;
 
 // URL base de los modelos de personaje
 const CHAR_BASE_URL = '/assets/models/characters/';
+
+// URL base de las armas Mixamo
+const WEAPONS_BASE_URL = '/assets/models/characters/weapons/';
+
+// ============================================================
+// Configuracion de armas del Guerrero (Mixamo).
+// Todos los valores son TUNEABLES a ojo desde el navegador:
+//   scale       -> factor de escala aplicado al mesh del arma.
+//                  Ambas armas miden 1.9061m en Y raw (caja estándar Meshy).
+//                  Espada:  0.5  → 1.9 × 0.5 ≈ 0.95m de hoja
+//                  Escudo:  0.26 → 1.9 × 0.26 ≈ 0.5m de diámetro
+//   position    -> offset local en metros respecto al pivot del hueso
+//   rotationDeg -> grados Euler YXZ (Y=giro horiz, X=inclin, Z=giro arma)
+// ============================================================
+
+const MIXAMO_SWORD_CFG = {
+  filename:    'sword_1h.glb',
+  boneName:    'mixamorig:LeftHand',
+  scale:       0.42,                      // <-- TUNABLE
+  position:    { x: 0, y: 0.5, z: 0 },   // <-- TUNABLE (Y: mango hacia mano)
+  rotationDeg: { x: 0, y: 0, z: 0 },     // <-- TUNABLE
+};
+
+const MIXAMO_SHIELD_CFG = {
+  filename:    'shield_round_1h.glb',
+  boneName:    'mixamorig:RightForeArm',
+  scale:       0.3,                       // <-- TUNABLE
+  position:    { x: 0, y: 0, z: 0 },     // <-- TUNABLE
+  rotationDeg: { x: 0, y: 0, z: 0 },     // <-- TUNABLE
+};
+
+// Desactivar carga de armas (temporal hasta fusión en Blender).
+// Poner a true para reactivar _loadMixamoWeapons().
+const LOAD_WEAPONS = false;
 
 // ============================================================
 // PlayerController -- controla el personaje con WASD.
@@ -84,11 +121,22 @@ export class PlayerController {
   private _currentInstance: AssetInstance | null = null;
 
   // Animation groups de la instancia activa
-  private _idleAnim: AnimationGroup | null = null;
-  private _walkAnim: AnimationGroup | null = null;
+  private _idleAnim:   AnimationGroup | null = null;
+  private _walkAnim:   AnimationGroup | null = null;
+  private _attackAnim: AnimationGroup | null = null;
+  private _deathAnim:  AnimationGroup | null = null;
 
   // Evita re-lanzar el swap de animacion en cada frame
-  private _isWalking = false;
+  private _isWalking  = false;
+  private _isAttacking = false;
+  // Bloquea input y animaciones tras la muerte del jugador
+  private _isDead = false;
+
+  // Instancias de armas activas; se limpian al cambiar de clase
+  private _weaponInstances: AssetInstance[] = [];
+
+  // Anchors de armas (TransformNode anclado al hueso); clave = kw del filename
+  private _weaponAnchors = new Map<string, { anchor: TransformNode; mesh: AbstractMesh }>();
 
   constructor(scene: Scene, input: InputManager, assetManager: AssetManager) {
     this._scene = scene;
@@ -101,6 +149,62 @@ export class PlayerController {
     scene.registerBeforeRender(() => {
       const deltaTime = scene.getEngine().getDeltaTime() / 1000;
       this._update(deltaTime);
+    });
+
+    // Escuchar click izquierdo a través de Babylon's pointer system.
+    // Motivo: attachControl(canvas, true) llama preventDefault() en pointerdown,
+    // lo que suprime el mousedown DOM en window. onPointerObservable vive
+    // dentro del mismo pipeline y no pelea con la cámara.
+    scene.onPointerObservable.add((pi) => {
+      if (pi.type === PointerEventTypes.POINTERDOWN && pi.event.button === 0) {
+        logger.debug('PlayerController: click izquierdo detectado — intentando ataque');
+        console.log('[INPUT] click izquierdo detectado');
+        this._tryAttack();
+      }
+    });
+
+    // Reaccionar a la muerte del jugador: parar animaciones en curso,
+    // reproducir Death_A una sola vez y emitir 'player:death-anim-end'
+    // cuando el último frame haya quedado congelado.
+    eventBus.on('player:death', () => {
+      this._isDead = true;
+
+      // Anular velocidad horizontal para que el cuerpo no siga deslizándose
+      if (this._capsuleAggregate !== null) {
+        const vel = this._capsuleAggregate.body.getLinearVelocity();
+        this._capsuleAggregate.body.setLinearVelocity(new Vector3(0, vel.y, 0));
+      }
+
+      // Interrumpir cualquier animación en curso
+      this._idleAnim?.stop();
+      this._walkAnim?.stop();
+      this._attackAnim?.stop();
+      this._isAttacking = false;
+
+      if (this._deathAnim !== null) {
+        // Reproducir Death_A una sola vez (loop = false).
+        // Babylon congela el modelo en el último frame automáticamente al acabar.
+        this._deathAnim.start(
+          /* loop     */ false,
+          /* speed    */ 1.0,
+          /* from     */ this._deathAnim.from,
+          /* to       */ this._deathAnim.to,
+          /* additive */ false,
+        );
+
+        // Emitir el evento cuando la animación haya terminado de verdad.
+        // addOnce: se desuscribe solo tras el primer disparo.
+        this._deathAnim.onAnimationGroupEndObservable.addOnce(() => {
+          eventBus.emit('player:death-anim-end', null);
+          logger.info('PlayerController: Death_A terminada — emitiendo player:death-anim-end');
+        });
+      } else {
+        // Fallback: no hay animación de muerte — mostrar Game Over de inmediato
+        eventBus.emit('player:death-anim-end', null);
+        logger.warn('PlayerController: sin Death_A — player:death-anim-end emitido sin animación');
+      }
+
+      logger.info('PlayerController: jugador muerto — animación de muerte iniciada');
     });
 
     logger.info('PlayerController: pivot y capsula creados', { position: this._pivot.position });
@@ -118,6 +222,12 @@ export class PlayerController {
   get mesh(): Mesh {
     return this._pivot;
   }
+
+  /**
+   * Indica si el modelo activo tiene animacion de muerte disponible.
+   * Consulta del sistema de combate para saber si puede reproducirla.
+   */
+  get hasDeathAnim(): boolean { return this._deathAnim !== null; }
 
   /**
    * PhysicsBody de la capsula Havok del player.
@@ -180,11 +290,18 @@ export class PlayerController {
    * Tras cargar, inicia la animacion Idle en loop automaticamente.
    */
   async loadModel(classId: ClassId): Promise<void> {
+    // Liberar armas del modelo anterior
+    for (const wi of this._weaponInstances) { wi.dispose(); }
+    this._weaponInstances = [];
+    for (const { anchor } of this._weaponAnchors.values()) { anchor.dispose(); }
+    this._weaponAnchors.clear();
+
     // Liberar el modelo anterior (cambio de clase en caliente)
     if (this._currentInstance !== null) {
       this._idleAnim = null;
       this._walkAnim = null;
       this._isWalking = false;
+      this._isDead = false;   // resetear flag de muerte al cambiar de clase
       this._currentInstance.dispose();
       this._currentInstance = null;
       logger.debug('PlayerController: modelo anterior liberado');
@@ -318,8 +435,11 @@ export class PlayerController {
     };
 
     const animMap = resolveAnimMap();
-    this._idleAnim = animMap.get('Idle') ?? null;
-    this._walkAnim = animMap.get('Run')  ?? null;
+    this._idleAnim   = animMap.get('Idle')     ?? null;
+    this._walkAnim   = animMap.get('Run')       ?? null;
+    this._attackAnim = animMap.get('Attack_A')  ?? null;
+    this._deathAnim  = animMap.get('Death_A')   ?? null;
+    this._isAttacking = false;
 
     // Arrancar Idle en loop como estado por defecto
     this._idleAnim?.start(
@@ -331,6 +451,12 @@ export class PlayerController {
     );
 
 
+    // Anclar armas al esqueleto (solo clases Mixamo)
+    // LOAD_WEAPONS = false: desactivado hasta fusión en Blender.
+    if (LOAD_WEAPONS && classDef.isMixamo === true) {
+      await this._loadMixamoWeapons();
+    }
+
     logger.info('PlayerController: modelo listo', { classId });
   }
 
@@ -340,11 +466,16 @@ export class PlayerController {
 
   private _update(deltaTime: number): void {
     if (!this._camera) { return; }
+    // Guard: el jugador está muerto — congelar todo input y movimiento
+    if (this._isDead) { return; }
 
     const moveDir = this._computeMoveDirection(this._camera);
     const isMovingNow = moveDir.lengthSquared() > 0.001;
 
     // Swap de animacion -- solo se ejecuta cuando cambia el estado
+    // Guard: no interrumpir animacion de ataque en curso
+    if (this._isAttacking) { return; }
+
     if (isMovingNow && !this._isWalking) {
       this._idleAnim?.stop();
       this._walkAnim?.start(
@@ -446,6 +577,219 @@ export class PlayerController {
     capsule.isPickable = false;
     capsule.position   = new Vector3(0, CAPSULE_HEIGHT / 2, 0);
     return capsule;
+  }
+
+  // ——————————————————————————————————————————
+  // Armas Mixamo
+  // ——————————————————————————————————————————
+
+  /**
+   * Carga sword_1h.glb y shield_round_1h.glb y los ancla al esqueleto
+   * del personaje Mixamo activo mediante attachToBone.
+   *
+   * Posicion/rotacion iniciales son placeholders (0,0,0) — ajustar
+   * MIXAMO_SWORD_CFG y MIXAMO_SHIELD_CFG al inicio del archivo.
+   */
+  private async _loadMixamoWeapons(): Promise<void> {
+    if (this._currentInstance === null) { return; }
+
+    // Localizar el mesh con skeleton (malla principal del personaje)
+    const allMeshes     = this._getAllMeshesFromInstance(this._currentInstance.rootNode);
+    const characterMesh = allMeshes.find((m) => m.skeleton !== null) ?? null;
+
+    if (characterMesh === null || characterMesh.skeleton === null) {
+      logger.warn('PlayerController._loadMixamoWeapons: no se encontro mesh con skeleton');
+      return;
+    }
+
+    const skeleton = characterMesh.skeleton;
+
+    for (const cfg of [MIXAMO_SWORD_CFG, MIXAMO_SHIELD_CFG]) {
+
+      // Escudo pendiente hasta validar la espada — saltar por ahora
+      if (cfg.filename.includes('shield')) { continue; }
+
+      // -- Cargar GLB del arma ------------------------------------------------
+      const container      = await this._assetManager.loadAsset(WEAPONS_BASE_URL, cfg.filename);
+      const weaponInstance = this._assetManager.instantiate(container);
+
+      // Convertir PBR->Standard (armas de Meshy llevan PBR)
+      const weaponMeshes = this._getAllMeshesFromInstance(weaponInstance.rootNode);
+      for (const m of weaponMeshes) {
+        if (m.material instanceof PBRMaterial) {
+          m.material = this._pbrToStandard(m.material, m.name);
+        } else if (m.material instanceof StandardMaterial) {
+          m.material.maxSimultaneousLights = 4;
+        }
+      }
+
+      // -- Obtener el mesh con geometría real (vertices > 0) -----------------
+      const weaponMesh = weaponMeshes.find((m) => m.getTotalVertices() > 0) ?? null;
+      if (weaponMesh === null) {
+        logger.warn('PlayerController: arma sin mesh con vertices', { filename: cfg.filename });
+        weaponInstance.dispose();
+        continue;
+      }
+
+      // kw: clave corta del filename (sin extension) para el anchor y el map
+      const kw = cfg.filename.replace('.glb', '').toLowerCase();
+
+      // -- Buscar hueso -------------------------------------------------------
+      const boneIdx = skeleton.getBoneIndexByName(cfg.boneName);
+      if (boneIdx === -1) {
+        logger.warn('PlayerController: hueso no encontrado', {
+          boneName: cfg.boneName,
+          allBones: skeleton.bones.map((b) => b.name),
+        });
+        continue;
+      }
+      const bone = skeleton.bones[boneIdx];
+      if (bone === undefined) {
+        logger.warn('PlayerController: bones[idx] undefined', { boneName: cfg.boneName });
+        continue;
+      }
+      logger.info('PlayerController: hueso encontrado', { boneName: cfg.boneName, boneIdx });
+
+      // -- Crear anchor TransformNode y anclar al hueso ---------------------
+      // attachToBone pisaria scaling/position/rotation del mesh cada frame;
+      // usando un wrapper TransformNode como intermediario, los transforms
+      // aplicados al weaponMesh (hijo del anchor) quedan en espacio local
+      // y Babylon no los sobreescribe.
+      const anchor = new TransformNode(`weaponAnchor_${kw}`, this._scene);
+      anchor.attachToBone(bone, characterMesh);
+
+      weaponMesh.setParent(anchor);
+      weaponMesh.scaling          = new Vector3(cfg.scale, cfg.scale, cfg.scale);
+      weaponMesh.position         = new Vector3(cfg.position.x, cfg.position.y, cfg.position.z);
+      weaponMesh.rotationQuaternion = Quaternion.RotationYawPitchRoll(
+        (cfg.rotationDeg.y * Math.PI) / 180,
+        (cfg.rotationDeg.x * Math.PI) / 180,
+        (cfg.rotationDeg.z * Math.PI) / 180,
+      );
+
+      this._weaponAnchors.set(kw, { anchor, mesh: weaponMesh });
+      this._weaponInstances.push(weaponInstance);
+      logger.info('PlayerController: arma anclada con anchor', {
+        filename: cfg.filename,
+        boneName: cfg.boneName,
+        meshName: weaponMesh.name,
+        anchorName: anchor.name,
+        scale:    cfg.scale,
+      });
+    }
+  }
+
+  // ——————————————————————————————————————————
+  // Lógica de ataque
+  // ——————————————————————————————————————————
+
+  /**
+   * Intenta reproducir la animación de ataque.
+   * Ignorado si ya hay un ataque en curso o si no hay animación cargada.
+   */
+  private _tryAttack(): void {
+    if (this._isDead)               { return; }
+    if (this._isAttacking)          { return; }
+    if (this._attackAnim === null)  { return; }
+
+    this._isAttacking = true;
+
+    // Anular inercia horizontal del cuerpo Havok: si el jugador atacaba
+    // en movimiento, el cuerpo conservaria la velocidad y seguiria deslizandose
+    // porque _update() retorna pronto y nunca llama setLinearVelocity(0).
+    if (this._capsuleAggregate !== null) {
+      const vel = this._capsuleAggregate.body.getLinearVelocity();
+      this._capsuleAggregate.body.setLinearVelocity(
+        new Vector3(0, vel.y, 0),  // respeta gravedad, zeroing X/Z
+      );
+    }
+
+    // Parar animacion actual (idle o run)
+    this._idleAnim?.stop();
+    this._walkAnim?.stop();
+
+    // Reproducir swing una sola vez (loop = false)
+    this._attackAnim.start(
+      /* loop     */ false,
+      /* speed    */ 1.0,
+      /* from     */ this._attackAnim.from,
+      /* to       */ this._attackAnim.to,
+      /* additive */ false,
+    );
+
+    // Emitir evento para futuros sistemas de impacto/combate
+    eventBus.emit('player:attack', null);
+
+    // Al terminar el swing: desactivar flag y volver al estado correcto
+    this._attackAnim.onAnimationGroupEndObservable.addOnce(() => {
+      this._isAttacking = false;
+      if (this._isWalking) {
+        this._walkAnim?.start(true, 1.0, this._walkAnim.from, this._walkAnim.to, false);
+      } else {
+        this._idleAnim?.start(true, 1.0, this._idleAnim.from, this._idleAnim.to, false);
+      }
+      logger.debug('PlayerController: ataque terminado, volviendo a idle/run');
+    });
+
+    logger.info('PlayerController: ataque iniciado');
+  }
+
+  // ——————————————————————————————————————————
+  // Dev handle para ajuste en vivo de armas (window.__mb.weapons)
+  // ——————————————————————————————————————————
+
+  /**
+   * Devuelve un objeto de debug para ajustar armas en caliente desde DevTools.
+   * Uso: window.__mb.weapons.sword.set({scale:0.5, x:0, y:0.1, z:0})
+   *      window.__mb.weapons.dump()
+   */
+  public weaponDevHandle(): {
+    sword:  { set: (v: Partial<{ scale: number; x: number; y: number; z: number; rotX: number; rotY: number; rotZ: number }>) => void };
+    shield: { set: (v: Partial<{ scale: number; x: number; y: number; z: number; rotX: number; rotY: number; rotZ: number }>) => void };
+    dump: () => void;
+  } {
+    const makeHandle = (kw: string) => ({
+      set: (v: Partial<{ scale: number; x: number; y: number; z: number; rotX: number; rotY: number; rotZ: number }>) => {
+        const entry = this._weaponAnchors.get(kw);
+        if (!entry) { console.warn(`[weapons] sin anchor para ${kw} — carga el Guerrero primero`); return; }
+        const { mesh } = entry;
+        if (v.scale !== undefined) { mesh.scaling.setAll(v.scale); }
+        if (v.x     !== undefined) { mesh.position.x = v.x; }
+        if (v.y     !== undefined) { mesh.position.y = v.y; }
+        if (v.z     !== undefined) { mesh.position.z = v.z; }
+        if (v.rotX !== undefined || v.rotY !== undefined || v.rotZ !== undefined) {
+          mesh.rotationQuaternion = Quaternion.RotationYawPitchRoll(
+            ((v.rotY ?? 0) * Math.PI) / 180,
+            ((v.rotX ?? 0) * Math.PI) / 180,
+            ((v.rotZ ?? 0) * Math.PI) / 180,
+          );
+        }
+      },
+    });
+
+    return {
+      sword:  makeHandle('sword_1h'),
+      shield: makeHandle('shield_round_1h'),
+      dump: () => {
+        for (const [kw, { mesh }] of this._weaponAnchors.entries()) {
+          const q      = mesh.rotationQuaternion ?? Quaternion.Identity();
+          const euler  = q.toEulerAngles();
+          const toDeg  = (r: number) => +(r * 180 / Math.PI).toFixed(2);
+          console.log(`[weapons.dump] ${kw}`, JSON.stringify({
+            scale: +mesh.scaling.x.toFixed(4),
+            x:     +mesh.position.x.toFixed(4),
+            y:     +mesh.position.y.toFixed(4),
+            z:     +mesh.position.z.toFixed(4),
+            rotX:  toDeg(euler.x),
+            rotY:  toDeg(euler.y),
+            rotZ:  toDeg(euler.z),
+          }));
+        }
+        if (this._weaponAnchors.size === 0) {
+          console.warn('[weapons.dump] no hay armas cargadas — carga el Guerrero primero');
+        }
+      },
+    };
   }
 
   // ——————————————————————————————————————————

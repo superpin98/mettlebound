@@ -52,6 +52,9 @@ export class PlayerStats {
   private pendingStatPoints: number;
   private appliedUpgrades: string[] = [];
 
+  // Flag para evitar emitir player:death más de una vez por sesión
+  private _isDead = false;
+
   private readonly _onEquipChange: (payload: { equipped: EquippedItems }) => void;
 
   constructor(classId: ClassId) {
@@ -192,6 +195,13 @@ export class PlayerStats {
   takeDamage(amount: number): void {
     this.currentHp = Math.max(0, this.currentHp - amount);
     this.emitStatsChanged();
+    // Detección de muerte: se emite una sola vez (flag _isDead evita re-emisión).
+    // Se detecta aquí porque es el único punto por el que baja el HP,
+    // tanto en exploración como en combate.
+    if (this.currentHp === 0 && !this._isDead) {
+      this._isDead = true;
+      eventBus.emit('player:death', null);
+    }
   }
 
   heal(amount: number): void {

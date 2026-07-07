@@ -20,6 +20,7 @@ import { CharacterSheet }      from '@/ui/CharacterSheet';
 import { PanelManager }        from '@/ui/PanelManager';
 import { ActionBar }           from '@/ui/ActionBar';
 import { applyScale, mountScaleSelector } from '@/ui/UIScale';
+import { GameOverModal }        from '@/ui/GameOverModal';
 import { eventBus }            from '@/core/EventBus';
 import { logger }              from '@/core/Logger';
 
@@ -107,6 +108,8 @@ playerController.setCamera(cameraController.camera);
     (stat)    => playerStats.spendStatPoint(stat),
     (upgrade) => playerStats.applyUpgrade(upgrade),
   );
+
+  new GameOverModal();
 
   let inventoryUI = new InventoryUI(inventory);
   let charSheet   = new CharacterSheet(playerStats, inventory);
@@ -233,6 +236,7 @@ playerController.setCamera(cameraController.camera);
       scene,
       playerController,
       playerStats: () => playerStats,
+      weapons: playerController.weaponDevHandle(),
     };
 
     // Suprimir advertencia de variable no usada

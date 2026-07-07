@@ -625,6 +625,12 @@ y crítica, asumiendo que habrá que Remeshear el modelo Estándar a low-poly de
 
 \*\*Objetos rígidos\*\* (barriles, cofres, armas): tris en vez de quads, sin rig.
 
+⚠️ \*\*Meshy normaliza TODOS los exports a ~1.9061 unidades en el eje mayor\*\*,
+independientemente del tamaño real-world que muestra la UI de Meshy (ese dato
+es poco fiable). Al recibir un GLB de arma de Meshy, esperar ~1.9m en el eje
+mayor, no 12 cm ni ningún otro valor del visor. Medir siempre el bounding box
+real del GLB antes de decidir la escala en Babylon.
+
 
 
 \#### 2.11.3 Paso 2.5 — Texturizado en Meshy (texto, no imagen)
@@ -735,6 +741,12 @@ ingle). Aguantó bien el Guerrero sin colapsar.
 
 &#x20; el `Death\_A` que ya usa Rusty/TargetDummy.)
 
+\- ⚠️ \*\*Las herramientas de fusión de animaciones (Blender NLA, scripts de merge)
+&#x20; pueden alterar los nombres de clip.\*\* El `ANIM_RULES` de `PlayerController.ts`
+&#x20; usa matching flexible (`.includes('idle')`, `.includes('run')`, etc.) en lugar de
+&#x20; comparación exacta. Si se usa herramienta nueva de fusión, verificar que los
+&#x20; nombres resultantes siguen siendo detectados por el matcher.
+
 \- Cada set en su subcarpeta de staging con los mismos nombres canónicos dentro.
 
 
@@ -766,6 +778,11 @@ En casa (Blender 5.1 + Claude MCP), sobre el material de staging:
 &#x20; el acero lea como "hierro mate sucio" y no como "espejo oscuro" en el dungeon.
 
 \- Export final: \*\*`.glb` con texturas embebidas\*\* (un solo archivo).
+
+\- \*\*Los GLBs exportados desde Blender ya están en metros — NO aplicar `modelScale = 0.01`.\*\*
+&#x20; El factor 0.01 solo aplica a GLBs/FBX descargados directamente de Mixamo sin pasar por
+&#x20; Blender. Los GLBs cocinados en Blender no necesitan corrección de escala; omitir el
+&#x20; campo `modelScale` o dejarlo en `1`. Ver `knight_fixed.glb` como referencia.
 
 \- El `.blend` se guarda en local, NO se versiona.
 
@@ -830,15 +847,46 @@ Solo el `.glb` final cocinado entra al repo, en su ruta canónica
    * ✅ 2 sets de animación descargados de Mixamo con nombres canónicos:
      `unarmed` (Idle, Run, Hit, Death\_A con skin) + `sword-and-shield` (Idle, Run, Attack\_A, Hit sin skin)
    * ✅ Staging en `C:\\Users\\dconde\\Desktop\\mettlebound-assets-wip\\knight\\`
-   * 🔄 EN GENERACIÓN: espada 1H + escudo redondo (armas iniciales del set sword-and-shield)
-   * ⏳ PENDIENTE: Blender (pivote a pies, fusionar malla + animaciones, export GLB único)
-   * ⏳ PENDIENTE: validación en dungeon con iluminación Grimspire
+   * ✅ `knight_fixed.glb` cargado y funcionando en el juego (escala, animaciones, materiales OK)
+   * ✅ Armas generadas en Meshy: `sword_1h.glb` + `shield_round_1h.glb` (~1.9m raw cada una)
+   * ✅ Anclaje temporal por código (`_loadMixamoWeapons`) activo mientras no esté el GLB fusionado
+   * 🔄 EN PROGRESO: fusión de armas en Blender → `knight_armed.glb` (pendiente sesión Blender)
+   * ⏳ PENDIENTE: validación visual de posición/rotación de armas en dungeon Grimspire
 
 2\. Cazadora. 3. Mago. 4. Pícaro.
 
 5\. Errante. 6. Rusty (sin urgencia). 7. Razas enemigas Sprint 5. 8. Bosses
 
 (presupuesto generoso).
+
+\#### 2.11.9 Anclaje de armas a personajes Mixamo (decisión canónica)
+
+\*\*Decisión canónica\*\*: las armas se fusionan en Blender INTO el personaje
+(un único `knight_armed.glb`), \*\*NO se anclan por código en runtime\*\*.
+
+\*\*Por qué NO `attachToBone` en runtime\*\*:
+
+\- Babylon `instantiateModelsToScene` añade un wrapper `__root__` vacío como
+&#x20; `rootNodes[0]`; el mesh real con geometría es un sibling en la escena,
+&#x20; no un hijo del rootNode. Se localiza buscando en `scene.meshes` por nombre
+&#x20; y `getTotalVertices() > 0`.
+\- Escala de hueso vía `bone.getWorldMatrix().decompose()` inestable durante
+&#x20; settling de animaciones (oscila entre 1, 0.0046, 0.999 por frame).
+\- La fusión en Blender evita todo esto: cero código extra, cero runtime flicker.
+
+\*\*Huesos del skeleton Mixamo del Guerrero\*\*:
+
+\- `mixamorig:LeftHand` — índice 10 (mano izquierda)
+\- `mixamorig:RightForeArm` — índice 21 (antebrazo derecho)
+\- Skeleton estándar Mixamo: 41 huesos, nomenclatura `mixamorig:*`.
+
+\*\*Medidas reales de armas Meshy\*\* (raw ~1.9m en eje mayor):
+
+\- `sword_1h.glb`: 0.47 × 1.91 × 0.10 m — 10 628 vértices
+\- `shield_round_1h.glb`: 1.89 × 1.91 × 0.41 m — 6 596 vértices
+
+El código `_loadMixamoWeapons()` en `PlayerController.ts` es solución
+temporal hasta que exista `knight_armed.glb`. En ese momento se elimina.
 
 \---
 
@@ -1167,6 +1215,12 @@ Push normal cuando toque, y solo cuando David lo pida.
 varias veces históricamente; Python parse → modify → serialize es más seguro).
 * **Verificar `tail -3`** tras cada edición para confirmar que el archivo no
 se ha truncado.
+* **Archivos siempre UTF-8 + LF** — el repo tiene `.gitattributes` con
+`* text=auto eol=lf`. Escribir siempre con `open(..., 'w', encoding='utf-8', newline='\n')`
+en Python. NUNCA escribir CRLF.
+* **NO ejecutar `npm install`** — los `node_modules` están instalados en Windows
+y los bindings nativos no son compatibles con el sandbox Linux. Reportar a David
+si falta algún binding.
 
 ### Lecciones aprendidas de workflow (memoria 15, ampliada)
 
@@ -1187,10 +1241,13 @@ físicas / HUD / items). SIEMPRE reutilizar código del sprint anterior.
 Si te tienta reimplementar algo, PARAR y reportar.
 11. **REGLA ARQUITECTÓNICA**: sistemas repetibles = módulos reutilizables desde
 el inicio (NO inline). Procedural depende de esto.
-12. **Mixamo GLB scale = 0.01 SIEMPRE**: Mixamo exporta en centímetros, Babylon
-lee GLTF en metros. El nodo mesh tiene `scale=[100,100,100]` interno; la jerarquía
-de huesos en cm (Hips ≈ Y=104.784). Sin corrección el personaje mide 170m.
-Aplicar `instance.rootNode.scaling = new Vector3(0.01, 0.01, 0.01)` al cargar.
+12. **Escala de GLBs Mixamo/Blender**: Los GLBs descargados **directamente de
+Mixamo** sin pasar por Blender están en centímetros → aplicar `modelScale = 0.01`
+(`instance.rootNode.scaling = new Vector3(0.01, 0.01, 0.01)`; Hips ≈ Y=104.784;
+sin corrección el personaje mide 170m). Los GLBs **exportados desde Blender**
+(pipeline canónico sección 2.11.5) ya están en metros → **NO** aplicar modelScale
+(omitir el campo o dejarlo en `1`). El Guerrero (`knight_fixed.glb`) es el caso
+de referencia: Blender → metros → sin modelScale.
 13. **PBRMaterial de Meshy excede GL_MAX_VERTEX_UNIFORM_BUFFERS (12)**: Meshy
 activa clearcoat, IBL, SH, sheen, subSurface aunque no los use. Solución:
 desactivar features + reemplazar PBR → StandardMaterial preservando albedoTexture.
@@ -1443,11 +1500,10 @@ En orden de prioridad:
 desde julio 2026, David lo aporta antes de arrancar.
 2. **Pipeline de assets 3D — Guerrero en curso** (sección 2.11):
 
-   * ✅ Copilot → Meshy → Mixamo completados. Staging en `mettlebound-assets-wip\knight\`.
-   * ✅ `unarmed_knight.glb` cargado como DEV tool (KnightValidation.ts) — validación visual activa.
-   * 🔄 EN GENERACIÓN: armas iniciales (espada 1H + escudo redondo) en Meshy.
-   * ⏳ BLOQUEANTE: David valida visualmente en navegador (escala, pivote, idle, textura).
-   * ⏳ BLOQUEANTE: sesión Blender en casa (pivote a pies, fusión anims, export GLB final).
+   * ✅ Copilot → Meshy → Mixamo → Blender completados. `knight_fixed.glb` activo en el juego.
+   * ✅ Armas generadas: `sword_1h.glb` + `shield_round_1h.glb`. Anclaje temporal por código activo.
+   * 🔄 BLOQUEANTE: sesión Blender — fusionar armas al skeleton → `knight_armed.glb`.
+   * ⏳ PENDIENTE: validación visual de posición/rotación de armas en dungeon.
    * Después del Guerrero: Cazadora, Mago, Pícaro, Errante en ese orden.
 3. **Visual polish del dungeon** (antorchas en puertas, salas incompletas,
 candado flotante, alineación fina). \~1-2 sesiones de Cowork. Se puede

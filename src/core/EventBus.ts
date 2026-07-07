@@ -27,6 +27,10 @@ export type GameEventMap = {
   'player:stats-changed': PlayerSnapshot;
   'player:level-up': { newLevel: number; snapshot: PlayerSnapshot };
   'player:xp-gained': { amount: number; snapshot: PlayerSnapshot };
+  'player:attack': null;        // swing iniciado — para futuros sistemas de impacto
+  'player:death':      null;        // HP llegó a 0 — emitido una sola vez por PlayerStats
+  'player:death-anim-end': null;     // animación Death_A terminada — dispara el GameOverModal
+  'input:attack': null;         // click izquierdo detectado por InputManager
   'ui:show-level-up-modal': { snapshot: PlayerSnapshot };
   'ui:close-level-up-modal': null;
   // Inventory

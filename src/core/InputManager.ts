@@ -16,7 +16,7 @@ export class InputManager {
 
   // Guardamos referencias a los listeners para poder eliminarlos en dispose()
   private readonly _onKeyDown: (e: KeyboardEvent) => void;
-  private readonly _onKeyUp: (e: KeyboardEvent) => void;
+  private readonly _onKeyUp:   (e: KeyboardEvent) => void;
 
   constructor() {
     this._onKeyDown = (e: KeyboardEvent) => {
@@ -28,7 +28,7 @@ export class InputManager {
     };
 
     window.addEventListener('keydown', this._onKeyDown);
-    window.addEventListener('keyup', this._onKeyUp);
+    window.addEventListener('keyup',   this._onKeyUp);
 
     logger.debug('InputManager: escuchando teclado');
   }
@@ -46,7 +46,7 @@ export class InputManager {
    */
   dispose(): void {
     window.removeEventListener('keydown', this._onKeyDown);
-    window.removeEventListener('keyup', this._onKeyUp);
+    window.removeEventListener('keyup',   this._onKeyUp);
     this._keysDown.clear();
     logger.debug('InputManager: disposed');
   }
