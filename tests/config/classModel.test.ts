@@ -4,7 +4,7 @@ import type { ClassId } from '@/types/game.types';
 
 // Mapeo canonico clase -> modelo (fuente de verdad: assets/README.md)
 const EXPECTED_MODELS: Record<ClassId, string> = {
-  guerrero: 'unarmed_knight.glb',
+  guerrero: 'knight_fixed.glb',
   cazador: 'Rogue.glb',
   mago: 'Mage.glb',
   picaro: 'Rogue_Hooded.glb',
