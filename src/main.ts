@@ -21,6 +21,10 @@ import { PanelManager }        from '@/ui/PanelManager';
 import { ActionBar }           from '@/ui/ActionBar';
 import { applyScale, mountScaleSelector } from '@/ui/UIScale';
 import { GameOverModal }        from '@/ui/GameOverModal';
+import { RustyController }      from '@/game/entities/RustyController';
+import { CombatTransition }     from '@/ui/CombatTransition';
+import { RunState }             from '@/game/RunState';
+
 import { eventBus }            from '@/core/EventBus';
 import { logger }              from '@/core/Logger';
 
@@ -47,6 +51,9 @@ import './style.css';
 //  11. initPhysics         -> capsula Havok (suelo ya existe)
 //  12. loadModel(class)    -> modelo 3D del personaje en escena
 // ============================================================
+
+// Estado de la run actual (karma en memoria — sin persistencia hasta Sprint 5)
+const runState = new RunState();
 
 const canvas = document.getElementById('renderCanvas');
 
@@ -87,6 +94,9 @@ playerController.setCamera(cameraController.camera);
   // -- PreviewScene: suelo fisico + luces (ANTES de initPhysics) -------------
   PreviewScene.build(scene);
 
+  // -- Rusty: NPC consciente neutral (carga el Skeleton_Minion.glb) ----------
+  const rusty = await RustyController.create(scene, assetManager);
+
   // -- Fisica del player (suelo ya existe) ------------------------------------
   playerController.initPhysics();
 
@@ -97,6 +107,39 @@ playerController.setCamera(cameraController.camera);
   playerController.teleportTo({ x: 0, y: 0, z: 0 });
 
   logger.info('main: PreviewScene lista.');
+
+  // -- CombatTransition: cinemática exploración→combate ------------------
+  const combatTransition = new CombatTransition(scene, cameraController.camera);
+
+  // Detección de impacto contra Rusty: se comprueba en cada swing del jugador.
+  // player:attack se emite al INICIO del swing (PlayerController._tryAttack).
+  // Si la distancia XZ es menor que el umbral → impacto → transición a combate.
+  const HIT_RANGE_XZ = 2.2; // metros — ajustable
+  let   _combatActive = false;
+
+  eventBus.on('player:attack', () => {
+    if (_combatActive) { return; } // ya en combate, ignorar
+    const pp = playerController.mesh.position;
+    const rp = rusty.position;
+    const dx = pp.x - rp.x;
+    const dz = pp.z - rp.z;
+    const dist = Math.sqrt(dx * dx + dz * dz);
+    if (dist > HIT_RANGE_XZ) { return; } // demasiado lejos
+
+    // Impacto confirmado — karma negativo (atacar a NPC neutral consciente)
+    runState.addKarma(-1);
+    logger.info('main: impacto en Rusty — karma', { karma: runState.karma });
+
+    // Freeze todo y arrancar cinemática
+    _combatActive = true;
+    eventBus.emit('combat:start', null);
+    void combatTransition.enter(() => {
+      // Callback 'Volver': revertir todo
+      void combatTransition.exit().then(() => {
+        _combatActive = false; // listo para detectar impacto de nuevo
+      });
+    });
+  });
 
   // -- Sistemas de juego ------------------------------------------------------
   let playerStats = new PlayerStats(chosenClass);
@@ -237,6 +280,8 @@ playerController.setCamera(cameraController.camera);
       playerController,
       playerStats: () => playerStats,
       weapons: playerController.weaponDevHandle(),
+      rusty,
+      run: runState,
     };
 
     // Suprimir advertencia de variable no usada

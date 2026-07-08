@@ -30,6 +30,8 @@ export type GameEventMap = {
   'player:attack': null;        // swing iniciado — para futuros sistemas de impacto
   'player:death':      null;        // HP llegó a 0 — emitido una sola vez por PlayerStats
   'player:death-anim-end': null;     // animación Death_A terminada — dispara el GameOverModal
+  'combat:start':  null;             // transición exploración→combate iniciada (freeze todo)
+  'combat:end':    null;             // vuelta a exploración (unfreeze)
   'input:attack': null;         // click izquierdo detectado por InputManager
   'ui:show-level-up-modal': { snapshot: PlayerSnapshot };
   'ui:close-level-up-modal': null;

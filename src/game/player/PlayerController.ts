@@ -131,6 +131,7 @@ export class PlayerController {
   private _isAttacking = false;
   // Bloquea input y animaciones tras la muerte del jugador
   private _isDead = false;
+  private _isInCombat = false;
 
   // Instancias de armas activas; se limpian al cambiar de clase
   private _weaponInstances: AssetInstance[] = [];
@@ -206,6 +207,10 @@ export class PlayerController {
 
       logger.info('PlayerController: jugador muerto — animación de muerte iniciada');
     });
+
+    // Congelar/descongelar movimiento e input durante transición a combate
+    eventBus.on('combat:start', () => { this._isInCombat = true; });
+    eventBus.on('combat:end',   () => { this._isInCombat = false; });
 
     logger.info('PlayerController: pivot y capsula creados', { position: this._pivot.position });
   }
@@ -467,7 +472,9 @@ export class PlayerController {
   private _update(deltaTime: number): void {
     if (!this._camera) { return; }
     // Guard: el jugador está muerto — congelar todo input y movimiento
-    if (this._isDead) { return; }
+    if (this._isDead)      { return; }
+    // Guard: en transición a combate — congelar exploración
+    if (this._isInCombat)  { return; }
 
     const moveDir = this._computeMoveDirection(this._camera);
     const isMovingNow = moveDir.lengthSquared() > 0.001;
@@ -689,6 +696,7 @@ export class PlayerController {
    */
   private _tryAttack(): void {
     if (this._isDead)               { return; }
+    if (this._isInCombat)           { return; }
     if (this._isAttacking)          { return; }
     if (this._attackAnim === null)  { return; }
 
