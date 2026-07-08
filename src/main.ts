@@ -24,6 +24,7 @@ import { GameOverModal }        from '@/ui/GameOverModal';
 import { RustyController }      from '@/game/entities/RustyController';
 import { CombatTransition }     from '@/ui/CombatTransition';
 import { CombatEntity }         from '@/game/combat/CombatEntity';
+import { CombatMovementSystem } from '@/game/combat/CombatMovementSystem';
 import { getClassById }          from '@/config/classes.config';
 import { RunState }             from '@/game/RunState';
 
@@ -137,8 +138,10 @@ playerController.setCamera(cameraController.camera);
       // -- Ficha del jugador (modelo de la clase activa) ----------------------
       const classDef  = getClassById(chosenClass);
       const modelFile = classDef.modelAssetId;
+      // playerEntity fuera del if para que sea accesible al crear CombatMovementSystem.
+      let playerEntity: import('@/game/combat/CombatEntity').CombatEntity | null = null;
       if (modelFile !== undefined) {
-        const playerEntity = await CombatEntity.create(scene, assetManager, {
+        playerEntity = await CombatEntity.create(scene, assetManager, {
           baseUrl:     '/assets/models/characters/',
           filename:    modelFile,
           isMixamo:    classDef.isMixamo    ?? false,
@@ -147,9 +150,10 @@ playerController.setCamera(cameraController.camera);
           displayName: 'Jugador',
           footprintW:  1,
           footprintH:  1,
+          dex:         playerStats.getSnapshot().coreStats.DEX,
         });
-        // Celda (9, 8): X = -0.5, Z = -1.5 (ligeramente al sur del centro).
-        // facingRad = 0 -> mira hacia +Z (hacia Rusty en Z = +1.5).
+        // Celda (9, 5): X = -0.5, Z = -4.5 (sur del centro, 10 celdas al sur de Rusty).
+        // facingRad = 0 -> mira hacia +Z (hacia Rusty en Z = +5.5).
         playerEntity.placeAt(9, 5, grid, 0);
         grid.occupy('player', 9, 5, 1, 1);
       } else {
@@ -166,11 +170,24 @@ playerController.setCamera(cameraController.camera);
         displayName: 'Rusty',
         footprintW:  1,
         footprintH:  1,
+        dex:         6,
       });
       // Celda (9, 11): X = -0.5, Z = +1.5 (ligeramente al norte del centro).
       // facingRad = Math.PI -> mira hacia -Z (hacia el jugador en Z = -1.5).
       rustyEntity.placeAt(9, 15, grid, Math.PI);
       grid.occupy('rusty', 9, 15, 1, 1);
+
+      // Sistema de movimiento por casillas (Pieza 3a).
+      // Solo se activa si la clase tiene modelo (playerEntity != null).
+      if (playerEntity !== null) {
+        const movSys = new CombatMovementSystem(
+          scene,
+          grid,
+          playerEntity,
+          'player',
+        );
+        movSys.activate();
+      }
     },
   );
 
@@ -324,9 +341,89 @@ playerController.setCamera(cameraController.camera);
     devRow.appendChild(classBtn);
 
     devPanel.appendChild(devRow);
+
+    // -- Editor de stats (DEV) -------------------------------------------------
+    // Permite editar STR/DEX/INT/LCK en caliente para testing.
+    // Los cambios se propagan a todos los sistemas via player:stats-changed.
+    // CombatMovementSystem escucha ese evento y actualiza movementPoints / resaltado.
+
+    const statsLabel = document.createElement('div');
+    statsLabel.classList.add('dev-label');
+    statsLabel.textContent = 'STATS';
+    devPanel.appendChild(statsLabel);
+
+    const statsGrid = document.createElement('div');
+    statsGrid.id = 'dev-stats-grid';
+
+    const STAT_KEYS = ['STR', 'DEX', 'INT', 'LCK'] as const;
+    type DevStat = typeof STAT_KEYS[number];
+
+    const statInputMap  = new Map<DevStat, HTMLInputElement>();
+    const statCurMap    = new Map<DevStat, HTMLSpanElement>();
+
+    const initialSnap = playerStats.getSnapshot();
+
+    for (const stat of STAT_KEYS) {
+      const row = document.createElement('div');
+      row.classList.add('dev-stats-row');
+
+      const lbl = document.createElement('span');
+      lbl.classList.add('dev-stats-lbl');
+      lbl.textContent = stat;
+
+      const cur = document.createElement('span');
+      cur.classList.add('dev-stats-cur');
+      cur.textContent = String(initialSnap.coreStats[stat]);
+      statCurMap.set(stat, cur);
+
+      const inp = document.createElement('input');
+      inp.type  = 'number';
+      inp.min   = '1';
+      inp.max   = '999';
+      inp.value = String(initialSnap.coreStats[stat]);
+      inp.classList.add('dev-stats-input');
+      statInputMap.set(stat, inp);
+
+      const btn = document.createElement('button');
+      btn.classList.add('dev-btn');
+      btn.textContent = 'Set';
+      btn.addEventListener('click', () => {
+        const val = parseInt(inp.value, 10);
+        if (!isNaN(val) && val >= 1) {
+          playerStats.setCoreStat(stat, val);
+        }
+      });
+      // Aplicar tambien con Enter dentro del input
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { btn.click(); }
+      });
+
+      row.appendChild(lbl);
+      row.appendChild(cur);
+      row.appendChild(inp);
+      row.appendChild(btn);
+      statsGrid.appendChild(row);
+    }
+
+    devPanel.appendChild(statsGrid);
     document.body.appendChild(devPanel);
 
-    // -- window.__mb: helpers de debug en DevTools ----------------------------
+    // Sincronizar spans e inputs cuando cambian los stats (nivel, item, set-coreStat, etc.)
+    eventBus.on('player:stats-changed', (snap) => {
+      for (const stat of STAT_KEYS) {
+        const curEl = statCurMap.get(stat);
+        const inpEl = statInputMap.get(stat);
+        if (curEl !== undefined) {
+          curEl.textContent = String(snap.coreStats[stat]);
+        }
+        // Solo actualizar el input si David no lo esta editando en este momento
+        if (inpEl !== undefined && inpEl !== document.activeElement) {
+          inpEl.value = String(snap.coreStats[stat]);
+        }
+      }
+    });
+
+    // -- window.__mb: helpers de debug en DevTools ---------------------------- helpers de debug en DevTools ----------------------------
     (window as unknown as Record<string, unknown>)['__mb'] = {
       scene,
       playerController,

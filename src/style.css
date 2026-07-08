@@ -1200,6 +1200,50 @@ body {
   background: rgba(255,255,255,0.08);
 }
 
+
+/* ─── DEV: Editor de stats ──────────────────────────────────────────────────── */
+
+#dev-stats-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.dev-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.dev-stats-lbl {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--border-gold-dim);
+  width: 26px;
+  text-align: right;
+  letter-spacing: 0.06em;
+}
+.dev-stats-cur {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  color: var(--text-muted);
+  width: 26px;
+  text-align: center;
+}
+.dev-stats-input {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  width: 48px;
+  background: rgba(20, 14, 6, 0.90);
+  border: 1px solid rgba(212,160,74,0.30);
+  border-radius: 3px;
+  color: var(--border-gold-dim);
+  padding: 2px 4px;
+  text-align: center;
+}
+.dev-stats-input:focus {
+  outline: none;
+  border-color: var(--border-gold);
+  color: var(--border-gold);
+}
 /* ─── Target Dummy HP Overlay (z-index: 1500) ───────────────────────────────── */
 
 .dummy-hp-overlay {

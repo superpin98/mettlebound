@@ -283,6 +283,25 @@ export class PlayerStats {
     eventBus.emit('player:stats-changed', this.getSnapshot());
   }
 
+  /**
+   * Fuerza el valor de un stat primario a un valor arbitrario.
+   * Solo para uso en el panel de desarrollo (DEV).
+   * Recalcula stats derivados, escala HP/MP y emite player:stats-changed.
+   *
+   * @param stat  'STR' | 'DEX' | 'INT' | 'LCK'
+   * @param value Valor deseado, clampeado a [1, 999].
+   */
+  setCoreStat(stat: keyof CoreStats, value: number): void {
+    const clamped  = Math.max(1, Math.min(999, Math.round(value)));
+    const oldMaxHp = this.getMaxHp();
+    const oldMaxMp = this.getMaxMp();
+    this.coreStats     = { ...this.coreStats, [stat]: clamped };
+    this.derivedStats  = calcDerivedStats(this.getEffectiveCore(), this.level);
+    this.currentHp     = this._scaleCurrentHp(this.currentHp, oldMaxHp, this.getMaxHp());
+    this.currentMp     = this._scaleCurrentMp(this.currentMp, oldMaxMp, this.getMaxMp());
+    this.emitStatsChanged();
+  }
+
   dispose(): void {
     eventBus.off('inventory:item-equipped',   this._onEquipChange);
     eventBus.off('inventory:item-unequipped', this._onEquipChange);

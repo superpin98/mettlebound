@@ -229,7 +229,7 @@ export class CombatGrid {
       this._scene,
     );
     floor.position.y = FLOOR_Y;
-    floor.isPickable = false;
+    floor.isPickable = true;
 
     const mat = new StandardMaterial('combatFloorMat', this._scene);
     mat.diffuseColor          = new Color3(0.12, 0.14, 0.18);

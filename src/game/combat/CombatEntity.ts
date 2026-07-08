@@ -48,7 +48,21 @@ export interface CombatEntityConfig {
   footprintW:  number;
   /** Profundidad del footprint en celdas (eje Z del grid). */
   footprintH:  number;
+  /**
+   * Destreza de la entidad. Determina los puntos de movimiento tactico.
+   * Formula: MOV_BASE + round((MOV_MAX - MOV_BASE) * min(dex, DEX_MOV_CAP) / DEX_MOV_CAP)
+   */
+  dex: number;
 }
+
+// ── Constantes de movimiento tactico ────────────────────────────────────────────
+
+/** Puntos de movimiento minimos (DEX = 0). */
+const MOV_BASE    = 4;
+/** Puntos de movimiento maximos (DEX >= DEX_MOV_CAP). */
+const MOV_MAX     = 12;
+/** DEX a partir de la cual el movimiento ya no mejora. */
+const DEX_MOV_CAP = 80;
 
 // ============================================================
 // CombatEntity -- ficha de tablero para el sistema tactico.
@@ -59,7 +73,7 @@ export interface CombatEntityConfig {
 // Caracteristicas:
 //   - Carga un GLB via AssetManager (aprovechar cache existente).
 //   - Reproduce su animacion Idle en loop desde el momento de creacion.
-//   - Conoce su posicion en el grid (celda ancla + footprint N×M).
+//   - Conoce su posicion en el grid (celda ancla + footprint N x M).
 //   - Soporta footprints multi-casilla (jugador/Rusty = 1x1;
 //     jefes futuros = 2x2, 3x3, etc.) desde el diseno.
 //   - SIN fisica Havok: es una ficha visual, no una entidad de exploracion.
@@ -78,6 +92,7 @@ export class CombatEntity {
   private readonly _pivot:      TransformNode;
   private readonly _footprintW: number;
   private readonly _footprintH: number;
+  private _dex:                 number;
   private _instance:            AssetInstance | null = null;
   private _idleAnim:            AnimationGroup | null = null;
 
@@ -94,6 +109,7 @@ export class CombatEntity {
     this.combatant.displayName = config.displayName;
     this._footprintW          = config.footprintW;
     this._footprintH          = config.footprintH;
+    this._dex                 = config.dex;
 
     this._pivot = new TransformNode(
       `combatEntity_${config.displayName}`,
@@ -103,7 +119,7 @@ export class CombatEntity {
     this._pivot.rotationQuaternion = Quaternion.Identity();
   }
 
-  // ── Factory async ────────────────────────────────────────────────────────────
+  // -- Factory async ------------------------------------------------------------
 
   /**
    * Crea e inicializa una CombatEntity de forma asincrona.
@@ -126,11 +142,13 @@ export class CombatEntity {
     logger.info('CombatEntity: entidad creada', {
       displayName: config.displayName,
       footprint:   `${config.footprintW}x${config.footprintH}`,
+      dex:         config.dex,
+      movPoints:   entity.movementPoints,
     });
     return entity;
   }
 
-  // ── API publica ──────────────────────────────────────────────────────────────
+  // -- API publica --------------------------------------------------------------
 
   /** Columna de la celda ancla (eje X, esquina XZ minima del footprint). */
   get cellX(): number { return this._cellX; }
@@ -145,11 +163,21 @@ export class CombatEntity {
   get footprintH(): number { return this._footprintH; }
 
   /**
+   * Puntos de movimiento tactico de esta entidad.
+   * Formula: MOV_BASE + round((MOV_MAX - MOV_BASE) * min(DEX, DEX_MOV_CAP) / DEX_MOV_CAP)
+   * Rango: [4, 12] para DEX in [0, 80+].
+   */
+  get movementPoints(): number {
+    const dexCapped = Math.min(this._dex, DEX_MOV_CAP);
+    return MOV_BASE + Math.round((MOV_MAX - MOV_BASE) * dexCapped / DEX_MOV_CAP);
+  }
+
+  /**
    * Posiciona la ficha en el grid y la orienta segun el angulo indicado.
    *
-   * Para footprints N×M, el pivot se coloca en el CENTRO geometrico
+   * Para footprints N x M, el pivot se coloca en el CENTRO geometrico
    * de todas las celdas que ocupa (no en la esquina ancla).
-   * Para 1×1: el pivot cae en el centro exacto de la celda.
+   * Para 1x1: el pivot cae en el centro exacto de la celda.
    *
    * @param anchorX   Columna de la celda ancla (esquina XZ minima).
    * @param anchorZ   Fila de la celda ancla.
@@ -158,6 +186,17 @@ export class CombatEntity {
    *                  0 = facing +Z. Math.PI = facing -Z.
    *                  Convencion identica a PlayerController y RustyController.
    */
+  /**
+   * Actualiza la DEX de la entidad en caliente.
+   * Llamado por CombatMovementSystem al recibir player:stats-changed,
+   * de modo que movementPoints refleje siempre la DEX actual del jugador.
+   *
+   * @param dex Nuevo valor de DEX (efectivo, ya con bonus de items si los hay).
+   */
+  updateDex(dex: number): void {
+    this._dex = dex;
+  }
+
   placeAt(
     anchorX:   number,
     anchorZ:   number,
@@ -169,7 +208,7 @@ export class CombatEntity {
 
     // Centro del footprint en espacio mundo.
     // cellToWorld(cx, cz) devuelve el centro de la celda (cx, cz).
-    // Para footprint N×M: el centro geometrico esta entre la celda ancla
+    // Para footprint N x M: el centro geometrico esta entre la celda ancla
     // y la celda en la esquina opuesta (anchorX + W - 1, anchorZ + H - 1).
     const a = grid.cellToWorld(anchorX, anchorZ);
     const b = grid.cellToWorld(
@@ -208,7 +247,7 @@ export class CombatEntity {
     logger.debug('CombatEntity: dispuesta', { displayName: this.combatant.displayName });
   }
 
-  // ── Carga del modelo ─────────────────────────────────────────────────────────
+  // -- Carga del modelo ---------------------------------------------------------
 
   private async _loadModel(
     assetManager: AssetManager,
@@ -251,7 +290,7 @@ export class CombatEntity {
     this._resolveIdleAnim(instance.animationGroups, config.filename);
   }
 
-  // ── Animacion ────────────────────────────────────────────────────────────────
+  // -- Animacion ----------------------------------------------------------------
 
   /**
    * Busca la animacion Idle por nombre (case-insensitive, contiene 'idle').
