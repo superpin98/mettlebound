@@ -22,6 +22,7 @@ import type { Vec3 } from '@/types/spatial.types';
 import { getClassById, isBodyPart } from '@/config/classes.config';
 import { logger } from '@/core/Logger';
 import { eventBus } from '@/core/EventBus';
+import { AttackHitbox } from '@/game/combat/AttackHitbox';
 
 // ============================================================
 // Constantes de configuracion
@@ -133,6 +134,10 @@ export class PlayerController {
   private _isDead = false;
   private _isInCombat = false;
 
+  // Hitbox de impacto (trigger esfera delante del pivot)
+  // Se crea en initPhysics(), se configura en loadModel()
+  private _attackHitbox: AttackHitbox | null = null;
+
   // Instancias de armas activas; se limpian al cambiar de clase
   private _weaponInstances: AssetInstance[] = [];
 
@@ -159,7 +164,6 @@ export class PlayerController {
     scene.onPointerObservable.add((pi) => {
       if (pi.type === PointerEventTypes.POINTERDOWN && pi.event.button === 0) {
         logger.debug('PlayerController: click izquierdo detectado — intentando ataque');
-        console.log('[INPUT] click izquierdo detectado');
         this._tryAttack();
       }
     });
@@ -255,6 +259,17 @@ export class PlayerController {
   }
 
   /**
+   * Registra un enemigo como target golpeable por el hitbox de ataque.
+   * Llamar desde main.ts tras crear cada enemigo.
+   *
+   * @param body       PhysicsBody del enemigo (identifica quién fue golpeado).
+   * @param getCenter  Función que devuelve el centro 3D del cuerpo del enemigo.
+   */
+  registerHitTarget(body: PhysicsBody, getCenter: () => Vector3): void {
+    this._attackHitbox?.registerTarget(body, getCenter);
+  }
+
+  /**
    * Conecta la capsula invisible al motor Havok y bloquea la inercia angular.
    *
    * CUANDO llamar: desde main.ts, DESPUES de scene.enablePhysics()
@@ -274,6 +289,9 @@ export class PlayerController {
       inertia:             new Vector3(0, 0, 0),
       inertiaOrientation:  Quaternion.Identity(),
     });
+
+    // Hitbox de ataque: trigger esfera anclada al pivot, delante del jugador
+    this._attackHitbox = new AttackHitbox(this._scene, this._pivot);
 
     logger.info('PlayerController: capsula fisica Havok activada.');
   }
@@ -445,6 +463,9 @@ export class PlayerController {
     this._attackAnim = animMap.get('Attack_A')  ?? null;
     this._deathAnim  = animMap.get('Death_A')   ?? null;
     this._isAttacking = false;
+
+    // Actualizar config de hitbox para la clase elegida
+    this._attackHitbox?.setClassConfig(classId);
 
     // Arrancar Idle en loop como estado por defecto
     this._idleAnim?.start(
@@ -725,7 +746,10 @@ export class PlayerController {
       /* additive */ false,
     );
 
-    // Emitir evento para futuros sistemas de impacto/combate
+    // Activar hitbox en la ventana de impacto del swing
+    this._attackHitbox?.scheduleWindow(this._attackAnim);
+
+    // Emitir evento de swing (para UI o sistemas futuros)
     eventBus.emit('player:attack', null);
 
     // Al terminar el swing: desactivar flag y volver al estado correcto

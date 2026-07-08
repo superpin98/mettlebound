@@ -57,7 +57,7 @@ export class CombatTransition {
    * Arranca la secuencia cinemática.
    * @param onReturn  Callback invocado cuando el usuario pulsa "Volver".
    */
-  async enter(onReturn: () => void): Promise<void> {
+  async enter(): Promise<void> {
     // a. Zoom cámara (simultáneo con el blur)
     this._animateRadius(ZOOM_RADIUS_TARGET, T_ZOOM_MS);
 
@@ -80,7 +80,7 @@ export class CombatTransition {
 
     // d. Stub de combate (aparece sobre el negro)
     await this._sleep(T_FADE_MS);
-    const stub = this._buildStub(onReturn);
+    const stub = this._buildStub();
     this._stub  = stub;
     overlay.appendChild(stub);
 
@@ -145,9 +145,9 @@ export class CombatTransition {
     return el;
   }
 
-  private _buildStub(onReturn: () => void): HTMLDivElement {
+  private _buildStub(): HTMLDivElement {
     const el = document.createElement('div');
-    el.className  = 'combat-stub';
+    el.className     = 'combat-stub';
     el.style.cssText = 'opacity: 0; transition: opacity 300ms ease;';
     el.innerHTML = `
       <div class="combat-stub__ornament">⚔</div>
@@ -156,14 +156,7 @@ export class CombatTransition {
       <p class="combat-stub__subtitle">
         [Escena de combate por turnos — en construcción]
       </p>
-      <button class="combat-stub__btn" id="combat-stub-return">
-        Volver a exploración
-      </button>
     `;
-
-    el.querySelector<HTMLButtonElement>('#combat-stub-return')
-      ?.addEventListener('click', () => { onReturn(); });
-
     return el;
   }
 

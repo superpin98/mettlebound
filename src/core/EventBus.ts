@@ -16,6 +16,7 @@
 import mitt from 'mitt';
 import type { PlayerSnapshot } from '@/types/game.types';
 import type { Item, EquipmentSlot, EquippedItems } from '@/types/items.types';
+import type { PhysicsBody } from '@babylonjs/core';
 
 /**
  * Mapa de eventos del juego.
@@ -27,7 +28,8 @@ export type GameEventMap = {
   'player:stats-changed': PlayerSnapshot;
   'player:level-up': { newLevel: number; snapshot: PlayerSnapshot };
   'player:xp-gained': { amount: number; snapshot: PlayerSnapshot };
-  'player:attack': null;        // swing iniciado — para futuros sistemas de impacto
+  'player:attack': null;        // swing iniciado
+  'player:attack-hit': { body: PhysicsBody };  // impacto real: hitbox tocó un cuerpo
   'player:death':      null;        // HP llegó a 0 — emitido una sola vez por PlayerStats
   'player:death-anim-end': null;     // animación Death_A terminada — dispara el GameOverModal
   'combat:start':  null;             // transición exploración→combate iniciada (freeze todo)

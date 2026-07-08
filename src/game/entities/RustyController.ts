@@ -17,11 +17,15 @@ import {
   Scene,
   TransformNode,
   Vector3,
+  Quaternion,
   MeshBuilder,
   StandardMaterial,
   DynamicTexture,
   Color3,
   AnimationGroup,
+  PhysicsBody,
+  PhysicsMotionType,
+  PhysicsShapeCapsule,
 } from '@babylonjs/core';
 import type { Observer } from '@babylonjs/core';
 
@@ -74,6 +78,8 @@ export class RustyController extends Combatant {
   private _waitTimer:             number  = 0;
   private _observer:              Observer<Scene> | null = null;
   private _isInCombat:            boolean = false;
+  private _pivotBody:             PhysicsBody | null = null;
+  private _pivotShape:            PhysicsShapeCapsule | null = null;
 
   // Handlers guardados para poder des-suscribirlos en dispose()
   private readonly _onCombatStart = (): void => { this._isInCombat = true; };
@@ -88,6 +94,19 @@ export class RustyController extends Combatant {
     this._pivot  = new TransformNode('rusty_pivot', scene);
     this._pivot.position.copyFrom(startPos);
     this._wanderTarget = startPos.clone();
+
+    // Cuerpo físico ANIMATED: el pivot conduce la física, sin gravedad.
+    // Necesario para que el hitbox de ataque del jugador detecte a Rusty.
+    this._pivotBody = new PhysicsBody(this._pivot, PhysicsMotionType.ANIMATED, false, scene);
+    this._pivotBody.disablePreStep = false;  // pivot.position → física cada frame
+    this._pivotShape = new PhysicsShapeCapsule(
+      new Vector3(0, 0.35, 0),  // base de la cápsula (sobre el suelo)
+      new Vector3(0, 1.7,  0),  // tope de la cápsula (cabeza del esqueleto)
+      0.35,                     // radio ~ anchura de hombros
+      scene,
+    );
+    this._pivotBody.shape = this._pivotShape;
+    this._pivotBody.setCollisionCallbackEnabled(true);
   }
 
   // ── Factory async ──────────────────────────────────────────────────────────
@@ -235,8 +254,13 @@ export class RustyController extends Combatant {
     pos.z += dz * invDist * WALK_SPEED * dt;
     pos.y  = 0; // siempre en el suelo, sin física Havok
 
-    // Orientar hacia la dirección de movimiento
-    this._pivot.rotation.y = Math.atan2(dx, dz);
+    // Orientar hacia la dirección de movimiento.
+    // PhysicsBody inicializa rotationQuaternion en el pivot; cuando existe,
+    // Babylon ignora rotation.y. Usamos Quaternion directamente.
+    this._pivot.rotationQuaternion = Quaternion.RotationAxis(
+      Vector3.Up(),
+      Math.atan2(dx, dz),
+    );
   }
 
   private _registerUpdate(): void {
@@ -249,7 +273,25 @@ export class RustyController extends Combatant {
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-  /** Posición actual de Rusty en el mundo (para futura detección de impacto). */
+  /**
+   * Cuerpo físico Havok de Rusty.
+   * Disponible tras create(). El hitbox de ataque del jugador lo usa para
+   * identificar a Rusty cuando TRIGGER_ENTERED se dispara.
+   */
+  get physicsBody(): PhysicsBody | null {
+    return this._pivotBody;
+  }
+
+  /**
+   * Centro 3D del cuerpo de Rusty (pivot + 1.0u en Y).
+   * Usar esto para el overlap query del hitbox, NO `position` (que está en y=0).
+   */
+  get bodyCenter(): Vector3 {
+    const p = this._pivot.position;
+    return new Vector3(p.x, p.y + 1.0, p.z);
+  }
+
+  /** Posición actual del pivot de Rusty en el mundo (nivel del suelo). */
   get position(): Vector3 {
     return this._pivot.position;
   }
@@ -263,6 +305,14 @@ export class RustyController extends Combatant {
     }
     this._currentAnim?.stop();
     this._instance?.dispose();
+    // Física: limpiar body antes de disponer el pivot (el body lo referencia)
+    if (this._pivotBody !== null) {
+      this._pivotBody.shape = null;
+      this._pivotBody.dispose();
+      this._pivotBody = null;
+    }
+    this._pivotShape?.dispose();
+    this._pivotShape = null;
     this._pivot.dispose();
     logger.info('RustyController: disposed');
   }

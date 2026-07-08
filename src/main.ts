@@ -100,6 +100,12 @@ playerController.setCamera(cameraController.camera);
   // -- Fisica del player (suelo ya existe) ------------------------------------
   playerController.initPhysics();
 
+  // Registrar a Rusty como target golpeable por el hitbox de ataque del jugador.
+  // getCenter() devuelve el centro 3D de su cuerpo (pivot + 1u en Y).
+  if (rusty.physicsBody !== null) {
+    playerController.registerHitTarget(rusty.physicsBody, () => rusty.bodyCenter);
+  }
+
   // -- Cargar modelo 3D del personaje ----------------------------------------
   await playerController.loadModel(chosenClass);
 
@@ -111,34 +117,23 @@ playerController.setCamera(cameraController.camera);
   // -- CombatTransition: cinemática exploración→combate ------------------
   const combatTransition = new CombatTransition(scene, cameraController.camera);
 
-  // Detección de impacto contra Rusty: se comprueba en cada swing del jugador.
-  // player:attack se emite al INICIO del swing (PlayerController._tryAttack).
-  // Si la distancia XZ es menor que el umbral → impacto → transición a combate.
-  const HIT_RANGE_XZ = 2.2; // metros — ajustable
-  let   _combatActive = false;
+  // Detección de impacto real: el AttackHitbox del jugador emite player:attack-hit
+  // cuando su trigger sphere toca el PhysicsBody de un objetivo durante la ventana
+  // de impacto del swing (40%-70% de la animación). Sustituye la detección XZ manual.
+  let _combatActive = false;
 
-  eventBus.on('player:attack', () => {
-    if (_combatActive) { return; } // ya en combate, ignorar
-    const pp = playerController.mesh.position;
-    const rp = rusty.position;
-    const dx = pp.x - rp.x;
-    const dz = pp.z - rp.z;
-    const dist = Math.sqrt(dx * dx + dz * dz);
-    if (dist > HIT_RANGE_XZ) { return; } // demasiado lejos
+  eventBus.on('player:attack-hit', (event) => {
+    if (_combatActive)                        { return; } // ya en combate
+    if (event.body !== rusty.physicsBody)     { return; } // no es Rusty
 
-    // Impacto confirmado — karma negativo (atacar a NPC neutral consciente)
+    // Impacto confirmado: golpe a NPC neutral consciente → karma negativo
     runState.addKarma(-1);
     logger.info('main: impacto en Rusty — karma', { karma: runState.karma });
 
-    // Freeze todo y arrancar cinemática
+    // Freeze exploración y arrancar cinemática
     _combatActive = true;
     eventBus.emit('combat:start', null);
-    void combatTransition.enter(() => {
-      // Callback 'Volver': revertir todo
-      void combatTransition.exit().then(() => {
-        _combatActive = false; // listo para detectar impacto de nuevo
-      });
-    });
+    void combatTransition.enter();
   });
 
   // -- Sistemas de juego ------------------------------------------------------
