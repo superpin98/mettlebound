@@ -70,21 +70,17 @@ const DEX_MOV_CAP = 80;
 // Representa una entidad (jugador, enemigo, aliado) posicionada
 // en el CombatGrid durante un encuentro de combate.
 //
-// Caracteristicas:
-//   - Carga un GLB via AssetManager (aprovechar cache existente).
-//   - Reproduce su animacion Idle en loop desde el momento de creacion.
-//   - Conoce su posicion en el grid (celda ancla + footprint N x M).
-//   - Soporta footprints multi-casilla (jugador/Rusty = 1x1;
-//     jefes futuros = 2x2, 3x3, etc.) desde el diseno.
-//   - SIN fisica Havok: es una ficha visual, no una entidad de exploracion.
+// Animaciones gestionadas:
+//   - Idle: reproducida en loop cuando la entidad esta quieta.
+//   - Walk: reproducida durante el recorrido (CombatWalker).
+//     startWalkAnim() / stopWalkAnim() controlan la transicion.
 //
-// Patron: constructor privado + factory estatica async (igual que RustyController).
+// Metodos de movimiento para CombatWalker:
+//   - setCell(x, z)            -> actualiza la celda logica sin mover el pivot
+//   - setWorldPosition(x,y,z)  -> mueve el pivot en espacio mundo
+//   - setFacingRad(rad)        -> rota el pivot hacia un angulo
 //
-// Uso:
-//   const entity = await CombatEntity.create(scene, assetManager, config);
-//   entity.placeAt(cx, cz, grid, facingRad);
-//   // ... combate en sprints futuros ...
-//   entity.dispose();
+// SIN fisica Havok: es una ficha visual, no una entidad de exploracion.
 // ============================================================
 
 export class CombatEntity {
@@ -95,6 +91,7 @@ export class CombatEntity {
   private _dex:                 number;
   private _instance:            AssetInstance | null = null;
   private _idleAnim:            AnimationGroup | null = null;
+  private _walkAnim:            AnimationGroup | null = null;
 
   /** Celda ancla (esquina XZ minima del footprint) en coordenadas de grid. */
   private _cellX = 0;
@@ -105,11 +102,11 @@ export class CombatEntity {
 
   // Constructor privado. Usar CombatEntity.create().
   private constructor(scene: Scene, config: CombatEntityConfig) {
-    this.combatant            = new Combatant(config.maxHp);
+    this.combatant             = new Combatant(config.maxHp);
     this.combatant.displayName = config.displayName;
-    this._footprintW          = config.footprintW;
-    this._footprintH          = config.footprintH;
-    this._dex                 = config.dex;
+    this._footprintW           = config.footprintW;
+    this._footprintH           = config.footprintH;
+    this._dex                  = config.dex;
 
     this._pivot = new TransformNode(
       `combatEntity_${config.displayName}`,
@@ -127,10 +124,6 @@ export class CombatEntity {
    * Si el GLB ya esta en el cache del AssetManager (cargado previamente
    * por PlayerController o RustyController), la operacion es sincrona
    * en la practica: sin peticion de red, solo instanciacion.
-   *
-   * @param scene        Escena Babylon activa.
-   * @param assetManager Cache de assets compartida con la exploracion.
-   * @param config       Configuracion del modelo y stats.
    */
   static async create(
     scene: Scene,
@@ -148,7 +141,7 @@ export class CombatEntity {
     return entity;
   }
 
-  // -- API publica --------------------------------------------------------------
+  // -- API publica: getters de estado ------------------------------------------
 
   /** Columna de la celda ancla (eje X, esquina XZ minima del footprint). */
   get cellX(): number { return this._cellX; }
@@ -166,37 +159,36 @@ export class CombatEntity {
    * Puntos de movimiento tactico de esta entidad.
    * Formula: MOV_BASE + round((MOV_MAX - MOV_BASE) * min(DEX, DEX_MOV_CAP) / DEX_MOV_CAP)
    * Rango: [4, 12] para DEX in [0, 80+].
+   * Se recalcula cada vez a partir de _dex (actualizable en caliente via updateDex).
    */
   get movementPoints(): number {
     const dexCapped = Math.min(this._dex, DEX_MOV_CAP);
     return MOV_BASE + Math.round((MOV_MAX - MOV_BASE) * dexCapped / DEX_MOV_CAP);
   }
 
-  /**
-   * Posiciona la ficha en el grid y la orienta segun el angulo indicado.
-   *
-   * Para footprints N x M, el pivot se coloca en el CENTRO geometrico
-   * de todas las celdas que ocupa (no en la esquina ancla).
-   * Para 1x1: el pivot cae en el centro exacto de la celda.
-   *
-   * @param anchorX   Columna de la celda ancla (esquina XZ minima).
-   * @param anchorZ   Fila de la celda ancla.
-   * @param grid      CombatGrid para la conversion celda->mundo.
-   * @param facingRad Angulo de rotacion Y en radianes.
-   *                  0 = facing +Z. Math.PI = facing -Z.
-   *                  Convencion identica a PlayerController y RustyController.
-   */
+  // -- API publica: stats -------------------------------------------------------
+
   /**
    * Actualiza la DEX de la entidad en caliente.
-   * Llamado por CombatMovementSystem al recibir player:stats-changed,
-   * de modo que movementPoints refleje siempre la DEX actual del jugador.
-   *
-   * @param dex Nuevo valor de DEX (efectivo, ya con bonus de items si los hay).
+   * Llamado por CombatMovementSystem al recibir player:stats-changed.
+   * @param dex Nuevo valor de DEX (efectivo, ya con bonus de items).
    */
   updateDex(dex: number): void {
     this._dex = dex;
   }
 
+  // -- API publica: posicionamiento completo (con recalculo de mundo) -----------
+
+  /**
+   * Posiciona la ficha en el grid y la orienta.
+   * Calcula el centro del footprint en espacio mundo y mueve el pivot.
+   * Usado para colocacion inicial y teleport (sin caminata).
+   *
+   * @param anchorX   Columna de la celda ancla (esquina XZ minima).
+   * @param anchorZ   Fila de la celda ancla.
+   * @param grid      CombatGrid para la conversion celda->mundo.
+   * @param facingRad Angulo de rotacion Y en radianes (0 = +Z, PI = -Z).
+   */
   placeAt(
     anchorX:   number,
     anchorZ:   number,
@@ -206,44 +198,95 @@ export class CombatEntity {
     this._cellX = anchorX;
     this._cellZ = anchorZ;
 
-    // Centro del footprint en espacio mundo.
-    // cellToWorld(cx, cz) devuelve el centro de la celda (cx, cz).
-    // Para footprint N x M: el centro geometrico esta entre la celda ancla
-    // y la celda en la esquina opuesta (anchorX + W - 1, anchorZ + H - 1).
     const a = grid.cellToWorld(anchorX, anchorZ);
     const b = grid.cellToWorld(
       anchorX + this._footprintW - 1,
       anchorZ + this._footprintH - 1,
     );
     this._pivot.position.x = (a.x + b.x) / 2;
-    this._pivot.position.y = 0;  // a ras del suelo del grid (Y = 0)
+    this._pivot.position.y = 0;
     this._pivot.position.z = (a.z + b.z) / 2;
 
-    this._pivot.rotationQuaternion = Quaternion.RotationAxis(
-      Vector3.Up(),
-      facingRad,
-    );
+    this._pivot.rotationQuaternion = Quaternion.RotationAxis(Vector3.Up(), facingRad);
 
     logger.debug('CombatEntity: posicionada en grid', {
-      displayName: this.combatant.displayName,
-      anchorX,
-      anchorZ,
-      worldX: this._pivot.position.x,
-      worldZ: this._pivot.position.z,
-      facingRad,
+      displayName: this.combatant.displayName, anchorX, anchorZ,
+      worldX: this._pivot.position.x, worldZ: this._pivot.position.z, facingRad,
     });
   }
+
+  // -- API para CombatWalker: movimiento paso a paso ---------------------------
+
+  /**
+   * Actualiza la celda logica sin mover el pivot visualmente.
+   * Llamado por CombatWalker al entrar en cada celda del path.
+   * Permite saber en que celda esta la entidad en cualquier momento
+   * del recorrido (util para redireccion futura).
+   */
+  setCell(x: number, z: number): void {
+    this._cellX = x;
+    this._cellZ = z;
+  }
+
+  /**
+   * Mueve el pivot a una posicion en espacio mundo.
+   * Llamado cada frame por CombatWalker durante la interpolacion.
+   */
+  setWorldPosition(x: number, y: number, z: number): void {
+    this._pivot.position.x = x;
+    this._pivot.position.y = y;
+    this._pivot.position.z = z;
+  }
+
+  /**
+   * Rota el pivot hacia el angulo indicado.
+   * Llamado por CombatWalker al cambiar de segmento en el path.
+   */
+  setFacingRad(rad: number): void {
+    this._pivot.rotationQuaternion = Quaternion.RotationAxis(Vector3.Up(), rad);
+  }
+
+  // -- API para CombatWalker: animaciones de caminata --------------------------
+
+  /**
+   * Inicia la animacion de caminata en loop.
+   * Pausa el Idle si estaba en reproduccion.
+   * Sin efecto si no se encontro animacion Walk en el GLB.
+   */
+  startWalkAnim(): void {
+    if (this._walkAnim === null) { return; }
+    this._idleAnim?.stop();
+    this._walkAnim.start(true, 1.0, this._walkAnim.from, this._walkAnim.to, false);
+    logger.debug('CombatEntity: Walk iniciada', { animName: this._walkAnim.name });
+  }
+
+  /**
+   * Detiene la animacion de caminata y reanuda el Idle.
+   * Sin efecto si no hay Walk activa.
+   */
+  stopWalkAnim(): void {
+    if (this._walkAnim === null) { return; }
+    this._walkAnim.stop();
+    if (this._idleAnim !== null) {
+      this._idleAnim.start(true, 1.0, this._idleAnim.from, this._idleAnim.to, false);
+    }
+    logger.debug('CombatEntity: Walk detenida, Idle reanudada');
+  }
+
+  // -- Ciclo de vida -----------------------------------------------------------
 
   /**
    * Libera todos los recursos 3D (meshes, animaciones, pivot).
    * Llamar al finalizar el combate o al destruir la escena.
    */
   dispose(): void {
+    this._walkAnim?.stop();
     this._idleAnim?.stop();
     this._instance?.dispose();
     this._pivot.dispose();
     this._instance = null;
     this._idleAnim = null;
+    this._walkAnim = null;
     logger.debug('CombatEntity: dispuesta', { displayName: this.combatant.displayName });
   }
 
@@ -256,27 +299,19 @@ export class CombatEntity {
     const container = await assetManager.loadAsset(config.baseUrl, config.filename);
     const instance  = assetManager.instantiate(container);
 
-    // Anclar al pivot. El pivot vive en world space;
-    // el modelo hereda su posicion, rotacion y escala.
     instance.rootNode.parent = this._pivot;
 
-    // Escala: solo si != 1 (GLBs cocinados en Blender ya estan en metros).
     if (config.modelScale !== 1) {
       const s = config.modelScale;
       instance.rootNode.scaling = new Vector3(s, s, s);
     }
 
-    // Modelos Mixamo: convertir PBR -> Standard para evitar desbordamiento
-    // de GL_MAX_VERTEX_UNIFORM_BUFFERS (limite WebGL = 12).
-    // Mismo tratamiento que en PlayerController._pbrToStandard().
     if (config.isMixamo) {
       for (const mesh of instance.rootNode.getChildMeshes(false)) {
         if (mesh.material instanceof PBRMaterial) {
           const pbr = mesh.material;
           const std = new StandardMaterial(`${mesh.name}_std`, mesh.getScene());
-          if (pbr.albedoTexture !== null) {
-            std.diffuseTexture = pbr.albedoTexture;
-          }
+          if (pbr.albedoTexture !== null) { std.diffuseTexture = pbr.albedoTexture; }
           std.specularColor         = new Color3(0, 0, 0);
           std.maxSimultaneousLights = 4;
           mesh.material             = std;
@@ -288,39 +323,59 @@ export class CombatEntity {
 
     this._instance = instance;
     this._resolveIdleAnim(instance.animationGroups, config.filename);
+    this._resolveWalkAnim(instance.animationGroups, config.filename);
   }
 
-  // -- Animacion ----------------------------------------------------------------
+  // -- Resolucion de animaciones ------------------------------------------------
 
   /**
-   * Busca la animacion Idle por nombre (case-insensitive, contiene 'idle').
-   * Descarta 'mixamo.com' (bind pose basura que Mixamo siempre incluye).
-   * Compatible con:
-   *   - KayKit:  'Idle', 'Walking_A', ...
-   *   - Mixamo:  'Knight_unarmed_idle', 'mixamo.com', ...
+   * Busca la animacion Idle (nombre contiene 'idle', case-insensitive).
+   * Descarta 'mixamo.com' (bind pose).
    */
   private _resolveIdleAnim(groups: AnimationGroup[], filename: string): void {
-    const idleGroup = groups.find((g) => {
+    const group = groups.find((g) => {
       const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
       return clean !== 'mixamo.com' && clean.includes('idle');
     });
 
-    if (idleGroup === undefined) {
+    if (group === undefined) {
       logger.warn('CombatEntity: animacion Idle no encontrada', {
-        filename,
-        available: groups.map((g) => g.name),
+        filename, available: groups.map((g) => g.name),
       });
       return;
     }
 
-    this._idleAnim = idleGroup;
-    idleGroup.start(
-      /* loop     */ true,
-      /* speed    */ 1.0,
-      /* from     */ idleGroup.from,
-      /* to       */ idleGroup.to,
-      /* additive */ false,
-    );
-    logger.debug('CombatEntity: Idle iniciada', { animName: idleGroup.name });
+    this._idleAnim = group;
+    group.start(true, 1.0, group.from, group.to, false);
+    logger.debug('CombatEntity: Idle iniciada', { animName: group.name });
+  }
+
+  /**
+   * Busca la animacion de caminata.
+   * Estrategia de busqueda (en orden):
+   *   1. Nombre contiene 'walk' (case-insensitive) — KayKit Walking_A, Walking_D_Skeletons...
+   *   2. Nombre contiene 'run'  (case-insensitive) — fallback para Mixamo.
+   * Descarta 'mixamo.com'. NO la inicia: se activa bajo demanda via startWalkAnim().
+   */
+  private _resolveWalkAnim(groups: AnimationGroup[], filename: string): void {
+    const group =
+      groups.find((g) => {
+        const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
+        return clean !== 'mixamo.com' && clean.includes('walk');
+      }) ??
+      groups.find((g) => {
+        const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
+        return clean !== 'mixamo.com' && clean.includes('run');
+      });
+
+    if (group === undefined) {
+      logger.warn('CombatEntity: animacion Walk/Run no encontrada (la ficha caminara sin anim)', {
+        filename, available: groups.map((g) => g.name),
+      });
+      return;
+    }
+
+    this._walkAnim = group;
+    logger.debug('CombatEntity: Walk resuelta', { animName: group.name });
   }
 }

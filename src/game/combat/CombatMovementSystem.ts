@@ -2,18 +2,19 @@
  * CombatMovementSystem -- click-to-move sobre el grid tactico.
  *
  * Al hacer clic izquierdo sobre el suelo del combate:
- *   1. Convierte el punto 3D a celda de grid (worldToCell).
- *   2. Valida que la celda no este ocupada por otra entidad.
- *   3. Ejecuta A* (CombatPathfinder) desde la celda actual.
- *   4. Comprueba que el coste no supere los puntos de movimiento.
- *   5. Teleporta la ficha a destino (placeAt) y actualiza la ocupacion.
- *   6. Recalcula el resaltado de rango (CombatReachableHighlight).
+ *   1. Ignora el click si hay una caminata en curso (CombatWalker.isWalking).
+ *   2. Convierte el punto 3D a celda de grid (worldToCell).
+ *   3. Valida que la celda no este ocupada por otra entidad.
+ *   4. Ejecuta A* (CombatPathfinder) desde la celda actual.
+ *   5. Comprueba que el coste no supere los puntos de movimiento.
+ *   6. Reserva la ocupacion del destino y libera el origen.
+ *   7. Oculta el resaltado de rango.
+ *   8. Inicia CombatWalker: la ficha camina con animacion celda a celda.
+ *   9. Al llegar: muestra el resaltado de rango desde la nueva posicion.
  *
  * Suscripcion a player:stats-changed:
  *   Cuando cambia la DEX (ej. via el panel DEV), actualiza la DEX de la entidad
- *   y recalcula el resaltado de rango inmediatamente.
- *
- * NO hay animacion de caminar (Pieza 3b).
+ *   y recalcula el resaltado de rango inmediatamente (si no esta caminando).
  */
 
 import { PointerEventTypes } from '@babylonjs/core';
@@ -24,6 +25,7 @@ import type { CombatEntity }        from '@/game/combat/CombatEntity';
 import type { PlayerSnapshot }      from '@/types/game.types';
 import { CombatPathfinder }         from '@/game/combat/CombatPathfinder';
 import { CombatReachableHighlight } from '@/game/combat/CombatReachableHighlight';
+import { CombatWalker }             from '@/game/combat/CombatWalker';
 import { eventBus }                 from '@/core/EventBus';
 import { logger }                   from '@/core/Logger';
 
@@ -34,6 +36,7 @@ export class CombatMovementSystem {
   private readonly _playerEntity: CombatEntity;
   private readonly _playerId:     string;
   private readonly _highlight:    CombatReachableHighlight;
+  private readonly _walker:       CombatWalker;
 
   private _isActive         = false;
   private _pointerObserver: Observer<PointerInfo> | null = null;
@@ -57,6 +60,7 @@ export class CombatMovementSystem {
     this._playerEntity = playerEntity;
     this._playerId     = playerId;
     this._highlight    = new CombatReachableHighlight(scene, grid, playerId);
+    this._walker       = new CombatWalker(scene);
   }
 
   // -- API publica --------------------------------------------------------------
@@ -76,7 +80,10 @@ export class CombatMovementSystem {
     // el resaltado de rango cuando el usuario modifica stats via el panel DEV.
     this._statsHandler = (snapshot: PlayerSnapshot) => {
       this._playerEntity.updateDex(snapshot.coreStats.DEX);
-      this._highlight.show(this._playerEntity);
+      // No refrescar el highlight si la ficha esta en movimiento
+      if (!this._walker.isWalking) {
+        this._highlight.show(this._playerEntity);
+      }
       logger.debug('CombatMovementSystem: DEX actualizada en caliente', {
         dex:           snapshot.coreStats.DEX,
         movementPoints: this._playerEntity.movementPoints,
@@ -105,6 +112,7 @@ export class CombatMovementSystem {
 
   /**
    * Desactiva el sistema:
+   *   - Cancela la caminata activa si la hubiera.
    *   - Elimina el listener de click.
    *   - Cancela la suscripcion a player:stats-changed.
    *   - Oculta el resaltado de rango.
@@ -113,6 +121,8 @@ export class CombatMovementSystem {
   deactivate(): void {
     if (!this._isActive) { return; }
     this._isActive = false;
+
+    this._walker.cancel();
 
     if (this._statsHandler !== null) {
       eventBus.off('player:stats-changed', this._statsHandler);
@@ -129,15 +139,19 @@ export class CombatMovementSystem {
     logger.debug('CombatMovementSystem: desactivado');
   }
 
-  /** Llama a deactivate() y libera el highlight. */
+  /** Llama a deactivate() y libera el highlight y el walker. */
   dispose(): void {
     this.deactivate();
     this._highlight.dispose();
+    this._walker.dispose();
   }
 
   // -- Logica interna -----------------------------------------------------------
 
   private _handleClick(): void {
+    // Bloquear clicks mientras la ficha esta en movimiento
+    if (this._walker.isWalking) { return; }
+
     // Raycast al suelo del combate (isPickable=true en CombatGrid).
     const pick = this._scene.pick(
       this._scene.pointerX,
@@ -178,14 +192,8 @@ export class CombatMovementSystem {
       return;
     }
 
-    // Calcular angulo de giro hacia el destino
-    const dx = dest.x - this._playerEntity.cellX;
-    const dz = dest.z - this._playerEntity.cellZ;
-    const facingRad = Math.atan2(dx, dz);
-
-    // Actualizar ocupacion y posicion
+    // Actualizar ocupacion: liberar origen y reservar destino ANTES de caminar
     this._grid.release(this._playerId);
-    this._playerEntity.placeAt(dest.x, dest.z, this._grid, facingRad);
     this._grid.occupy(
       this._playerId,
       dest.x,
@@ -194,11 +202,22 @@ export class CombatMovementSystem {
       this._playerEntity.footprintH,
     );
 
-    // Recalcular el resaltado desde la nueva posicion
-    this._highlight.show(this._playerEntity);
+    // Ocultar resaltado durante el movimiento
+    this._highlight.hide();
 
-    logger.info('CombatMovementSystem: jugador movido', {
-      from: start, to: dest, cost: result.cost, movementPoints: mp,
+    logger.info('CombatMovementSystem: iniciando caminata', {
+      from: start, to: dest, cost: result.cost, movementPoints: mp, steps: result.path.length,
     });
+
+    // Iniciar caminata -- al llegar mostrar el nuevo rango
+    this._walker.startWalk(
+      result.path,
+      this._playerEntity,
+      this._grid,
+      () => {
+        this._highlight.show(this._playerEntity);
+        logger.info('CombatMovementSystem: jugador llego al destino', { dest });
+      },
+    );
   }
 }
