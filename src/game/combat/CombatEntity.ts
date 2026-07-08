@@ -7,7 +7,7 @@ import {
   StandardMaterial,
   Color3,
 } from '@babylonjs/core';
-import type { Scene, AnimationGroup } from '@babylonjs/core';
+import type { Scene, AnimationGroup, AbstractMesh } from '@babylonjs/core';
 
 // Imports internos
 import type { AssetManager, AssetInstance } from '@/core/AssetManager';
@@ -104,6 +104,7 @@ export class CombatEntity {
   private _instance:            AssetInstance | null = null;
   private _idleAnim:            AnimationGroup | null = null;
   private _walkAnim:            AnimationGroup | null = null;
+  private _weaponMeshes:         AbstractMesh[]         = [];
 
   /** Celda ancla (esquina XZ minima del footprint) en coordenadas de grid. */
   private _cellX = 0;
@@ -299,6 +300,7 @@ export class CombatEntity {
     this._instance = null;
     this._idleAnim = null;
     this._walkAnim = null;
+    this._weaponMeshes = [];
     logger.debug('CombatEntity: dispuesta', { displayName: this.combatant.displayName });
   }
 
@@ -337,6 +339,10 @@ export class CombatEntity {
     const animSet: AnimSet = STANCE_ANIM_SET[config.weaponStance ?? 'unarmed'];
     this._resolveIdleAnim(instance.animationGroups, config.filename, animSet);
     this._resolveWalkAnim(instance.animationGroups, config.filename, animSet);
+
+    // Detectar meshes de arma (sword/shield) y aplicar visibilidad inicial
+    this._findAndCacheWeaponMeshes(instance.rootNode.getChildMeshes(false));
+    this._setWeaponVisibility((config.weaponStance ?? 'unarmed') === 'sword_and_shield');
   }
 
   // -- Helpers de resolucion de animaciones ------------------------------------
@@ -354,6 +360,34 @@ export class CombatEntity {
       ? (sns.length  > 0 ? sns  : base)
       : (base.length > 0 ? base : sns);
     return preferred[0];
+  }
+
+  // -- Visibilidad de armas fusionadas ---------------------------------------
+
+  /**
+   * Identifica los meshes de arma (sword/shield) entre los hijos del modelo.
+   * Nombre limpio (sin _instN) contiene 'sword' o 'shield'.
+   */
+  private _findAndCacheWeaponMeshes(all: AbstractMesh[]): void {
+    const weapons: AbstractMesh[] = [];
+    for (const m of all) {
+      const clean = m.name.replace(/_inst\d+$/, '').toLowerCase();
+      if (clean.includes('sword') || clean.includes('shield')) {
+        weapons.push(m);
+        for (const child of m.getChildMeshes(false)) { weapons.push(child); }
+      }
+    }
+    this._weaponMeshes = weapons;
+    logger.debug('CombatEntity: weapon meshes detectados', {
+      displayName: this.combatant.displayName,
+      count: weapons.length,
+      names: weapons.map((m) => m.name),
+    });
+  }
+
+  /** Activa o desactiva la visibilidad de los meshes de arma cacheados. */
+  private _setWeaponVisibility(visible: boolean): void {
+    for (const mesh of this._weaponMeshes) { mesh.isVisible = visible; }
   }
 
   // -- Resolucion de animaciones ------------------------------------------------

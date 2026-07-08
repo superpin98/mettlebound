@@ -155,6 +155,10 @@ export class PlayerController {
   // Anchors de armas (TransformNode anclado al hueso); clave = kw del filename
   private _weaponAnchors = new Map<string, { anchor: TransformNode; mesh: AbstractMesh }>();
 
+  // Meshes de arma (espada + escudo) del modelo armado fusionado.
+  // Se detectan por nombre al cargar y se ocultan/muestran segun el stance.
+  private _weaponMeshes: AbstractMesh[] = [];
+
   constructor(scene: Scene, input: InputManager, assetManager: AssetManager) {
     this._scene = scene;
     this._input = input;
@@ -341,6 +345,7 @@ export class PlayerController {
     this._weaponInstances = [];
     for (const { anchor } of this._weaponAnchors.values()) { anchor.dispose(); }
     this._weaponAnchors.clear();
+    this._weaponMeshes = [];   // limpiar cache de meshes de arma
 
     // Liberar el modelo anterior (cambio de clase en caliente)
     if (this._currentInstance !== null) {
@@ -417,6 +422,10 @@ export class PlayerController {
 
     this._currentInstance = instance;
 
+    // Detectar y cachear los meshes de arma del modelo fusionado (sword/shield).
+    // Se usan para togglear la visibilidad segun el stance activo.
+    this._findAndCacheWeaponMeshes();
+
     // Ocultar armas/accesorios que no corresponden a esta clase.
     // Modelos Mixamo: malla integrada sin nodos de arma separados.
     // Los nombres Mixamo no pasan isBodyPart() y visibleAttachments:[]
@@ -465,6 +474,12 @@ export class PlayerController {
       /* additive */ false
     );
 
+
+    // Estado inicial de visibilidad: armas visibles solo si stance armado
+    this._setWeaponVisibility(this._weaponStance === 'sword_and_shield');
+
+    // Estado inicial de visibilidad: armas visibles solo si stance armado
+    this._setWeaponVisibility(this._weaponStance === 'sword_and_shield');
 
     // Anclar armas al esqueleto (solo clases Mixamo)
     // LOAD_WEAPONS = false: desactivado hasta fusión en Blender.
@@ -892,6 +907,46 @@ export class PlayerController {
     });
   }
 
+  // Visibilidad de armas fusionadas
+  // ——————————————————————
+
+  /**
+   * Identifica los meshes de espada y escudo en la instancia activa.
+   * Estrategia: nombre limpio (sin sufijo _instN) contiene 'sword' o 'shield'.
+   * Tambien incluye hijos de cada mesh encontrado.
+   * Llamar despues de asignar this._currentInstance.
+   */
+  private _findAndCacheWeaponMeshes(): void {
+    if (this._currentInstance === null) { this._weaponMeshes = []; return; }
+    const all = this._getAllMeshesFromInstance(this._currentInstance.rootNode);
+    const weapons: AbstractMesh[] = [];
+    for (const m of all) {
+      const clean = m.name.replace(/_inst\d+$/, '').toLowerCase();
+      if (clean.includes('sword') || clean.includes('shield')) {
+        weapons.push(m);
+        for (const child of m.getChildMeshes(false)) { weapons.push(child); }
+      }
+    }
+    this._weaponMeshes = weapons;
+    logger.info('PlayerController: weapon meshes detectados', {
+      count: weapons.length,
+      names: weapons.map((m) => m.name),
+    });
+  }
+
+  /**
+   * Activa o desactiva la visibilidad de los meshes de arma cacheados.
+   * Sin efecto si no hay weapon meshes (clase sin armas fusionadas).
+   */
+  private _setWeaponVisibility(visible: boolean): void {
+    for (const mesh of this._weaponMeshes) {
+      mesh.isVisible = visible;
+    }
+    if (this._weaponMeshes.length > 0) {
+      logger.debug('PlayerController: weapon visibility', { visible, count: this._weaponMeshes.length });
+    }
+  }
+
   // Resolucion de animaciones por stance
   // ——————————————————————————————————————————
 
@@ -979,6 +1034,9 @@ export class PlayerController {
    */
   private _refreshAnimsForStance(stance: WeaponStance): void {
     this._weaponStance = stance;
+
+    // Visibilidad de armas: siempre se aplica, independiente del estado de anim
+    this._setWeaponVisibility(stance === 'sword_and_shield');
 
     if (this._currentInstance === null) {
       // Modelo aun no cargado -- solo guardamos el stance para que loadModel() lo use

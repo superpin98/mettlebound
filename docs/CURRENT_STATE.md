@@ -117,6 +117,38 @@ Archivos modificados respecto a HEAD `fab6274`:
 
 ### PENDIENTE commit
 
+---
+
+## Sistema de visibilidad de armas (julio 2026) ✅
+
+Espada y escudo se ocultan en estado `unarmed` y se muestran al equipar `sword_and_shield`.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---|---|
+| `src/game/player/PlayerController.ts` | `_weaponMeshes`, `_findAndCacheWeaponMeshes()`, `_setWeaponVisibility()` |
+| `src/game/combat/CombatEntity.ts` | Idem, para enemigos con armas |
+
+### Logica
+
+- Al cargar modelo: `_findAndCacheWeaponMeshes()` escanea todos los meshes del `rootNode`, filtra los que contengan `sword` o `shield` en el nombre (limpiando el sufijo `_inst{N}` de Babylon).
+- Los meshes cacheados en `_weaponMeshes[]`.
+- `_setWeaponVisibility(visible)` itera el array y setea `isVisible`.
+- Hook en `_refreshAnimsForStance`: primera linea (antes del null check), siempre se ejecuta.
+- Hook en `loadModel`: tras cachear meshes, aplica visibilidad segun stance actual.
+
+### Nombres de meshes esperados en Babylon
+
+Los objetos Blender (`sword`, `shield`) se exportan como nodos GLTF y Babylon los instancia como:
+- `sword_inst1` (o `sword_inst0` segun contador de instancias)
+- `shield_inst1`
+
+El logger confirma los nombres reales al arrancar: `PlayerController: weapon meshes detectados { count, names }`.
+
+### TypeScript
+
+`tsc --noEmit` limpio tras todos los cambios de esta sesion.
 
 
 ## knight_armed.glb — fusión espada + escudo (julio 2026)
