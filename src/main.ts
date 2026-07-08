@@ -23,6 +23,8 @@ import { applyScale, mountScaleSelector } from '@/ui/UIScale';
 import { GameOverModal }        from '@/ui/GameOverModal';
 import { RustyController }      from '@/game/entities/RustyController';
 import { CombatTransition }     from '@/ui/CombatTransition';
+import { CombatEntity }         from '@/game/combat/CombatEntity';
+import { getClassById }          from '@/config/classes.config';
 import { RunState }             from '@/game/RunState';
 
 import { eventBus }            from '@/core/EventBus';
@@ -122,10 +124,53 @@ playerController.setCamera(cameraController.camera);
     scene,
     canvas,
     cameraController.camera,
+    // onBlackScreen: ocultar toda la escena de exploracion
     () => {
       for (const m of explorationMeshes) { m.isVisible = false; }
       playerController.mesh.setEnabled(false);
       rusty.setEnabled(false);
+    },
+    // onPlaceCombatants: colocar las fichas de combate con la pantalla a negro.
+    // Los GLBs ya estan en cache (cargados por PlayerController y RustyController),
+    // asi que las dos instanciaciones son practicamente sincronas.
+    async (grid) => {
+      // -- Ficha del jugador (modelo de la clase activa) ----------------------
+      const classDef  = getClassById(chosenClass);
+      const modelFile = classDef.modelAssetId;
+      if (modelFile !== undefined) {
+        const playerEntity = await CombatEntity.create(scene, assetManager, {
+          baseUrl:     '/assets/models/characters/',
+          filename:    modelFile,
+          isMixamo:    classDef.isMixamo    ?? false,
+          modelScale:  classDef.modelScale  ?? 1,
+          maxHp:       100,
+          displayName: 'Jugador',
+          footprintW:  1,
+          footprintH:  1,
+        });
+        // Celda (9, 8): X = -0.5, Z = -1.5 (ligeramente al sur del centro).
+        // facingRad = 0 -> mira hacia +Z (hacia Rusty en Z = +1.5).
+        playerEntity.placeAt(9, 5, grid, 0);
+        grid.occupy('player', 9, 5, 1, 1);
+      } else {
+        logger.warn('main: clase sin modelAssetId, saltando ficha de jugador', { chosenClass });
+      }
+
+      // -- Ficha de Rusty (Skeleton_Minion.glb) --------------------------------
+      const rustyEntity = await CombatEntity.create(scene, assetManager, {
+        baseUrl:     '/assets/models/characters/skeletons/',
+        filename:    'Skeleton_Minion.glb',
+        isMixamo:    false,
+        modelScale:  1,
+        maxHp:       45,
+        displayName: 'Rusty',
+        footprintW:  1,
+        footprintH:  1,
+      });
+      // Celda (9, 11): X = -0.5, Z = +1.5 (ligeramente al norte del centro).
+      // facingRad = Math.PI -> mira hacia -Z (hacia el jugador en Z = -1.5).
+      rustyEntity.placeAt(9, 15, grid, Math.PI);
+      grid.occupy('rusty', 9, 15, 1, 1);
     },
   );
 

@@ -11,9 +11,9 @@ import {
 import type { AbstractMesh } from '@babylonjs/core';
 
 // ============================================================
-// CombatGrid -- tablero táctico 20×20 para la escena de combate.
+// CombatGrid -- tablero tactico 20x20 para la escena de combate.
 //
-// 20 celdas × 20 celdas de 1 m cada una = grid de 20×20 m.
+// 20 celdas x 20 celdas de 1 m cada una = grid de 20x20 m.
 // Origen del mundo (0,0,0) = centro exacto del tablero.
 //
 // Uso:
@@ -22,18 +22,24 @@ import type { AbstractMesh } from '@babylonjs/core';
 //   grid.hide();     // oculta sin destruir
 //   grid.dispose();  // destruye todo
 //
-// Conversión de coordenadas:
-//   grid.cellToWorld(cx, cz) → Vector3 (centro de la celda)
-//   grid.worldToCell(pos)    → { x, z } en rango 0-19
+// Conversion de coordenadas:
+//   grid.cellToWorld(cx, cz) -> Vector3 (centro de la celda)
+//   grid.worldToCell(pos)    -> { x, z } en rango 0-19
+//
+// Sistema de ocupacion (footprints multi-casilla):
+//   grid.occupy(entityId, anchorX, anchorZ, footprintW, footprintH)
+//   grid.release(entityId)
+//   grid.isAreaFree(anchorX, anchorZ, footprintW, footprintH)
+//   grid.occupantAt(cx, cz) -> entityId | null
 // ============================================================
 
-// ── Constantes ───────────────────────────────────────────────────────────────
+// -- Constantes ---------------------------------------------------------------
 
-const CELLS      = 20;              // 20×20 celdas tácticas
-const CELL_SIZE  = 1;               // 1 metro por celda → grid 20×20 m
+const CELLS      = 20;              // 20x20 celdas tacticas
+const CELL_SIZE  = 1;               // 1 metro por celda -> grid 20x20 m
 const GRID_TOTAL = CELLS * CELL_SIZE;
 const FLOOR_Y    = -0.1;           // suelo ligeramente bajo el plano Y=0
-const LINE_Y     = 0.01;           // líneas flotando 1 cm sobre el suelo
+const LINE_Y     = 0.01;           // lineas flotando 1 cm sobre el suelo
 
 const LINE_COLOR = new Color3(0.35, 0.40, 0.55);
 const LINE_ALPHA = 0.7;
@@ -48,15 +54,21 @@ export class CombatGrid {
   private _physics: PhysicsAggregate | null = null;
   private _built    = false;
 
+  // ── Sistema de ocupacion ────────────────────────────────────────────────────
+  // Mapa "cx,cz" -> entityId: que entidad ocupa cada celda.
+  // Mapa entityId -> ["cx,cz", ...]: celdas que ocupa cada entidad (para release).
+  private readonly _occupancy:   Map<string, string>   = new Map();
+  private readonly _entityCells: Map<string, string[]> = new Map();
+
   constructor(scene: Scene) {
     this._scene = scene;
   }
 
-  // ── API pública ─────────────────────────────────────────────────────────────
+  // ── API publica: grid ────────────────────────────────────────────────────────
 
   /**
-   * Construye el suelo + líneas en la escena (lazy: solo se ejecuta la primera vez).
-   * show() llama a build() automáticamente.
+   * Construye el suelo + lineas en la escena (lazy: solo se ejecuta la primera vez).
+   * show() llama a build() automaticamente.
    */
   build(): void {
     if (this._built) { return; }
@@ -79,7 +91,7 @@ export class CombatGrid {
   }
 
   /**
-   * Convierte coordenada de celda (0–19, 0–19) a posición mundial.
+   * Convierte coordenada de celda (0-19, 0-19) a posicion mundial.
    * Devuelve el CENTRO de la celda a Y=0.
    *
    * @param cx  Columna (0 = izquierda del grid, 19 = derecha).
@@ -95,8 +107,8 @@ export class CombatGrid {
   }
 
   /**
-   * Convierte posición mundial a coordenada de celda.
-   * El resultado está clampeado a [0, 19].
+   * Convierte posicion mundial a coordenada de celda.
+   * El resultado esta clampeado a [0, 19].
    */
   worldToCell(pos: Vector3): { x: number; z: number } {
     const half = GRID_TOTAL / 2;
@@ -105,7 +117,7 @@ export class CombatGrid {
     return { x, z };
   }
 
-  /** Destruye todos los meshes del grid y libera la física. */
+  /** Destruye todos los meshes del grid, libera la fisica y limpia la ocupacion. */
   dispose(): void {
     this._physics?.dispose();
     this._physics = null;
@@ -113,10 +125,102 @@ export class CombatGrid {
     this._floor = null;
     for (const l of this._lines) { l.dispose(); }
     this._lines = [];
+    this._occupancy.clear();
+    this._entityCells.clear();
     this._built = false;
   }
 
-  // ── Construcción interna ─────────────────────────────────────────────────────
+  // ── API publica: sistema de ocupacion ────────────────────────────────────────
+
+  /**
+   * Marca las celdas del footprint de una entidad como ocupadas.
+   *
+   * Soporta footprints multi-casilla:
+   *   - 1x1: jugador, Rusty, enemigos genericos.
+   *   - 2x2, 3x3, etc.: jefes (Sprint 5+).
+   *
+   * Precondicion: llamar isAreaFree() antes para validar.
+   * Si alguna celda ya esta ocupada, se sobreescribe sin error.
+   *
+   * @param entityId   Identificador unico de la entidad (p.ej. 'player', 'rusty').
+   * @param anchorX    Columna de la celda ancla (esquina XZ minima del footprint).
+   * @param anchorZ    Fila de la celda ancla.
+   * @param footprintW Anchura del footprint en celdas (eje X).
+   * @param footprintH Profundidad del footprint en celdas (eje Z).
+   */
+  occupy(
+    entityId:   string,
+    anchorX:    number,
+    anchorZ:    number,
+    footprintW: number,
+    footprintH: number,
+  ): void {
+    const keys: string[] = [];
+    for (let dx = 0; dx < footprintW; dx++) {
+      for (let dz = 0; dz < footprintH; dz++) {
+        const key = `${anchorX + dx},${anchorZ + dz}`;
+        this._occupancy.set(key, entityId);
+        keys.push(key);
+      }
+    }
+    this._entityCells.set(entityId, keys);
+  }
+
+  /**
+   * Libera todas las celdas ocupadas por la entidad indicada.
+   * No hace nada si la entidad no estaba registrada.
+   *
+   * @param entityId Identificador de la entidad a liberar.
+   */
+  release(entityId: string): void {
+    const keys = this._entityCells.get(entityId);
+    if (keys === undefined) { return; }
+    for (const key of keys) {
+      this._occupancy.delete(key);
+    }
+    this._entityCells.delete(entityId);
+  }
+
+  /**
+   * Comprueba si todas las celdas del footprint indicado estan libres.
+   *
+   * @param anchorX    Columna de la celda ancla.
+   * @param anchorZ    Fila de la celda ancla.
+   * @param footprintW Anchura del footprint en celdas (eje X).
+   * @param footprintH Profundidad del footprint en celdas (eje Z).
+   * @param ignoreId   Si se indica, las celdas ocupadas por esta entidad
+   *                   se consideran libres (util al calcular movimiento propio).
+   */
+  isAreaFree(
+    anchorX:    number,
+    anchorZ:    number,
+    footprintW: number,
+    footprintH: number,
+    ignoreId:   string | undefined = undefined,
+  ): boolean {
+    for (let dx = 0; dx < footprintW; dx++) {
+      for (let dz = 0; dz < footprintH; dz++) {
+        const key     = `${anchorX + dx},${anchorZ + dz}`;
+        const occupant = this._occupancy.get(key);
+        if (occupant !== undefined && occupant !== ignoreId) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Devuelve el entityId que ocupa la celda indicada, o null si esta libre.
+   *
+   * @param cx Columna de la celda (0-19).
+   * @param cz Fila de la celda (0-19).
+   */
+  occupantAt(cx: number, cz: number): string | null {
+    return this._occupancy.get(`${cx},${cz}`) ?? null;
+  }
+
+  // ── Construccion interna ─────────────────────────────────────────────────────
 
   private _buildFloor(): void {
     const floor = MeshBuilder.CreateBox(
@@ -150,7 +254,7 @@ export class CombatGrid {
     for (let i = 0; i <= CELLS; i++) {
       const pos = -half + i * CELL_SIZE;
 
-      // Líneas paralelas al eje Z (columnas)
+      // Lineas paralelas al eje Z (columnas)
       const lx = MeshBuilder.CreateLines(
         `combatLineX_${i}`,
         {
@@ -161,7 +265,7 @@ export class CombatGrid {
       );
       this._lines.push(lx);
 
-      // Líneas paralelas al eje X (filas)
+      // Lineas paralelas al eje X (filas)
       const lz = MeshBuilder.CreateLines(
         `combatLineZ_${i}`,
         {
