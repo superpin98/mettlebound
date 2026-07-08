@@ -11,6 +11,7 @@ import {
   PhysicsAggregate,
   PhysicsShapeType,
 } from '@babylonjs/core';
+import type { AbstractMesh } from '@babylonjs/core';
 
 // ============================================================
 // PreviewScene -- escena base minimalista para Sprint 4-EXT.
@@ -36,12 +37,13 @@ export class PreviewScene {
 
   /**
    * Construye el suelo fisico + luces neutras de validacion.
-   * Devuelve la escena configurada (misma referencia, por convenio).
+   * Devuelve todos los meshes visuales creados (suelo + líneas de grid),
+   * para que quien llame pueda ocultarlos al entrar en combate.
    *
    * IMPORTANTE: llamar ANTES de playerController.initPhysics()
    * para que la capsula del player no caiga al vacio.
    */
-  static build(scene: Scene): void {
+  static build(scene: Scene): AbstractMesh[] {
 
     // ---- Fondo neutro (gris oscuro, no negro Grimspire) -----------------
     scene.clearColor = new Color4(0.125, 0.125, 0.157, 1); // #202028
@@ -73,7 +75,7 @@ export class PreviewScene {
       scene,
     );
 
-    PreviewScene._buildGridLines(scene);
+    const lines = PreviewScene._buildGridLines(scene);
 
     // ---- Luz hemisferica de ambiente (alta, neutra, pareja) -------------
     const ambient = new HemisphericLight('valAmbient', new Vector3(0, 1, 0), scene);
@@ -96,22 +98,27 @@ export class PreviewScene {
     const dirLeft = new DirectionalLight('valDirLeft', new Vector3(1, -0.5, 0.3).normalize(), scene);
     dirLeft.intensity = 0.35;
     dirLeft.diffuse   = new Color3(0.9, 0.92, 0.95);
+
+    // Devolver todos los meshes visuales para poder ocultarlos al entrar en combate.
+    // Las luces NO se devuelven: iluminan también la escena de combate, lo que es correcto.
+    return [ground, ...lines];
   }
 
   // ——————————————————————————————————————————
   // Privado: grid visual de lineas
   // ——————————————————————————————————————————
 
-  private static _buildGridLines(scene: Scene): void {
+  private static _buildGridLines(scene: Scene): AbstractMesh[] {
     const half  = GRID_SIZE / 2;
     const step  = GRID_SIZE / GRID_DIVS;
     const Y     = 0.01;
     const color = new Color3(0.3, 0.3, 0.35);
+    const meshes: AbstractMesh[] = [];
 
     for (let i = 0; i <= GRID_DIVS; i++) {
       const pos = -half + i * step;
 
-      MeshBuilder.CreateLines(
+      meshes.push(MeshBuilder.CreateLines(
         `gridLineX_${i}`,
         {
           points: [
@@ -124,9 +131,9 @@ export class PreviewScene {
           ],
         },
         scene,
-      );
+      ));
 
-      MeshBuilder.CreateLines(
+      meshes.push(MeshBuilder.CreateLines(
         `gridLineZ_${i}`,
         {
           points: [
@@ -139,7 +146,9 @@ export class PreviewScene {
           ],
         },
         scene,
-      );
+      ));
     }
+
+    return meshes;
   }
 }

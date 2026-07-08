@@ -92,7 +92,8 @@ playerController.setCamera(cameraController.camera);
   let chosenClass = await ClassSelectionModal.show();
 
   // -- PreviewScene: suelo fisico + luces (ANTES de initPhysics) -------------
-  PreviewScene.build(scene);
+  // Los meshes devueltos se ocultan al entrar en la escena de combate.
+  const explorationMeshes = PreviewScene.build(scene);
 
   // -- Rusty: NPC consciente neutral (carga el Skeleton_Minion.glb) ----------
   const rusty = await RustyController.create(scene, assetManager);
@@ -115,7 +116,18 @@ playerController.setCamera(cameraController.camera);
   logger.info('main: PreviewScene lista.');
 
   // -- CombatTransition: cinemática exploración→combate ------------------
-  const combatTransition = new CombatTransition(scene, cameraController.camera);
+  // onBlackScreen: se llama cuando la pantalla está completamente a negro,
+  // antes de revelar la escena de combate. Oculta toda la exploración.
+  const combatTransition = new CombatTransition(
+    scene,
+    canvas,
+    cameraController.camera,
+    () => {
+      for (const m of explorationMeshes) { m.isVisible = false; }
+      playerController.mesh.setEnabled(false);
+      rusty.setEnabled(false);
+    },
+  );
 
   // Detección de impacto real: el AttackHitbox del jugador emite player:attack-hit
   // cuando su trigger sphere toca el PhysicsBody de un objetivo durante la ventana

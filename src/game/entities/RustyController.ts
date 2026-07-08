@@ -296,6 +296,14 @@ export class RustyController extends Combatant {
     return this._pivot.position;
   }
 
+  /**
+   * Activa o desactiva a Rusty y todos sus meshes hijo.
+   * Usado para ocultarlo al entrar en la escena de combate.
+   */
+  setEnabled(enabled: boolean): void {
+    this._pivot.setEnabled(enabled);
+  }
+
   dispose(): void {
     eventBus.off('combat:start', this._onCombatStart);
     eventBus.off('combat:end',   this._onCombatEnd);
