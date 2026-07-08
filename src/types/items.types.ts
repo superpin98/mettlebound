@@ -10,6 +10,17 @@ import type { ClassId, Rarity, UpgradeEffect } from '@/types/game.types';
 /** Categoria principal de un item. */
 export type ItemType = 'weapon' | 'armor' | 'accessory' | 'pet' | 'consumable';
 
+/**
+ * Subtipo de arma. Controla que set de animaciones usa el portador.
+ * Extensible: anadir nuevos valores cuando existan modelos y anims para ellos.
+ */
+export type WeaponSubType =
+  | 'sword_and_shield'  // espada + escudo -- activa anims _SNS
+  | 'sword_2h'          // espadon / hacha a dos manos (reservado)
+  | 'bow'               // arco (reservado)
+  | 'dagger'            // daga / armas duales (reservado)
+  | 'staff';            // baculo / varita (reservado)
+
 /** Slot de equipo donde puede colocarse un item. 10 slots totales. */
 export type EquipmentSlot =
   | 'head'    // casco
@@ -119,6 +130,8 @@ export interface Item {
   readonly rarity: Rarity;
   readonly itemType: ItemType;
   readonly slot: EquipmentSlot;
+  /** Subtipo de arma. Solo presente en items de tipo 'weapon'. */
+  readonly weaponSubType?: WeaponSubType;
   readonly level: number;            // nivel minimo requerido para equiparlo
   readonly iLevel: number;           // item level (escala los rangos de stats)
   readonly setId?: string;           // si pertenece a un conjunto
@@ -136,6 +149,8 @@ export interface ItemTemplate {
   readonly name: string;             // nombre base (ej: "Capucha de Cuero")
   readonly itemType: ItemType;
   readonly slot: EquipmentSlot;
+  /** Subtipo de arma. Solo para templates con itemType 'weapon'. */
+  readonly weaponSubType?: WeaponSubType;
   readonly setId?: string;
   /** Clases que pueden equipar este item. Undefined = cualquier clase. */
   readonly allowedClasses?: readonly ClassId[];

@@ -1,7 +1,7 @@
 # Estado Actual — METTLEBOUND
 
-**Última actualización:** Sprint 4-EXT — knight_armed.glb generado (fusión espada+escudo al caballero) (julio 2026)
-**Tests:** 234 pasando (cifra real — CURRENT_STATE anterior tenía 508 desactualizado)
+**Última actualización:** Sprint 4-EXT — WeaponStance + animset SNS/base por equipamiento (julio 2026)
+**Tests:** 234 pasando en Windows (sandbox Linux no puede correr tests: rolldown native binding ausente — pre-existente)
 **TypeScript:** `tsc --noEmit` limpio, 0 errores
 **Rama git:** `sprint-4-combate`, HEAD `b392ff9` (pendiente commit de esta sesión)
 **Build:** `npm run build` limpio (solo warning chunk size Babylon — normal)
@@ -78,6 +78,46 @@ Archivos modificados respecto a HEAD `fab6274`:
 | `.gitignore` | Añadido `assets_wip/`, `*.blend`, `*.blend1` |
 
 ---
+
+## knight_armed_v2.glb — 9 animaciones + armas fusionadas (julio 2026) ✅ FINAL
+
+- **Archivo:** `public/assets/models/characters/knight_armed_v2.glb` (22.42 MB)
+- **Animaciones (9):** Idle (0–57f), Run (0–21f), Attack_A (0–28f), Hit (0–29f), Death_A (0–94f) + Idle_SNS (1–77f), Run_SNS (1–24f), Attack_SNS (1–37f), Hit_SNS (1–28f) — todas con `use_fake_user=True`
+- **Espada:** parented a `mixamorig:RightHand` (DIESTRO), location (-0.4231, 0.1664, 1.3142), rotation (0°,0°,0°), scale 0.42
+- **Escudo:** parented a `mixamorig:LeftForeArm` (DIESTRO), location (-0.0443, -0.4507, 1.0646), rotation (0°,0°,0°), scale 0.2944
+- **Posiciones ajustadas manualmente por David en Blender** — espada en mano derecha en alto (Idle_SNS), escudo cubriendo antebrazo izquierdo
+- **Slot fix Blender 5.x:** asignación de action requiere `animation_data.action_slot = action.slots[0]`; sin esto las animaciones no se aplican aunque `.action` esté seteado
+- **classes.config.ts:** `modelAssetId: 'knight_armed_v2.glb'` ✅ actualizado
+- **PENDIENTE commit:** `git add public/assets/models/characters/knight_armed_v2.glb src/config/classes.config.ts docs/CURRENT_STATE.md` + push
+
+## Sistema WeaponStance -- animset por equipamiento (julio 2026) ✅
+
+### Archivos nuevos/modificados
+
+| Archivo | Cambio |
+|---|---|
+|  | + union; + en  e  |
+|  |  lleva  |
+|  | Propaga  del template al item generado |
+|  | NUEVO -- , , ,  |
+|  |  con filtro SNS/base;  recalculable en caliente; suscripcion a eventos de equip |
+|  |  en ; filtro SNS/base en  y  |
+
+### Logica
+
+- : slot  vacio o subtype desconocido ->  (set base);  ->  (set SNS).
+- : , .
+- : para cada regla, separa candidatos en SNS/base y elige el set preferido con fallback al otro. Death siempre base (no existe Death_SNS).
+- Cambio en caliente:  ->  ->  -> re-resuelve y reanuda Idle del nuevo set.
+- El ataque en curso no se interrumpe al cambiar stance.
+
+### WeaponSubType extensible
+
+ -- los no-SNS hacen fallback a  hasta que existan sus animsets.
+
+### PENDIENTE commit
+
+
 
 ## knight_armed.glb — fusión espada + escudo (julio 2026)
 

@@ -19,10 +19,17 @@ import type { InputManager } from '@/core/InputManager';
 import type { AssetManager, AssetInstance } from '@/core/AssetManager';
 import type { ClassId } from '@/types/game.types';
 import type { Vec3 } from '@/types/spatial.types';
+import type { EquippedItems } from '@/types/items.types';
 import { getClassById, isBodyPart } from '@/config/classes.config';
 import { logger } from '@/core/Logger';
 import { eventBus } from '@/core/EventBus';
 import { AttackHitbox } from '@/game/combat/AttackHitbox';
+import {
+  deriveWeaponStance,
+  STANCE_ANIM_SET,
+  type WeaponStance,
+  type AnimSet,
+} from '@/game/player/WeaponStance';
 
 // ============================================================
 // Constantes de configuracion
@@ -127,6 +134,10 @@ export class PlayerController {
   private _attackAnim: AnimationGroup | null = null;
   private _deathAnim:  AnimationGroup | null = null;
 
+  // Stance de arma activo — determina que animset (base / SNS) se usa.
+  // Se actualiza en caliente al equipar/desequipar items.
+  private _weaponStance: WeaponStance = 'unarmed';
+
   // Evita re-lanzar el swap de animacion en cada frame
   private _isWalking  = false;
   private _isAttacking = false;
@@ -215,6 +226,18 @@ export class PlayerController {
     // Congelar/descongelar movimiento e input durante transición a combate
     eventBus.on('combat:start', () => { this._isInCombat = true; });
     eventBus.on('combat:end',   () => { this._isInCombat = false; });
+
+    // Actualizar animset cuando el jugador equipa o desequipa un arma.
+    // Si el modelo aun no esta cargado, solo se actualiza _weaponStance;
+    // loadModel() lo leerá al terminar de cargar.
+    const onEquipChange = ({ equipped }: { equipped: EquippedItems }): void => {
+      const newStance = deriveWeaponStance(equipped);
+      if (newStance !== this._weaponStance) {
+        this._refreshAnimsForStance(newStance);
+      }
+    };
+    eventBus.on('inventory:item-equipped',   onEquipChange);
+    eventBus.on('inventory:item-unequipped', onEquipChange);
 
     logger.info('PlayerController: pivot y capsula creados', { position: this._pivot.position });
   }
@@ -418,46 +441,12 @@ export class PlayerController {
       names: instance.animationGroups.map((g) => g.name),
     });
 
-    // Mapeo flexible de AnimationGroups a nombres canonicos.
-    // Usa inclusion en minusculas sobre el nombre limpio (sin sufijo _instN).
-    // Cubre nombres sucios de Mixamo (Knight_unarmed_idle, etc.) y nombres
-    // canonicos limpios (Idle, Run, Attack_A...) sin mapear a mano por personaje.
-    // 'mixamo.com' es la bind pose basura que Mixamo siempre incluye — se descarta.
-    const ANIM_RULES: Array<{ key: string; test: (n: string) => boolean }> = [
-      { key: 'Idle',     test: (n) => n.includes('idle') },
-      { key: 'Run',      test: (n) => n.includes('run') || n.includes('walk') },
-      { key: 'Attack_A', test: (n) => n.includes('attack') },
-      { key: 'Hit',      test: (n) => n.includes('hit') },
-      { key: 'Death_A',  test: (n) => n.includes('death') || n.includes('dying') },
-    ];
-
-    const resolveAnimMap = (): Map<string, AnimationGroup> => {
-      const map = new Map<string, AnimationGroup>();
-      for (const rule of ANIM_RULES) {
-        const matches = instance.animationGroups.filter((g) => {
-          const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
-          if (clean === 'mixamo.com') { return false; }
-          return rule.test(clean);
-        });
-        if (matches.length === 0) {
-          logger.warn('PlayerController: animacion no encontrada', { key: rule.key, filename });
-        } else {
-          // matches.length > 0 garantizado por el else; ! es seguro aqui
-          const first = matches[0]!;
-          map.set(rule.key, first);
-          if (matches.length > 1) {
-            logger.debug('PlayerController: multiples groups para misma categoria, usando primero', {
-              key:       rule.key,
-              used:      first.name,
-              discarded: matches.slice(1).map((g) => g.name),
-            });
-          }
-        }
-      }
-      return map;
-    };
-
-    const animMap = resolveAnimMap();
+    // Resolver animaciones segun el stance actual.
+    // Si el jugador ya tenia un arma equipada antes de que el modelo cargara
+    // (p.ej. item inicial asignado antes de loadModel), _weaponStance ya
+    // estara actualizado y se usara el animset correcto desde el principio.
+    const animSet = STANCE_ANIM_SET[this._weaponStance];
+    const animMap = this._resolveAnimMap(animSet, filename);
     this._idleAnim   = animMap.get('Idle')     ?? null;
     this._walkAnim   = animMap.get('Run')       ?? null;
     this._attackAnim = animMap.get('Attack_A')  ?? null;
@@ -868,6 +857,7 @@ export class PlayerController {
   }
 
   // ——————————————————————————————————————————
+  // ——————————————————————
   // Visibilidad de armas y accesorios
   // ——————————————————————
 
@@ -899,6 +889,135 @@ export class PlayerController {
     logger.debug('PlayerController: visibilidad de attachments aplicada', {
       classId,
       whitelist,
+    });
+  }
+
+  // Resolucion de animaciones por stance
+  // ——————————————————————————————————————————
+
+  /**
+   * Reglas de busqueda de animaciones por nombre (case-insensitive, sin sufijo _instN).
+   * Cada entrada mapea una clave canonica a un predicado de substring.
+   */
+  private static readonly _ANIM_RULES: ReadonlyArray<{
+    key: string;
+    test: (n: string) => boolean;
+  }> = [
+    { key: 'Idle',     test: (n) => n.includes('idle') },
+    { key: 'Run',      test: (n) => n.includes('run') || n.includes('walk') },
+    { key: 'Attack_A', test: (n) => n.includes('attack') },
+    { key: 'Hit',      test: (n) => n.includes('hit') },
+    { key: 'Death_A',  test: (n) => n.includes('death') || n.includes('dying') },
+  ];
+
+  /**
+   * Resuelve el mapa de AnimationGroups segun el animset deseado.
+   *
+   * Para cada regla:
+   *   1. Recoge todos los candidatos cuyo nombre limpio pasa el predicado.
+   *   2. Separa en snsMatches (nombre contiene '_sns') y baseMatches (el resto).
+   *   3. Segun animSet:
+   *        'sns'  → prefiere snsMatches;  si no hay, usa baseMatches  (fallback)
+   *        'base' → prefiere baseMatches; si no hay, usa snsMatches   (fallback)
+   *   4. Death_A siempre usa baseMatches (no hay variante _SNS de muerte).
+   *
+   * @param animSet  - 'base' o 'sns', derivado de STANCE_ANIM_SET[stance]
+   * @param filename - Solo para mensajes de log
+   */
+  private _resolveAnimMap(animSet: AnimSet, filename: string): Map<string, AnimationGroup> {
+    const groups = this._currentInstance?.animationGroups ?? [];
+    const map    = new Map<string, AnimationGroup>();
+
+    for (const rule of PlayerController._ANIM_RULES) {
+      // Todos los candidatos que pasan el predicado (excluye bind pose de Mixamo)
+      const candidates = groups.filter((g) => {
+        const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
+        return clean !== 'mixamo.com' && rule.test(clean);
+      });
+
+      if (candidates.length === 0) {
+        logger.warn('PlayerController: animacion no encontrada', { key: rule.key, filename });
+        continue;
+      }
+
+      // Partir en SNS y base
+      const snsMatches  = candidates.filter((g) =>  g.name.replace(/_inst\d+$/, '').toLowerCase().includes('_sns'));
+      const baseMatches = candidates.filter((g) => !g.name.replace(/_inst\d+$/, '').toLowerCase().includes('_sns'));
+
+      // Death siempre usa el set base (no existe Death_SNS)
+      let preferred: AnimationGroup[];
+      if (rule.key === 'Death_A') {
+        preferred = baseMatches.length > 0 ? baseMatches : candidates;
+      } else if (animSet === 'sns') {
+        preferred = snsMatches.length  > 0 ? snsMatches  : baseMatches;
+      } else {
+        preferred = baseMatches.length > 0 ? baseMatches : snsMatches;
+      }
+
+      if (preferred.length === 0) {
+        logger.warn('PlayerController: animacion no encontrada tras filtrado', { key: rule.key, animSet, filename });
+        continue;
+      }
+
+      const chosen = preferred[0]!;
+      map.set(rule.key, chosen);
+
+      logger.debug('PlayerController: anim resuelta', {
+        key: rule.key, animSet,
+        chosen: chosen.name,
+        discarded: preferred.slice(1).map((g) => g.name),
+      });
+    }
+
+    return map;
+  }
+
+  /**
+   * Actualiza el stance activo y re-resuelve todas las animaciones en caliente.
+   * Si el jugador esta atacando o muerto, las referencias se actualizan
+   * pero no se interrumpe la animacion en curso.
+   */
+  private _refreshAnimsForStance(stance: WeaponStance): void {
+    this._weaponStance = stance;
+
+    if (this._currentInstance === null) {
+      // Modelo aun no cargado -- solo guardamos el stance para que loadModel() lo use
+      logger.debug('PlayerController: stance cambiado antes de cargar modelo', { stance });
+      return;
+    }
+
+    const animSet = STANCE_ANIM_SET[stance];
+    const animMap = this._resolveAnimMap(animSet, this._currentInstance.rootNode.name);
+
+    // Detener anims actuales (a no ser que este muriendo)
+    if (!this._isDead) {
+      this._idleAnim?.stop();
+      this._walkAnim?.stop();
+    }
+
+    // Reasignar referencias
+    this._idleAnim   = animMap.get('Idle')     ?? null;
+    this._walkAnim   = animMap.get('Run')       ?? null;
+    this._attackAnim = animMap.get('Attack_A')  ?? null;
+    this._deathAnim  = animMap.get('Death_A')   ?? null;
+
+    // Si hay un ataque o muerte en curso, no interrumpir -- las nuevas referencias
+    // se usaran la proxima vez que corresponda
+    if (this._isAttacking || this._isDead) { return; }
+
+    // Reanudar la animacion correspondiente al estado de movimiento actual
+    if (this._isWalking) {
+      this._walkAnim?.start(true, 1.0, this._walkAnim.from, this._walkAnim.to, false);
+    } else {
+      this._idleAnim?.start(true, 1.0, this._idleAnim.from, this._idleAnim.to, false);
+    }
+
+    logger.info('PlayerController: stance actualizado en caliente', {
+      stance, animSet,
+      idle:   this._idleAnim?.name   ?? 'none',
+      walk:   this._walkAnim?.name   ?? 'none',
+      attack: this._attackAnim?.name ?? 'none',
+      death:  this._deathAnim?.name  ?? 'none',
     });
   }
 }

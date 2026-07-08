@@ -159,6 +159,7 @@ export function generateItem(baseId: string, rarity: Rarity, iLevel: number): It
     rarity,
     itemType: template.itemType,
     slot: template.slot,
+    ...(template.weaponSubType !== undefined ? { weaponSubType: template.weaponSubType } : {}),
     level,
     iLevel,
     ...(template.setId !== undefined ? { setId: template.setId } : {}),

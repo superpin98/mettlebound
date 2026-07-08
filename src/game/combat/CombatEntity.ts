@@ -14,6 +14,11 @@ import type { AssetManager, AssetInstance } from '@/core/AssetManager';
 import type { CombatGrid } from '@/game/world/CombatGrid';
 import { Combatant } from '@/game/combat/Combatant';
 import { logger } from '@/core/Logger';
+import {
+  STANCE_ANIM_SET,
+  type WeaponStance,
+  type AnimSet,
+} from '@/game/player/WeaponStance';
 
 // ============================================================
 // Tipos
@@ -53,6 +58,13 @@ export interface CombatEntityConfig {
    * Formula: MOV_BASE + round((MOV_MAX - MOV_BASE) * min(dex, DEX_MOV_CAP) / DEX_MOV_CAP)
    */
   dex: number;
+  /**
+   * Stance de arma. Controla que animset usa la entidad.
+   * 'unarmed' = set base (Idle, Run).
+   * 'sword_and_shield' = set SNS (Idle_SNS, Run_SNS).
+   * Por defecto 'unarmed' si no se indica.
+   */
+  weaponStance?: WeaponStance;
 }
 
 // ── Constantes de movimiento tactico ────────────────────────────────────────────
@@ -322,60 +334,81 @@ export class CombatEntity {
     }
 
     this._instance = instance;
-    this._resolveIdleAnim(instance.animationGroups, config.filename);
-    this._resolveWalkAnim(instance.animationGroups, config.filename);
+    const animSet: AnimSet = STANCE_ANIM_SET[config.weaponStance ?? 'unarmed'];
+    this._resolveIdleAnim(instance.animationGroups, config.filename, animSet);
+    this._resolveWalkAnim(instance.animationGroups, config.filename, animSet);
+  }
+
+  // -- Helpers de resolucion de animaciones ------------------------------------
+
+  /**
+   * Filtra candidatos segun animset.
+   *   'sns'  → prefiere grupos con '_sns' en el nombre; fallback a los demas.
+   *   'base' → prefiere grupos sin '_sns';              fallback a los demas.
+   */
+  private static _pickByAnimSet(candidates: AnimationGroup[], animSet: AnimSet): AnimationGroup | undefined {
+    if (candidates.length === 0) { return undefined; }
+    const sns  = candidates.filter((g) =>  g.name.replace(/_inst\d+$/, '').toLowerCase().includes('_sns'));
+    const base = candidates.filter((g) => !g.name.replace(/_inst\d+$/, '').toLowerCase().includes('_sns'));
+    const preferred = animSet === 'sns'
+      ? (sns.length  > 0 ? sns  : base)
+      : (base.length > 0 ? base : sns);
+    return preferred[0];
   }
 
   // -- Resolucion de animaciones ------------------------------------------------
 
   /**
    * Busca la animacion Idle (nombre contiene 'idle', case-insensitive).
-   * Descarta 'mixamo.com' (bind pose).
+   * Descarta 'mixamo.com'. Aplica filtro SNS/base segun animSet.
    */
-  private _resolveIdleAnim(groups: AnimationGroup[], filename: string): void {
-    const group = groups.find((g) => {
+  private _resolveIdleAnim(groups: AnimationGroup[], filename: string, animSet: AnimSet): void {
+    const candidates = groups.filter((g) => {
       const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
       return clean !== 'mixamo.com' && clean.includes('idle');
     });
 
+    const group = CombatEntity._pickByAnimSet(candidates, animSet);
+
     if (group === undefined) {
       logger.warn('CombatEntity: animacion Idle no encontrada', {
-        filename, available: groups.map((g) => g.name),
+        filename, animSet, available: groups.map((g) => g.name),
       });
       return;
     }
 
     this._idleAnim = group;
     group.start(true, 1.0, group.from, group.to, false);
-    logger.debug('CombatEntity: Idle iniciada', { animName: group.name });
+    logger.debug('CombatEntity: Idle iniciada', { animName: group.name, animSet });
   }
 
   /**
    * Busca la animacion de caminata.
-   * Estrategia de busqueda (en orden):
-   *   1. Nombre contiene 'walk' (case-insensitive) — KayKit Walking_A, Walking_D_Skeletons...
-   *   2. Nombre contiene 'run'  (case-insensitive) — fallback para Mixamo.
+   * Estrategia (en orden): 'walk' → 'run'. Aplica filtro SNS/base segun animSet.
    * Descarta 'mixamo.com'. NO la inicia: se activa bajo demanda via startWalkAnim().
    */
-  private _resolveWalkAnim(groups: AnimationGroup[], filename: string): void {
+  private _resolveWalkAnim(groups: AnimationGroup[], filename: string, animSet: AnimSet): void {
+    const walkCandidates = groups.filter((g) => {
+      const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
+      return clean !== 'mixamo.com' && clean.includes('walk');
+    });
+    const runCandidates = groups.filter((g) => {
+      const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
+      return clean !== 'mixamo.com' && clean.includes('run');
+    });
+
     const group =
-      groups.find((g) => {
-        const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
-        return clean !== 'mixamo.com' && clean.includes('walk');
-      }) ??
-      groups.find((g) => {
-        const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
-        return clean !== 'mixamo.com' && clean.includes('run');
-      });
+      CombatEntity._pickByAnimSet(walkCandidates, animSet) ??
+      CombatEntity._pickByAnimSet(runCandidates,  animSet);
 
     if (group === undefined) {
       logger.warn('CombatEntity: animacion Walk/Run no encontrada (la ficha caminara sin anim)', {
-        filename, available: groups.map((g) => g.name),
+        filename, animSet, available: groups.map((g) => g.name),
       });
       return;
     }
 
     this._walkAnim = group;
-    logger.debug('CombatEntity: Walk resuelta', { animName: group.name });
+    logger.debug('CombatEntity: Walk resuelta', { animName: group.name, animSet });
   }
 }

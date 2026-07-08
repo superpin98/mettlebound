@@ -17,6 +17,7 @@ export const ITEM_TEMPLATES: readonly ItemTemplate[] = [
     name: 'Espada Larga Mellada',
     itemType: 'weapon',
     slot: 'weapon',
+    weaponSubType: 'sword_and_shield',
     baseStats: {},
     iconAssetId: 'icon_sword_placeholder',
   },
