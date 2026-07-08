@@ -1,9 +1,9 @@
 # Estado Actual — METTLEBOUND
 
-**Última actualización:** Sprint 4-EXT — Pipeline Blender validado + Guerrero cargando en PreviewScene (julio 2026)
-**Tests:** 508 pasando (28 archivos de test)
+**Última actualización:** Sprint 4-EXT — knight_armed.glb generado (fusión espada+escudo al caballero) (julio 2026)
+**Tests:** 234 pasando (cifra real — CURRENT_STATE anterior tenía 508 desactualizado)
 **TypeScript:** `tsc --noEmit` limpio, 0 errores
-**Rama git:** `sprint-4-combate`, HEAD `fab6274`
+**Rama git:** `sprint-4-combate`, HEAD `b392ff9` (pendiente commit de esta sesión)
 **Build:** `npm run build` limpio (solo warning chunk size Babylon — normal)
 
 ---
@@ -79,13 +79,35 @@ Archivos modificados respecto a HEAD `fab6274`:
 
 ---
 
+## knight_armed.glb — fusión espada + escudo (julio 2026)
+
+- **Archivo:** `public/assets/models/characters/knight_armed.glb` (22.7 MB)
+- **Geometría:** knight_fixed + sword_1h + shield_round_1h
+- **Espada:** parented a `mixamorig:LeftHand` (caballero ZURDO), scale 0.5
+- **Escudo:** parented a `mixamorig:RightForeArm`, scale 0.3
+- **Animaciones:** 5 (Idle 72f, Run 27f, Attack_A 36f, Hit 37f, Death_A 118f)
+- **FCurves fix:** todas las FCurves de traslación escaladas ×0.01 (615 curvas, 35.670 keyframes) — corrige bug Mixamo cm→m
+- **Armature:** escala aplicada 0.01→1.0 antes del parenting
+- **PENDIENTE (código Babylon):** cambiar `modelAssetId` de knight a `knight_armed.glb` y ajustar orientación y offsets de espada/escudo en mano
+- **PENDIENTE:** Attack_A sigue rota (explosión estrella, pre-existing en knight_fixed.glb)
+
+### Proceso técnico confirmado para bone parenting con Mixamo en Blender 5.x
+
+1. `transform_apply(scale=True)` para fijar escala 0.01→1.0 del armature
+2. Escalar todas las FCurves de traslación ×0.01 (API Blender 5.x: `action.layers→strips→channelbags→fcurves`)
+3. Posicionar mesh del arma en world pos del hueso objetivo (frame 1, depsgraph evaluated)
+4. Parent via OPERADOR `bpy.ops.object.parent_set(type='BONE', keep_transform=True)` con `arm.data.bones.active` establecido — NO via API directa (da posiciones incorrectas)
+
+---
+
 ## Siguiente bloque de trabajo
 
 En orden de prioridad:
 
-1. **David valida visualmente el Guerrero** — textura, escala, idle. ¿Pivote en pies o caderas?
-2. **Conectar clases restantes** — las otras 4 clases siguen usando modelos KayKit (OK de momento).
-3. **Fase B Sprint 4-EXT** — motor de combate por turnos:
+1. **Conectar knight_armed.glb en código** — cambiar `modelAssetId: 'knight_fixed.glb'` → `'knight_armed.glb'` en `classes.config.ts`, verificar que armas son visibles y se mueven con el skeleton
+2. **Ajustar orientación/offset de armas** — probablemente la espada y el escudo necesiten rotación local para quedar bien en la mano. Esto se hace en Blender (rotar el mesh del arma antes de emparentar) o ajustando `localMatrix` en Babylon.
+3. **Conectar clases restantes** — las otras 4 clases siguen usando modelos KayKit (OK de momento).
+4. **Fase B Sprint 4-EXT** — motor de combate por turnos:
    - Decisión primera: modelo de movimiento (BG3 vs 1-acción)
    - Sistema de turnos DEX + encadenamiento
    - Snapshot/clonado de sala para transición exploración→combate

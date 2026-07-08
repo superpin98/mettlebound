@@ -15,7 +15,7 @@ export const CLASS_DEFINITIONS: ClassDefinition[] = [
     baseStats: { STR: 10, DEX: 4, INT: 2, LCK: 4 },
     freePoints: 0,
     startingItemId: 'sword_long_notched',
-    modelAssetId: 'knight_fixed.glb',
+    modelAssetId: 'knight_armed.glb',
     isMixamo: true,
     visibleAttachments: [],
   },
