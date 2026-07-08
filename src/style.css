@@ -1244,6 +1244,65 @@ body {
   border-color: var(--border-gold);
   color: var(--border-gold);
 }
+/* ─── Movement Bar (UI de producto — HUD de combate táctico) ────────────────── */
+/*
+ * Barra de puntos de movimiento restantes. Visible durante el turno de combate.
+ * Posición: centrada en la parte inferior de la pantalla.
+ * Reestilizable en el UI Pass sin tocar MovementBar.ts.
+ */
+
+#movement-bar {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(10, 7, 20, 0.84);
+  border: 1px solid rgba(212, 160, 74, 0.30);
+  border-radius: 7px;
+  padding: 7px 14px;
+  pointer-events: none;
+  font-family: var(--font-ui);
+  transform: translateX(-50%) scale(var(--ui-scale, 1));
+  transform-origin: bottom center;
+}
+
+#movement-bar.mov-bar-hidden { display: none; }
+
+.mov-bar-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  min-width: 28px;
+}
+
+.mov-bar-track {
+  width: 130px;
+  height: 9px;
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.mov-bar-fill {
+  height: 100%;
+  background: #4caf50;
+  border-radius: 5px;
+  /* Transición corta: suaviza el avance frame a frame sin lag perceptible */
+  transition: width 80ms linear;
+}
+
+.mov-bar-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 44px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ─── Target Dummy HP Overlay (z-index: 1500) ───────────────────────────────── */
 
 .dummy-hp-overlay {

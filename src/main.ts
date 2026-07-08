@@ -119,6 +119,10 @@ playerController.setCamera(cameraController.camera);
   logger.info('main: PreviewScene lista.');
 
   // -- CombatTransition: cinemática exploración→combate ------------------
+  // Referencia al sistema de movimiento. Hoisted para que el boton DEV pueda
+  // llamar a reloadMovement() (simular inicio de turno) desde fuera del callback.
+  let movSys: CombatMovementSystem | null = null;
+
   // onBlackScreen: se llama cuando la pantalla está completamente a negro,
   // antes de revelar la escena de combate. Oculta toda la exploración.
   const combatTransition = new CombatTransition(
@@ -177,10 +181,10 @@ playerController.setCamera(cameraController.camera);
       rustyEntity.placeAt(9, 15, grid, Math.PI);
       grid.occupy('rusty', 9, 15, 1, 1);
 
-      // Sistema de movimiento por casillas (Pieza 3a).
+      // Sistema de movimiento por casillas.
       // Solo se activa si la clase tiene modelo (playerEntity != null).
       if (playerEntity !== null) {
-        const movSys = new CombatMovementSystem(
+        movSys = new CombatMovementSystem(
           scene,
           grid,
           playerEntity,
@@ -340,6 +344,22 @@ playerController.setCamera(cameraController.camera);
     });
     devRow.appendChild(classBtn);
 
+    // -- Recargar movimiento (simular inicio de turno) -------------------------
+    // TODO: se sustituye por el inicio de turno real cuando exista sistema de turnos.
+    const reloadMovBtn = document.createElement('button');
+    reloadMovBtn.classList.add('dev-btn');
+    reloadMovBtn.textContent = 'Recargar MOV';
+    reloadMovBtn.title = 'Simula inicio de turno: recarga el presupuesto de movimiento [R]';
+    reloadMovBtn.addEventListener('click', () => { movSys?.reloadMovement(); });
+    devRow.appendChild(reloadMovBtn);
+
+    // Tecla R (fuera de inputs) como atajo de teclado del mismo boton
+    document.addEventListener('keydown', (e: KeyboardEvent) => {
+      if ((e.key === 'r' || e.key === 'R') && !(document.activeElement instanceof HTMLInputElement)) {
+        movSys?.reloadMovement();
+      }
+    });
+
     devPanel.appendChild(devRow);
 
     // -- Editor de stats (DEV) -------------------------------------------------
@@ -423,7 +443,7 @@ playerController.setCamera(cameraController.camera);
       }
     });
 
-    // -- window.__mb: helpers de debug en DevTools ---------------------------- helpers de debug en DevTools ----------------------------
+    // -- window.__mb: helpers de debug en DevTools ----------------------------
     (window as unknown as Record<string, unknown>)['__mb'] = {
       scene,
       playerController,

@@ -12,9 +12,10 @@
  *
  * Ciclo de vida:
  *   const hl = new CombatReachableHighlight(scene, grid, 'player');
- *   hl.show(playerEntity);   // recalcula y muestra el rango
- *   hl.hide();               // oculta todo
- *   hl.dispose();            // libera los meshes al salir del combate
+ *   hl.show(playerEntity);           // usa entity.movementPoints como presupuesto
+ *   hl.show(playerEntity, 3.5);      // presupuesto explicito (PM restantes del turno)
+ *   hl.hide();                       // oculta todo
+ *   hl.dispose();                    // libera los meshes al salir del combate
  */
 
 import {
@@ -67,17 +68,21 @@ export class CombatReachableHighlight {
   // -- API publica --------------------------------------------------------------
 
   /**
-   * Calcula el rango de movimiento de la entidad y resalta las celdas alcanzables.
+   * Calcula el rango de movimiento y resalta las celdas alcanzables.
    * Oculta todos los planos primero, luego muestra solo los alcanzables.
    *
-   * @param entity Ficha del jugador (para leer cellX/cellZ y movementPoints).
+   * @param entity   Ficha del jugador (para leer cellX/cellZ).
+   * @param maxCost  Presupuesto maximo en PM. Si se omite, usa entity.movementPoints
+   *                 (MP totales). Pasar los PM RESTANTES del turno tras caminar.
    */
-  show(entity: CombatEntity): void {
+  show(entity: CombatEntity, maxCost?: number): void {
     this.hide();  // limpiar estado anterior
+
+    const budget = maxCost !== undefined ? maxCost : entity.movementPoints;
 
     const reachable = CombatPathfinder.getReachableCells(
       { x: entity.cellX, z: entity.cellZ },
-      entity.movementPoints,
+      budget,
       this._grid,
       this._entityId,
     );
@@ -96,7 +101,7 @@ export class CombatReachableHighlight {
 
     logger.debug('CombatReachableHighlight: rango mostrado', {
       origin:    `(${entity.cellX},${entity.cellZ})`,
-      movPoints: entity.movementPoints,
+      budget,
       cellCount: count,
     });
   }

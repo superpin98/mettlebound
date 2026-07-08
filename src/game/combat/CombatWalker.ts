@@ -8,8 +8,18 @@
  * Velocidad: WALK_SPEED metros/segundo (constante ajustable abajo).
  * Actualizacion: scene.onBeforeRenderObservable (independiente de fps).
  *
- * Sin redireccion en tiempo real — eso es Pieza 3c.
- * Cancel() detiene el movimiento sin llamar a onComplete().
+ * Costes de segmento (para elapsedCost):
+ *   ortogonal = 1.0  (mismo que el pathfinder)
+ *   diagonal  = 1.5  (mismo que el pathfinder)
+ * Longitudes fisicas de segmento (para velocidad visual constante):
+ *   ortogonal = 1.0 m
+ *   diagonal  = sqrt(2) m
+ *
+ * API principal:
+ *   startWalk(path, entity, grid, onComplete)  -- inicia el recorrido
+ *   redirectTo(newPath)                        -- redirige sin cortar la caminata
+ *   cancel()                                   -- detiene sin llamar onComplete
+ *   elapsedCost (getter)                       -- coste gastado hasta este instante
  */
 
 import type { Scene, Observer } from '@babylonjs/core';
@@ -35,7 +45,9 @@ export class CombatWalker {
   private _path:       GridCell[]          = [];
   private _segIdx      = 0;        // indice del segmento actual en _path
   private _t           = 0;        // progreso en el segmento actual [0, 1)
-  private _segLenM     = 1.0;      // longitud del segmento en metros
+  private _segLenM     = 1.0;      // longitud FISICA del segmento en metros (para vel.)
+  private _segCosts:   number[]    = [];  // coste de juego por segmento (1.0 orto, 1.5 diag)
+  private _costSpent   = 0;        // suma de costes de segmentos ya completados
   private _onComplete: (() => void) | null = null;
   private _observer:   Observer<Scene> | null = null;
   private _isWalking   = false;
@@ -48,6 +60,17 @@ export class CombatWalker {
 
   /** True si hay una caminata en curso. */
   get isWalking(): boolean { return this._isWalking; }
+
+  /**
+   * Coste de juego acumulado desde el inicio de la caminata actual hasta este instante.
+   * ortogonal=1.0, diagonal=1.5 por segmento. Fraccion proporcional al progreso _t.
+   * Devuelve 0 si no hay caminata activa.
+   */
+  get elapsedCost(): number {
+    if (!this._isWalking) { return 0; }
+    const segCost = this._segCosts[this._segIdx] ?? 0;
+    return this._costSpent + segCost * this._t;
+  }
 
   /**
    * Inicia el recorrido por el path indicado.
@@ -81,12 +104,14 @@ export class CombatWalker {
     this._onComplete = onComplete;
     this._segIdx     = 0;
     this._t          = 0;
+    this._segCosts   = this._buildSegCosts(path);
+    this._costSpent  = 0;
     this._isWalking  = true;
 
     // Arrancar animacion y orientar hacia el primer paso
     entity.startWalkAnim();
     this._updateFacing(0);
-    this._segLenM = this._segmentLength(0);
+    this._segLenM = this._segmentLengthM(0);
 
     // Registrar update loop
     this._observer = this._scene.onBeforeRenderObservable.add(() => {
@@ -94,8 +119,51 @@ export class CombatWalker {
     });
 
     logger.debug('CombatWalker: caminata iniciada', {
-      steps:     path.length,
-      walkSpeed: WALK_SPEED,
+      steps: path.length, walkSpeed: WALK_SPEED,
+    });
+  }
+
+  /**
+   * Redirige la caminata activa hacia un nuevo path.
+   * El path debe comenzar en la celda logica actual de la entidad.
+   *
+   * Comportamiento:
+   *   - Snappea la entidad a la celda logica actual (path[0]).
+   *   - Resetea el progreso interno (segIdx=0, t=0, costSpent=0).
+   *   - El observer sigue activo: la animacion no se interrumpe.
+   *   - onComplete original sigue vigente (se llama al llegar al nuevo destino).
+   *
+   * Ocupacion: el llamador actualiza release/occupy ANTES de llamar a redirectTo.
+   *
+   * @param newPath Nuevo path desde la celda logica actual hasta el nuevo destino.
+   */
+  redirectTo(newPath: GridCell[]): void {
+    if (!this._isWalking || this._entity === null || this._grid === null) { return; }
+    // Seguridad: si el path es trivial, ignorar (el llamador lo previene)
+    if (newPath.length < 2) { return; }
+
+    // Snap a la celda logica actual (path[0] = entity.cellX/Z)
+    const startCell = newPath[0];
+    if (startCell !== undefined) {
+      const w = this._grid.cellToWorld(startCell.x, startCell.z);
+      this._entity.setWorldPosition(w.x, 0, w.z);
+      this._entity.setCell(startCell.x, startCell.z);
+    }
+
+    // Reemplazar el path y resetear estado de progreso
+    this._path      = newPath;
+    this._segIdx    = 0;
+    this._t         = 0;
+    this._segCosts  = this._buildSegCosts(newPath);
+    this._costSpent = 0;
+    this._segLenM   = this._segmentLengthM(0);
+
+    this._updateFacing(0);
+
+    // El observer sigue activo — la caminata continua sin corte
+    logger.debug('CombatWalker: redirigido', {
+      steps: newPath.length,
+      dest:  newPath[newPath.length - 1],
     });
   }
 
@@ -109,9 +177,11 @@ export class CombatWalker {
     this._isWalking = false;
     this._detachObserver();
     this._entity?.stopWalkAnim();
-    this._entity  = null;
-    this._grid    = null;
-    this._path    = [];
+    this._entity     = null;
+    this._grid       = null;
+    this._path       = [];
+    this._segCosts   = [];
+    this._costSpent  = 0;
     this._onComplete = null;
     logger.debug('CombatWalker: caminata cancelada');
   }
@@ -132,6 +202,10 @@ export class CombatWalker {
 
     // Bucle para manejar el caso improbable de saltar mas de un segmento en un frame
     while (this._t >= 1) {
+      // Acumular el coste del segmento completado
+      const completedCost = this._segCosts[this._segIdx] ?? 0;
+      this._costSpent += completedCost;
+
       // Llegar a la celda destino del segmento actual
       const toCell = this._path[this._segIdx + 1];
       if (toCell === undefined) {
@@ -153,7 +227,7 @@ export class CombatWalker {
       }
 
       // Configurar el siguiente segmento
-      this._segLenM = this._segmentLength(this._segIdx);
+      this._segLenM = this._segmentLengthM(this._segIdx);
       this._updateFacing(this._segIdx);
     }
 
@@ -194,6 +268,8 @@ export class CombatWalker {
     this._entity     = null;
     this._grid       = null;
     this._path       = [];
+    this._segCosts   = [];
+    this._costSpent  = 0;
     this._onComplete = null;
 
     logger.debug('CombatWalker: llegado al destino');
@@ -206,22 +282,42 @@ export class CombatWalker {
     const toCell   = this._path[segIdx + 1];
     if (fromCell === undefined || toCell === undefined || this._entity === null) { return; }
 
-    const dx = toCell.x - fromCell.x;
-    const dz = toCell.z - fromCell.z;
+    const dx  = toCell.x - fromCell.x;
+    const dz  = toCell.z - fromCell.z;
     const rad = Math.atan2(dx, dz);
     this._entity.setFacingRad(rad);
   }
 
-  /** Longitud en metros del segmento indicado (1.0 ortogonal, sqrt(2) diagonal). */
-  private _segmentLength(segIdx: number): number {
+  /**
+   * Longitud FISICA en metros del segmento (para calcular velocidad visual constante).
+   * ortogonal = 1.0 m,  diagonal = sqrt(2) m.
+   * NO confundir con el coste de juego (1.0 / 1.5) en _segCosts.
+   */
+  private _segmentLengthM(segIdx: number): number {
     const a = this._path[segIdx];
     const b = this._path[segIdx + 1];
     if (a === undefined || b === undefined) { return 1.0; }
 
     const dx = Math.abs(b.x - a.x);
     const dz = Math.abs(b.z - a.z);
-    // Diagonal si ambos ejes cambian
     return (dx > 0 && dz > 0) ? Math.SQRT2 : 1.0;
+  }
+
+  /**
+   * Precomputa los costes de juego de cada segmento del path.
+   * ortogonal = 1.0,  diagonal = 1.5  (igual que CombatPathfinder.DIRECTIONS).
+   */
+  private _buildSegCosts(path: GridCell[]): number[] {
+    const costs: number[] = [];
+    for (let i = 0; i < path.length - 1; i++) {
+      const a = path[i];
+      const b = path[i + 1];
+      if (a === undefined || b === undefined) { costs.push(1.0); continue; }
+      const dx = Math.abs(b.x - a.x);
+      const dz = Math.abs(b.z - a.z);
+      costs.push((dx > 0 && dz > 0) ? 1.5 : 1.0);
+    }
+    return costs;
   }
 
   private _detachObserver(): void {
