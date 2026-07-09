@@ -111,6 +111,9 @@ export class CombatEntity {
   private _weaponStance:  WeaponStance    = 'unarmed';
   private _animGroups:    AnimationGroup[] = [];
   private _modelFilename: string           = '';
+  /** True mientras CombatWalker tiene una caminata activa para esta entidad. */
+  private _isWalking = false;
+
   /** Referencia al handler de equipar/desequipar para poder desuscribirlo en dispose(). */
   private _equipHandler: ((payload: { item: Item; slot: EquipmentSlot; equipped: EquippedItems }) => void) | null = null;
 
@@ -275,6 +278,7 @@ export class CombatEntity {
    * Sin efecto si no se encontro animacion Walk en el GLB.
    */
   startWalkAnim(): void {
+    this._isWalking = true;
     if (this._walkAnim === null) { return; }
     this._idleAnim?.stop();
     this._walkAnim.start(true, 1.0, this._walkAnim.from, this._walkAnim.to, false);
@@ -286,6 +290,7 @@ export class CombatEntity {
    * Sin efecto si no hay Walk activa.
    */
   stopWalkAnim(): void {
+    this._isWalking = false;
     if (this._walkAnim === null) { return; }
     this._walkAnim.stop();
     if (this._idleAnim !== null) {
@@ -321,8 +326,21 @@ export class CombatEntity {
     this._resolveWalkAnim(this._animGroups, this._modelFilename, animSet);
     this._setWeaponVisibility(stance === 'sword_and_shield');
 
+    // Si la entidad está caminando, _resolveIdleAnim acaba de arrancar la idle del nuevo set.
+    // La paramos y arrancamos la walk del nuevo set para que el recorrido continúe animado.
+    // _resolveIdleAnim/_resolveWalkAnim reasignan _idleAnim/_walkAnim, pero TS mantiene
+    // el narrowing de la asignación explícita a null anterior y no lo resetea a través
+    // de llamadas a métodos. El cast a AnimationGroup | null escapa ese narrowing incorrecto.
+    const idleNow = this._idleAnim as AnimationGroup | null;
+    const walkNow = this._walkAnim as AnimationGroup | null;
+    if (this._isWalking && walkNow !== null) {
+      idleNow?.stop();
+      walkNow.start(true, 1.0, walkNow.from, walkNow.to, false);
+    }
+
     logger.debug('CombatEntity: stance cambiado en caliente', {
       displayName: this.combatant.displayName, stance,
+      walkingAtChange: this._isWalking,
     });
   }
 
