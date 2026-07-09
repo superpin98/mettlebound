@@ -25,6 +25,9 @@ import { RustyController }      from '@/game/entities/RustyController';
 import { CombatTransition }     from '@/ui/CombatTransition';
 import { CombatEntity }         from '@/game/combat/CombatEntity';
 import { CombatMovementSystem } from '@/game/combat/CombatMovementSystem';
+import { CombatTurnSystem }     from '@/game/combat/CombatTurnSystem';
+import type { TurnCombatant }   from '@/game/combat/CombatTurnSystem';
+import { InitiativeTracker }    from '@/ui/InitiativeTracker';
 import { getClassById }          from '@/config/classes.config';
 import { RunState }             from '@/game/RunState';
 
@@ -125,6 +128,13 @@ playerController.setCamera(cameraController.camera);
   // Ficha de combate de Rusty — hoisted para exponerla en window.__mb (debug).
   let rustyEntity: import('@/game/combat/CombatEntity').CombatEntity | null = null;
 
+  // Botón «Terminar turno» — en DOM desde el inicio, visible solo en combate.
+  const endTurnBtn = document.createElement('button');
+  endTurnBtn.id          = 'end-turn-btn';
+  endTurnBtn.textContent = 'Terminar turno';
+  endTurnBtn.disabled    = true;
+  document.body.appendChild(endTurnBtn);
+
   // onBlackScreen: se llama cuando la pantalla está completamente a negro,
   // antes de revelar la escena de combate. Oculta toda la exploración.
   const combatTransition = new CombatTransition(
@@ -198,6 +208,16 @@ playerController.setCamera(cameraController.camera);
           'player',
         );
         movSys.activate();
+
+        // -- Sistema de turnos + HUD de iniciativa ----------------
+        const turnOrder: TurnCombatant[] = [
+          { id: 'player', displayName: 'Jugador', icon: '🛡️', isPlayer: true  },
+          { id: 'rusty',  displayName: 'Rusty',   icon: '💀', isPlayer: false },
+        ];
+        const tracker = new InitiativeTracker();
+        const turnSys = new CombatTurnSystem(turnOrder, movSys, tracker, endTurnBtn);
+        endTurnBtn.classList.add('visible');
+        turnSys.start();
       }
     },
   );

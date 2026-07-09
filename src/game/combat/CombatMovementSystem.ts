@@ -64,6 +64,7 @@ export class CombatMovementSystem {
   private _barObserver: Observer<Scene> | null = null;
 
   private _isActive         = false;
+  private _playerTurnActive = true;   // false durante el turno del enemigo
   private _pointerObserver: Observer<PointerInfo> | null = null;
   private _statsHandler: ((snapshot: PlayerSnapshot) => void) | null = null;
 
@@ -218,9 +219,23 @@ export class CombatMovementSystem {
     });
   }
 
+  /**
+   * Habilita o deshabilita el input del jugador sin desactivar el sistema.
+   * Llamado por CombatTurnSystem al cambiar de turno.
+   *   false → oculta highlight, ignora clicks (turno del enemigo).
+   *   true  → los clicks vuelven a funcionar (reloadMovement() se llama aparte).
+   */
+  setPlayerTurnActive(active: boolean): void {
+    this._playerTurnActive = active;
+    if (!active) {
+      this._highlight.hide();
+    }
+  }
+
   // -- Logica interna -----------------------------------------------------------
 
   private _handleClick(): void {
+    if (!this._playerTurnActive) { return; } // turno del enemigo: ignorar clicks
     // Raycast al suelo del combate (isPickable=true en CombatGrid)
     const pick = this._scene.pick(
       this._scene.pointerX,

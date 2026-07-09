@@ -1125,7 +1125,7 @@ body {
 
 #dev-panel {
   position: fixed;
-  bottom: 16px;
+  top: 16px;
   right: 16px;
   z-index: 5000;
   display: flex;
@@ -1499,4 +1499,96 @@ body {
   font-size: 13px;
   color: var(--text-muted);
   line-height: 1.6;
+}
+
+/* ─── InitiativeTracker (cola de turnos animada, estilo BG3) ── */
+#initiative-tracker {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  /* gap: 0 — el espaciado lo gestiona margin-right de cada .init-card */
+  z-index: 120;
+  pointer-events: none;
+}
+
+#initiative-tracker.initiative-tracker--hidden {
+  display: none;
+}
+
+/* Cada tarjeta de turno.
+   width + overflow: hidden necesarios para la animación de salida
+   (JS anima width → 0 + margin-right → 0 para el efecto slide). */
+.init-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 58px;
+  margin-right: 8px;    /* espaciado: animado a 0 en la salida */
+  padding: 6px 4px 5px;
+  overflow: hidden;
+  background: var(--bg-panel);
+  border: 2px solid var(--border-gold-dim);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* Primer turno de la cola: resalte sutil (el avance importa más que el resalte) */
+.init-card--current {
+  border-color: var(--border-gold);
+  box-shadow: 0 0 8px 1px rgba(212, 160, 74, 0.4);
+}
+
+.init-card__icon {
+  font-size: 26px;
+  line-height: 1;
+  user-select: none;
+}
+
+.init-card__name {
+  font-family: 'VT323', monospace;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ─── Botón "Terminar turno" ────────────────────────────────── */
+#end-turn-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 10px 22px;
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+  background: var(--bg-panel-mid);
+  border: 2px solid var(--border-gold);
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 120;
+  display: none;        /* oculto fuera de combate */
+  transition:
+    background    0.15s ease,
+    border-color  0.15s ease,
+    opacity       0.15s ease;
+}
+
+#end-turn-btn.visible {
+  display: block;
+}
+
+#end-turn-btn:hover:not(:disabled) {
+  background: var(--bg-panel-light);
+  border-color: var(--border-gold-bright);
+}
+
+#end-turn-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }

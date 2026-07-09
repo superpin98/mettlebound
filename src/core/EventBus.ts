@@ -32,8 +32,10 @@ export type GameEventMap = {
   'player:attack-hit': { body: PhysicsBody };  // impacto real: hitbox tocó un cuerpo
   'player:death':      null;        // HP llegó a 0 — emitido una sola vez por PlayerStats
   'player:death-anim-end': null;     // animación Death_A terminada — dispara el GameOverModal
-  'combat:start':  null;             // transición exploración→combate iniciada (freeze todo)
-  'combat:end':    null;             // vuelta a exploración (unfreeze)
+  'combat:start':      null;         // transición exploración→combate iniciada (freeze todo)
+  'combat:end':        null;         // vuelta a exploración (unfreeze)
+  'combat:turn-start': { combatantId: string; isPlayer: boolean; turnNumber: number };
+  'combat:turn-end':   { combatantId: string };
   'input:attack': null;         // click izquierdo detectado por InputManager
   'ui:show-level-up-modal': { snapshot: PlayerSnapshot };
   'ui:close-level-up-modal': null;
