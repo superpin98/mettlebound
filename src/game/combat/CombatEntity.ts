@@ -11,6 +11,7 @@ import type { Scene, AnimationGroup, AbstractMesh } from '@babylonjs/core';
 
 // Imports internos
 import type { AssetManager, AssetInstance } from '@/core/AssetManager';
+import type { CoreStats } from '@/types/game.types';
 import type { CombatGrid } from '@/game/world/CombatGrid';
 import { Combatant } from '@/game/combat/Combatant';
 import { logger } from '@/core/Logger';
@@ -57,10 +58,11 @@ export interface CombatEntityConfig {
   /** Profundidad del footprint en celdas (eje Z del grid). */
   footprintH:  number;
   /**
-   * Destreza de la entidad. Determina los puntos de movimiento tactico.
-   * Formula: MOV_BASE + round((MOV_MAX - MOV_BASE) * min(dex, DEX_MOV_CAP) / DEX_MOV_CAP)
+   * Stats primarios de la entidad (STR/DEX/INT/LCK).
+   * DEX determina los puntos de movimiento tactico.
+   * Formula: MOV_BASE + round((MOV_MAX - MOV_BASE) * min(DEX, DEX_MOV_CAP) / DEX_MOV_CAP)
    */
-  dex: number;
+  coreStats: CoreStats;
   /**
    * Stance de arma. Controla que animset usa la entidad.
    * 'unarmed' = set base (Idle, Run).
@@ -103,7 +105,7 @@ export class CombatEntity {
   private readonly _pivot:      TransformNode;
   private readonly _footprintW: number;
   private readonly _footprintH: number;
-  private _dex:                 number;
+  private _coreStats:            CoreStats;
   private _instance:            AssetInstance | null = null;
   private _idleAnim:            AnimationGroup | null = null;
   private _walkAnim:            AnimationGroup | null = null;
@@ -130,7 +132,7 @@ export class CombatEntity {
     this.combatant.displayName = config.displayName;
     this._footprintW           = config.footprintW;
     this._footprintH           = config.footprintH;
-    this._dex                  = config.dex;
+    this._coreStats             = config.coreStats;
 
     this._pivot = new TransformNode(
       `combatEntity_${config.displayName}`,
@@ -159,7 +161,7 @@ export class CombatEntity {
     logger.info('CombatEntity: entidad creada', {
       displayName: config.displayName,
       footprint:   `${config.footprintW}x${config.footprintH}`,
-      dex:         config.dex,
+      coreStats:   config.coreStats,
       movPoints:   entity.movementPoints,
     });
     return entity;
@@ -183,22 +185,25 @@ export class CombatEntity {
    * Puntos de movimiento tactico de esta entidad.
    * Formula: MOV_BASE + round((MOV_MAX - MOV_BASE) * min(DEX, DEX_MOV_CAP) / DEX_MOV_CAP)
    * Rango: [4, 12] para DEX in [0, 80+].
-   * Se recalcula cada vez a partir de _dex (actualizable en caliente via updateDex).
+   * Se recalcula cada vez a partir de _coreStats.DEX (actualizable via updateCoreStats).
    */
   get movementPoints(): number {
-    const dexCapped = Math.min(this._dex, DEX_MOV_CAP);
+    const dexCapped = Math.min(this._coreStats.DEX, DEX_MOV_CAP);
     return MOV_BASE + Math.round((MOV_MAX - MOV_BASE) * dexCapped / DEX_MOV_CAP);
   }
 
   // -- API publica: stats -------------------------------------------------------
 
+  /** Stats primarios de combate de la entidad (STR/DEX/INT/LCK). */
+  get coreStats(): CoreStats { return this._coreStats; }
+
   /**
-   * Actualiza la DEX de la entidad en caliente.
+   * Actualiza el bloque completo de stats en caliente.
    * Llamado por CombatMovementSystem al recibir player:stats-changed.
-   * @param dex Nuevo valor de DEX (efectivo, ya con bonus de items).
+   * @param stats Nuevo bloque CoreStats efectivo (ya con bonus de items).
    */
-  updateDex(dex: number): void {
-    this._dex = dex;
+  updateCoreStats(stats: CoreStats): void {
+    this._coreStats = stats;
   }
 
   // -- API publica: posicionamiento completo (con recalculo de mundo) -----------

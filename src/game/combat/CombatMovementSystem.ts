@@ -116,10 +116,10 @@ export class CombatMovementSystem {
 
     // Suscripcion a cambios de stats (panel DEV)
     this._statsHandler = (snapshot: PlayerSnapshot) => {
-      this._playerEntity.updateDex(snapshot.coreStats.DEX);
+      this._playerEntity.updateCoreStats(snapshot.coreStats);
       const newTotal = this._playerEntity.movementPoints;
       if (newTotal !== this._movPointsTotal) {
-        // Cambio de stat via panel DEV = refresco de turno con nueva DEX:
+        // Cambio de stat via panel DEV = refresco de turno con nuevos stats:
         // rellenar al 100% con el nuevo maximo, no conservar el valor viejo.
         this._movPointsTotal     = newTotal;
         this._movPointsRemaining = newTotal;
@@ -129,8 +129,8 @@ export class CombatMovementSystem {
       if (!this._walker.isWalking) {
         this._highlight.show(this._playerEntity, this._movPointsRemaining);
       }
-      logger.debug('CombatMovementSystem: DEX actualizada en caliente', {
-        dex: snapshot.coreStats.DEX,
+      logger.debug('CombatMovementSystem: stats actualizados en caliente', {
+        coreStats: snapshot.coreStats,
         movementPoints: this._playerEntity.movementPoints,
       });
     };

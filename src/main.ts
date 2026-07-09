@@ -122,6 +122,8 @@ playerController.setCamera(cameraController.camera);
   // Referencia al sistema de movimiento. Hoisted para que el boton DEV pueda
   // llamar a reloadMovement() (simular inicio de turno) desde fuera del callback.
   let movSys: CombatMovementSystem | null = null;
+  // Ficha de combate de Rusty — hoisted para exponerla en window.__mb (debug).
+  let rustyEntity: import('@/game/combat/CombatEntity').CombatEntity | null = null;
 
   // onBlackScreen: se llama cuando la pantalla está completamente a negro,
   // antes de revelar la escena de combate. Oculta toda la exploración.
@@ -154,7 +156,8 @@ playerController.setCamera(cameraController.camera);
           displayName: 'Jugador',
           footprintW:  1,
           footprintH:  1,
-          dex:          playerStats.getSnapshot().coreStats.DEX,
+          // Stats completos del jugador — DEX determina puntos de movimiento.
+          coreStats:    playerStats.getSnapshot().coreStats,
           // Heredar el stance activo de exploración (unarmed / sword_and_shield).
           weaponStance: playerController.weaponStance,
         });
@@ -167,16 +170,18 @@ playerController.setCamera(cameraController.camera);
       }
 
       // -- Ficha de Rusty (Skeleton_Minion.glb) --------------------------------
-      const rustyEntity = await CombatEntity.create(scene, assetManager, {
+      rustyEntity = await CombatEntity.create(scene, assetManager, {
         baseUrl:     '/assets/models/characters/skeletons/',
         filename:    'Skeleton_Minion.glb',
         isMixamo:    false,
         modelScale:  1,
-        maxHp:       45,
+        maxHp:       45,          // HP canonico de Rusty (docs/02_ENEMIES.md)
         displayName: 'Rusty',
         footprintW:  1,
         footprintH:  1,
-        dex:         6,
+        // Stats canonicos de Rusty: esqueleto agil pero debil.
+        // DEX 6 => 4 + round(8 * 6/80) = 4+1 = 5 puntos de movimiento.
+        coreStats:   { STR: 8, DEX: 6, INT: 3, LCK: 3 },
       });
       // Celda (9, 11): X = -0.5, Z = +1.5 (ligeramente al norte del centro).
       // facingRad = Math.PI -> mira hacia -Z (hacia el jugador en Z = -1.5).
@@ -449,10 +454,14 @@ playerController.setCamera(cameraController.camera);
     (window as unknown as Record<string, unknown>)['__mb'] = {
       scene,
       playerController,
-      playerStats: () => playerStats,
-      weapons: playerController.weaponDevHandle(),
+      playerStats:  () => playerStats,
+      weapons:      playerController.weaponDevHandle(),
       rusty,
-      run: runState,
+      // rustyEntity() devuelve la ficha tactica de Rusty tras entrar en combate.
+      // Uso en DevTools: window.__mb.rustyEntity()?.coreStats
+      //                  window.__mb.rustyEntity()?.combatant.currentHp
+      rustyEntity:  () => rustyEntity,
+      run:          runState,
     };
 
     // Suprimir advertencia de variable no usada
