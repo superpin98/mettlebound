@@ -26,6 +26,7 @@ import { CombatTransition }     from '@/ui/CombatTransition';
 import { CombatEntity }         from '@/game/combat/CombatEntity';
 import { CombatMovementSystem } from '@/game/combat/CombatMovementSystem';
 import { CombatTurnSystem }     from '@/game/combat/CombatTurnSystem';
+import { CombatActionBar }      from '@/ui/CombatActionBar';
 import { InitiativeSystem, hasTrait } from '@/game/combat/InitiativeSystem';
 import type { InitCombatantDef } from '@/game/combat/InitiativeSystem';
 import { InitiativeTracker }    from '@/ui/InitiativeTracker';
@@ -127,7 +128,9 @@ playerController.setCamera(cameraController.camera);
   // llamar a reloadMovement() (simular inicio de turno) desde fuera del callback.
   let movSys:   CombatMovementSystem | null = null;
   // Referencia al sistema de turnos. Hoisted para exponerlo en window.__mb (debug).
-  let turnSys:  CombatTurnSystem     | null = null;
+  let turnSys:         CombatTurnSystem | null = null;
+  // Referencia a la barra de acciones de combate. Hoisted para window.__mb.
+  let combatActionBar: CombatActionBar  | null = null;
   // Ficha de combate de Rusty — hoisted para exponerla en window.__mb (debug).
   let rustyEntity: import('@/game/combat/CombatEntity').CombatEntity | null = null;
 
@@ -232,6 +235,10 @@ playerController.setCamera(cameraController.camera);
 
         const tracker = new InitiativeTracker();
         turnSys = new CombatTurnSystem(initSys, movSys, tracker, endTurnBtn);
+        // Barra de acciones: recibe el budget ya creado en turnSys.
+        // Se muestra antes de start() para que reciba el primer combat:turn-start.
+        combatActionBar = new CombatActionBar(turnSys.budget);
+        combatActionBar.show();
         endTurnBtn.classList.add('visible');
         turnSys.start();
       }
@@ -503,6 +510,9 @@ playerController.setCamera(cameraController.camera);
       //   → { principal: true, secondary: true } al inicio del turno
       //   → { principal: false, secondary: true } tras atacar
       budget:       () => turnSys?.budget.snapshot,
+      // combatActionBar: la barra de acciones de combate.
+      // Uso en DevTools: window.__mb.combatActionBar()
+      combatActionBar: () => combatActionBar,
     };
 
     // Suprimir advertencia de variable no usada

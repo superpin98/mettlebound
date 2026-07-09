@@ -143,6 +143,12 @@ export class CombatTurnSystem {
   private _activateCombatant(combatant: TurnCombatant): void {
     this._turnNumber++;
 
+    // Recargar el budget ANTES del emit para que los suscriptores de
+    // 'combat:turn-start' lean el estado ya actualizado (p. ej. CombatActionBar).
+    if (combatant.isPlayer) {
+      this._budget.reload();
+    }
+
     eventBus.emit('combat:turn-start', {
       combatantId: combatant.id,
       isPlayer:    combatant.isPlayer,
@@ -163,7 +169,7 @@ export class CombatTurnSystem {
   }
 
   private _doPlayerTurn(): void {
-    this._budget.reload();                    // ← recarga 1 principal + 1 secundaria
+    // _budget.reload() ya fue llamado en _activateCombatant antes del emit.
     this._movSys.setPlayerTurnActive(true);
     this._movSys.reloadMovement();
     this._endTurnBtn.disabled = false;
