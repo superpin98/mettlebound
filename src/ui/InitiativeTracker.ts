@@ -14,7 +14,7 @@
  * Esto lo hace reutilizable con cualquier InitiativeCalculator externo.
  */
 
-import type { TurnCombatant } from '@/game/combat/CombatTurnSystem';
+import type { TurnCombatant } from '@/game/combat/InitiativeSystem';
 
 /** Duración de la animación de salida en ms. */
 const LEAVE_MS  = 280;
@@ -104,6 +104,28 @@ export class InitiativeTracker {
         });
       }, LEAVE_MS + 10);
     });
+  }
+
+  /**
+   * Recalcula y reemplaza la cola completa con una cross-fade suave.
+   * Llamar cuando cambia el orden de iniciativa en pleno combate
+   * (ej. después de updateCombatantDex).
+   *
+   * La animación: fade out (110ms) → initQueue → fade in (200ms).
+   * No bloquea: la actualización ocurre en segundo plano.
+   */
+  refreshQueue(newQueue: TurnCombatant[]): void {
+    const FADE_OUT_MS = 110;
+    const FADE_IN_MS  = 200;
+    this._el.style.transition = `opacity ${FADE_OUT_MS}ms ease`;
+    this._el.style.opacity    = '0';
+    setTimeout(() => {
+      this.initQueue(newQueue);
+      requestAnimationFrame(() => {
+        this._el.style.transition = `opacity ${FADE_IN_MS}ms ease`;
+        this._el.style.opacity    = '1';
+      });
+    }, FADE_OUT_MS + 10);
   }
 
   /** Hace visible el tracker. */

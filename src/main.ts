@@ -26,7 +26,8 @@ import { CombatTransition }     from '@/ui/CombatTransition';
 import { CombatEntity }         from '@/game/combat/CombatEntity';
 import { CombatMovementSystem } from '@/game/combat/CombatMovementSystem';
 import { CombatTurnSystem }     from '@/game/combat/CombatTurnSystem';
-import type { TurnCombatant }   from '@/game/combat/CombatTurnSystem';
+import { InitiativeSystem, hasTrait } from '@/game/combat/InitiativeSystem';
+import type { InitCombatantDef } from '@/game/combat/InitiativeSystem';
 import { InitiativeTracker }    from '@/ui/InitiativeTracker';
 import { getClassById }          from '@/config/classes.config';
 import { RunState }             from '@/game/RunState';
@@ -209,13 +210,26 @@ playerController.setCamera(cameraController.camera);
         );
         movSys.activate();
 
-        // -- Sistema de turnos + HUD de iniciativa ----------------
-        const turnOrder: TurnCombatant[] = [
-          { id: 'player', displayName: 'Jugador', icon: '🛡️', isPlayer: true  },
-          { id: 'rusty',  displayName: 'Rusty',   icon: '💀', isPlayer: false },
+        // -- Sistema de iniciativa real (acumulación por DEX) --------
+        // Sorpresa: jugador ataca primero SALVO que Rusty tenga DEX >= 1.5×
+        // la del jugador O tenga el trait 'alert' (stub: siempre false).
+        // TODO: sustituir rustyIsAlert por hasTrait real cuando existan los traits.
+        const playerDex    = playerEntity.coreStats.DEX;
+        const rustyDex     = rustyEntity?.coreStats.DEX ?? 6;
+        const rustyIsAlert = hasTrait(rustyEntity, 'alert');  // stub — false
+        const hasSurprise  = rustyDex < playerDex * 1.5 && !rustyIsAlert;
+
+        const combatantDefs: InitCombatantDef[] = [
+          { id: 'player', displayName: 'Jugador', icon: '🛡️', isPlayer: true,  dex: playerDex },
+          { id: 'rusty',  displayName: 'Rusty',   icon: '💀', isPlayer: false, dex: rustyDex  },
         ];
+        const initSys = new InitiativeSystem(
+          combatantDefs,
+          { surpriseAttackerId: hasSurprise ? 'player' : undefined },
+        );
+
         const tracker = new InitiativeTracker();
-        const turnSys = new CombatTurnSystem(turnOrder, movSys, tracker, endTurnBtn);
+        const turnSys = new CombatTurnSystem(initSys, movSys, tracker, endTurnBtn);
         endTurnBtn.classList.add('visible');
         turnSys.start();
       }
