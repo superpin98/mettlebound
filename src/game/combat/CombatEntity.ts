@@ -14,11 +14,14 @@ import type { AssetManager, AssetInstance } from '@/core/AssetManager';
 import type { CombatGrid } from '@/game/world/CombatGrid';
 import { Combatant } from '@/game/combat/Combatant';
 import { logger } from '@/core/Logger';
+import type { Item, EquipmentSlot, EquippedItems } from '@/types/items.types';
 import {
+  deriveWeaponStance,
   STANCE_ANIM_SET,
   type WeaponStance,
   type AnimSet,
 } from '@/game/player/WeaponStance';
+import { eventBus } from '@/core/EventBus';
 
 // ============================================================
 // Tipos
@@ -104,7 +107,12 @@ export class CombatEntity {
   private _instance:            AssetInstance | null = null;
   private _idleAnim:            AnimationGroup | null = null;
   private _walkAnim:            AnimationGroup | null = null;
-  private _weaponMeshes:         AbstractMesh[]         = [];
+  private _weaponMeshes:  AbstractMesh[]  = [];
+  private _weaponStance:  WeaponStance    = 'unarmed';
+  private _animGroups:    AnimationGroup[] = [];
+  private _modelFilename: string           = '';
+  /** Referencia al handler de equipar/desequipar para poder desuscribirlo en dispose(). */
+  private _equipHandler: ((payload: { item: Item; slot: EquipmentSlot; equipped: EquippedItems }) => void) | null = null;
 
   /** Celda ancla (esquina XZ minima del footprint) en coordenadas de grid. */
   private _cellX = 0;
@@ -286,6 +294,38 @@ export class CombatEntity {
     logger.debug('CombatEntity: Walk detenida, Idle reanudada');
   }
 
+  // -- API publica: cambio de stance en caliente --------------------------------
+
+  /**
+   * Cambia el stance de arma en caliente.
+   * Re-resuelve las animaciones Idle/Walk con el nuevo animset (SNS o base)
+   * y actualiza la visibilidad de los meshes de arma.
+   * La anim Idle del nuevo set arranca inmediatamente para que el cambio
+   * sea visible al vuelo. Si la entidad estaba caminando, Walk se re-resuelve
+   * sin interrupcion (CombatWalker la volvera a leer en el siguiente startWalkAnim).
+   *
+   * @param stance Nuevo stance de arma.
+   */
+  setWeaponStance(stance: WeaponStance): void {
+    this._weaponStance = stance;
+    const animSet: AnimSet = STANCE_ANIM_SET[stance];
+
+    // Detener anims actuales antes de reasignar referencias
+    this._idleAnim?.stop();
+    this._walkAnim?.stop();
+    this._idleAnim = null;
+    this._walkAnim = null;
+
+    // Re-resolver con el nuevo animset. _resolveIdleAnim arranca la Idle automaticamente.
+    this._resolveIdleAnim(this._animGroups, this._modelFilename, animSet);
+    this._resolveWalkAnim(this._animGroups, this._modelFilename, animSet);
+    this._setWeaponVisibility(stance === 'sword_and_shield');
+
+    logger.debug('CombatEntity: stance cambiado en caliente', {
+      displayName: this.combatant.displayName, stance,
+    });
+  }
+
   // -- Ciclo de vida -----------------------------------------------------------
 
   /**
@@ -293,13 +333,20 @@ export class CombatEntity {
    * Llamar al finalizar el combate o al destruir la escena.
    */
   dispose(): void {
+    // Desuscribir del bus antes de limpiar (evita listeners huerfanos al salir del combate)
+    if (this._equipHandler !== null) {
+      eventBus.off('inventory:item-equipped',   this._equipHandler);
+      eventBus.off('inventory:item-unequipped', this._equipHandler);
+      this._equipHandler = null;
+    }
     this._walkAnim?.stop();
     this._idleAnim?.stop();
     this._instance?.dispose();
     this._pivot.dispose();
-    this._instance = null;
-    this._idleAnim = null;
-    this._walkAnim = null;
+    this._instance    = null;
+    this._idleAnim    = null;
+    this._walkAnim    = null;
+    this._animGroups  = [];
     this._weaponMeshes = [];
     logger.debug('CombatEntity: dispuesta', { displayName: this.combatant.displayName });
   }
@@ -335,14 +382,31 @@ export class CombatEntity {
       }
     }
 
-    this._instance = instance;
-    const animSet: AnimSet = STANCE_ANIM_SET[config.weaponStance ?? 'unarmed'];
-    this._resolveIdleAnim(instance.animationGroups, config.filename, animSet);
-    this._resolveWalkAnim(instance.animationGroups, config.filename, animSet);
+    this._instance      = instance;
+    this._animGroups    = instance.animationGroups;
+    this._modelFilename = config.filename;
+
+    const initialStance: WeaponStance = config.weaponStance ?? 'unarmed';
+    this._weaponStance = initialStance;
+    const animSet: AnimSet = STANCE_ANIM_SET[initialStance];
+    this._resolveIdleAnim(this._animGroups, this._modelFilename, animSet);
+    this._resolveWalkAnim(this._animGroups, this._modelFilename, animSet);
 
     // Detectar meshes de arma (sword/shield) y aplicar visibilidad inicial
     this._findAndCacheWeaponMeshes(instance.rootNode.getChildMeshes(false));
-    this._setWeaponVisibility((config.weaponStance ?? 'unarmed') === 'sword_and_shield');
+    this._setWeaponVisibility(initialStance === 'sword_and_shield');
+
+    // Suscribirse a cambios de inventario para actualizar stance en caliente en combate.
+    // Se desuscribe en dispose().
+    const handler = ({ equipped }: { equipped: EquippedItems }): void => {
+      const newStance = deriveWeaponStance(equipped);
+      if (newStance !== this._weaponStance) {
+        this.setWeaponStance(newStance);
+      }
+    };
+    this._equipHandler = handler;
+    eventBus.on('inventory:item-equipped',   handler);
+    eventBus.on('inventory:item-unequipped', handler);
   }
 
   // -- Helpers de resolucion de animaciones ------------------------------------

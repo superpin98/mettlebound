@@ -154,7 +154,9 @@ playerController.setCamera(cameraController.camera);
           displayName: 'Jugador',
           footprintW:  1,
           footprintH:  1,
-          dex:         playerStats.getSnapshot().coreStats.DEX,
+          dex:          playerStats.getSnapshot().coreStats.DEX,
+          // Heredar el stance activo de exploración (unarmed / sword_and_shield).
+          weaponStance: playerController.weaponStance,
         });
         // Celda (9, 5): X = -0.5, Z = -4.5 (sur del centro, 10 celdas al sur de Rusty).
         // facingRad = 0 -> mira hacia +Z (hacia Rusty en Z = +5.5).

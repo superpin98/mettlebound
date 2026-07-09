@@ -265,6 +265,9 @@ export class PlayerController {
    */
   get hasDeathAnim(): boolean { return this._deathAnim !== null; }
 
+  /** Stance de arma activo del jugador. Lo lee CombatEntity al crearse en combate. */
+  get weaponStance(): WeaponStance { return this._weaponStance; }
+
   /**
    * PhysicsBody de la capsula Havok del player.
    * Solo disponible despues de llamar initPhysics().
