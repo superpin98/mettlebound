@@ -1079,34 +1079,35 @@ body {
 
 #action-bar {
   position: fixed;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%) scale(var(--ui-scale, 1));
-  transform-origin: bottom center;
+  /* Siempre 8px por encima del borde visual superior del engranaje ⚙,
+     independientemente de --ui-scale:
+       bottom_engranaje(16px) + altura_btn(~24px) × scale + gap(8px)
+       = calc(24px + 24px * var(--ui-scale, 1))               */
+  bottom: calc(24px + 24px * var(--ui-scale, 1));
+  left: 16px;
+  transform: scale(var(--ui-scale, 1));
+  transform-origin: bottom left;
   z-index: 2000;
   display: flex;
-  gap: 8px;
-  background: rgba(10, 8, 5, 0.88);
-  border: 1px solid var(--border-gold-dim);
-  border-radius: 8px;
-  padding: 8px 14px;
+  flex-direction: column;  /* botones en vertical */
+  gap: 4px;
   pointer-events: auto;
 }
 
 .action-btn {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;    /* icono + texto en horizontal, más compacto */
   align-items: center;
-  gap: 2px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.10);
+  gap: 6px;
+  background: rgba(10, 8, 5, 0.88);
+  border: 1px solid var(--border-gold-dim);
   border-radius: 6px;
-  padding: 8px 20px;
+  padding: 5px 10px 5px 8px;
   cursor: pointer;
   color: var(--text-secondary);
   font-family: var(--font-ui);
   transition: background 0.12s, border-color 0.12s;
-  min-width: 88px;
+  white-space: nowrap;
 }
 .action-btn:hover {
   background: rgba(255,255,255,0.09);
@@ -1117,9 +1118,9 @@ body {
   border-color: var(--border-gold);
   color: var(--border-gold);
 }
-.action-btn-icon  { font-size: 24px; line-height: 1; }
-.action-btn-label { font-size: 11px; letter-spacing: 0.08em; font-weight: 600; }
-.action-btn-key   { font-size: 10px; color: var(--text-muted); }
+.action-btn-icon  { font-size: 18px; line-height: 1; }
+.action-btn-label { font-size: 10px; letter-spacing: 0.08em; font-weight: 600; }
+.action-btn-key   { font-size: 9px;  color: var(--text-muted); }
 
 /* ─── DEV Panel (z-index: 3000) ─────────────────────────────────────────────── */
 
@@ -1344,8 +1345,8 @@ body {
 
 #ui-scale-root {
   position: fixed;
-  bottom: 80px;
-  left: 12px;
+  bottom: 16px;
+  left: 16px;
   z-index: 3000;
   pointer-events: auto;
 }

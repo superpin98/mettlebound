@@ -125,7 +125,9 @@ playerController.setCamera(cameraController.camera);
   // -- CombatTransition: cinemática exploración→combate ------------------
   // Referencia al sistema de movimiento. Hoisted para que el boton DEV pueda
   // llamar a reloadMovement() (simular inicio de turno) desde fuera del callback.
-  let movSys: CombatMovementSystem | null = null;
+  let movSys:   CombatMovementSystem | null = null;
+  // Referencia al sistema de turnos. Hoisted para exponerlo en window.__mb (debug).
+  let turnSys:  CombatTurnSystem     | null = null;
   // Ficha de combate de Rusty — hoisted para exponerla en window.__mb (debug).
   let rustyEntity: import('@/game/combat/CombatEntity').CombatEntity | null = null;
 
@@ -229,7 +231,7 @@ playerController.setCamera(cameraController.camera);
         );
 
         const tracker = new InitiativeTracker();
-        const turnSys = new CombatTurnSystem(initSys, movSys, tracker, endTurnBtn);
+        turnSys = new CombatTurnSystem(initSys, movSys, tracker, endTurnBtn);
         endTurnBtn.classList.add('visible');
         turnSys.start();
       }
@@ -496,6 +498,11 @@ playerController.setCamera(cameraController.camera);
       //                  window.__mb.rustyEntity()?.combatant.currentHp
       rustyEntity:  () => rustyEntity,
       run:          runState,
+      // budget: presupuesto de acciones del turno del jugador (solo en combate).
+      // Uso en DevTools: window.__mb.budget()
+      //   → { principal: true, secondary: true } al inicio del turno
+      //   → { principal: false, secondary: true } tras atacar
+      budget:       () => turnSys?.budget.snapshot,
     };
 
     // Suprimir advertencia de variable no usada

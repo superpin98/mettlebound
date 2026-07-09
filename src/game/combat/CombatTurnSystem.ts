@@ -20,6 +20,7 @@ import type { CombatMovementSystem } from '@/game/combat/CombatMovementSystem';
 import type { PlayerSnapshot }       from '@/types/game.types';
 import type { InitiativeTracker }    from '@/ui/InitiativeTracker';
 import { InitiativeSystem }          from '@/game/combat/InitiativeSystem';
+import { CombatActionBudget }        from '@/game/combat/CombatActionBudget';
 import type { TurnCombatant }        from '@/game/combat/InitiativeSystem';
 import { eventBus }                  from '@/core/EventBus';
 import { logger }                    from '@/core/Logger';
@@ -53,6 +54,12 @@ export class CombatTurnSystem {
   private _statsHandler: ((snap: PlayerSnapshot) => void) | null = null;
 
   /**
+   * Presupuesto de acciones del turno (1 principal + 1 secundaria).
+   * Se recarga al inicio de cada turno del jugador y se vacía en dispose().
+   */
+  private readonly _budget: CombatActionBudget;
+
+  /**
    * @param initSys     Sistema de iniciativa que calcula el orden real.
    * @param movSys      Sistema de movimiento del jugador.
    * @param tracker     HUD de iniciativa.
@@ -69,10 +76,15 @@ export class CombatTurnSystem {
     this._tracker    = tracker;
     this._endTurnBtn = endTurnBtn;
 
+    this._budget = new CombatActionBudget();
+
     endTurnBtn.addEventListener('click', () => { this.endPlayerTurn(); });
   }
 
   // ── API pública ────────────────────────────────────────────────────────────────
+
+  /** Presupuesto de acciones del turno actual (para UI y debug). */
+  get budget(): CombatActionBudget { return this._budget; }
 
   /**
    * Arranca el ciclo de turnos.
@@ -120,6 +132,7 @@ export class CombatTurnSystem {
       eventBus.off('player:stats-changed', this._statsHandler);
       this._statsHandler = null;
     }
+    this._budget.reset();
     this._tracker.hide();
     this._endTurnBtn.disabled = true;
     this._isRunning = false;
@@ -150,6 +163,7 @@ export class CombatTurnSystem {
   }
 
   private _doPlayerTurn(): void {
+    this._budget.reload();                    // ← recarga 1 principal + 1 secundaria
     this._movSys.setPlayerTurnActive(true);
     this._movSys.reloadMovement();
     this._endTurnBtn.disabled = false;
