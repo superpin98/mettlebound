@@ -1680,6 +1680,57 @@ body {
   line-height: 1;
 }
 
+/* ── Sección de recursos (Tweak 5): siempre visible entre acciones y collapse ─ */
+/*
+ * Contiene MovementBar y, en el futuro, maná / stamina / cargas.
+ * No forma parte de .cab-body, por lo que NO se colapsa con las acciones.
+ * Layout: fila flexible; cada recurso ocupa el espacio disponible.
+ */
+.cab-recursos {
+  pointer-events: auto;
+  width: clamp(280px, 55vw, 600px);
+  background: rgba(10, 8, 5, 0.93);
+  border: 1px solid var(--border-gold-dim);
+  border-bottom: none;   /* .cab-collapse-btn cierra por abajo */
+  padding: 0.38em 0.75em 0.42em;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75em;
+  flex-wrap: nowrap;
+  min-height: 2em;
+}
+
+/* Cuando las acciones están colapsadas, recursos pasa a ser la franja superior */
+.cab-body.cab-body--collapsed + .cab-recursos {
+  border-radius: 8px 8px 0 0;
+}
+
+/* ── MovementBar embebido en .cab-recursos (override de la versión flotante) ─ */
+#movement-bar.mov-bar--embedded {
+  /* Anular posición fija del modo standalone */
+  position: static;
+  bottom: auto;
+  left: auto;
+  transform: none;
+  /* Fondo y borde propios los da .cab-recursos */
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  /* Ocupa todo el ancho disponible en la fila de recursos */
+  flex: 1;
+  min-width: 0;
+  gap: 0.55em;
+}
+
+/* La pista de la barra se expande en modo embebido */
+#movement-bar.mov-bar--embedded .mov-bar-track {
+  width: auto;
+  flex: 1;
+  min-width: 48px;
+}
+
 
 #initiative-tracker {
   position: fixed;
@@ -1770,4 +1821,45 @@ body {
 #end-turn-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+/* ── CombatAttackSystem: modo selección de objetivo ─────────────────────────── */
+
+/* Cursor punto de mira en toda la página mientras se selecciona objetivo */
+body.mb-selecting-target,
+body.mb-selecting-target * {
+  cursor: crosshair !important;
+}
+
+/* Resaltar el botón de Atacar cuando se está en modo selección */
+#combat-action-bar.cab--selecting .cab-action-btn[data-action-id="attack"] {
+  box-shadow:  0 0 0 2px var(--border-gold), 0 0 8px 2px rgba(192, 160, 96, 0.5);
+  background:  rgba(192, 160, 96, 0.15);
+  border-color: var(--border-gold-bright, #d4b060);
+}
+
+/* ── Toast de feedback de combate ─────────────────────────────────────────────── */
+
+#mb-combat-toast {
+  position:   fixed;
+  bottom:     calc(72px + 24px * var(--ui-scale, 1));  /* por encima de la barra */
+  left:       50%;
+  transform:  translateX(-50%);
+  background: rgba(100, 20, 20, 0.92);
+  color:      #f0d0a0;
+  font-family: 'VT323', monospace;
+  font-size:  clamp(13px, 1.6vw, 17px);
+  letter-spacing: 0.04em;
+  padding:    5px 18px;
+  border:     1px solid rgba(200, 80, 80, 0.5);
+  border-radius: 4px;
+  pointer-events: none;
+  z-index:    3000;
+  opacity:    0;
+  transition: opacity 0.25s ease;
+  white-space: nowrap;
+}
+
+#mb-combat-toast.mb-toast--visible {
+  opacity: 1;
 }

@@ -182,6 +182,13 @@ export class CombatEntity {
   get footprintH(): number { return this._footprintH; }
 
   /**
+   * TransformNode raíz de la entidad en el mundo 3D.
+   * Usado por CombatHpBar y otros sistemas que necesitan hacer parent
+   * a la jerarquía visual de esta entidad.
+   */
+  get pivot(): TransformNode { return this._pivot; }
+
+  /**
    * Puntos de movimiento tactico de esta entidad.
    * Formula: MOV_BASE + round((MOV_MAX - MOV_BASE) * min(DEX, DEX_MOV_CAP) / DEX_MOV_CAP)
    * Rango: [4, 12] para DEX in [0, 80+].
@@ -302,6 +309,60 @@ export class CombatEntity {
       this._idleAnim.start(true, 1.0, this._idleAnim.from, this._idleAnim.to, false);
     }
     logger.debug('CombatEntity: Walk detenida, Idle reanudada');
+  }
+
+  // -- API publica: animación de ataque ----------------------------------------
+
+  /**
+   * Reproduce la animación de ataque UNA sola vez y vuelve al Idle al terminar.
+   *
+   * Busca un AnimationGroup cuyo nombre contenga 'attack' (case-insensitive),
+   * aplicando el filtro SNS/base según el stance actual de la entidad.
+   * Si no existe la animación, llama onEnd() inmediatamente (degradación elegante).
+   *
+   * @param onEnd Callback opcional ejecutado cuando la animación termina
+   *              (o inmediatamente si no hay animación de ataque).
+   */
+  playAttackAnim(onEnd?: () => void): void {
+    const animSet = STANCE_ANIM_SET[this._weaponStance];
+
+    const candidates = this._animGroups.filter((g) => {
+      const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
+      return clean !== 'mixamo.com' && clean.includes('attack');
+    });
+
+    const group = CombatEntity._pickByAnimSet(candidates, animSet);
+
+    if (group === undefined) {
+      logger.warn('CombatEntity: animación de ataque no encontrada — skip', {
+        displayName: this.combatant.displayName,
+        weaponStance: this._weaponStance,
+        available: this._animGroups.map((g) => g.name),
+      });
+      onEnd?.();
+      return;
+    }
+
+    // Parar Idle para que no compita con el ataque
+    this._idleAnim?.stop();
+
+    // Reproducir ataque UNA vez (loop=false)
+    group.start(false, 1.0, group.from, group.to, false);
+
+    // Al terminar: volver al Idle y notificar
+    group.onAnimationGroupEndObservable.addOnce(() => {
+      if (this._idleAnim !== null) {
+        this._idleAnim.start(true, 1.0, this._idleAnim.from, this._idleAnim.to, false);
+      }
+      onEnd?.();
+      logger.debug('CombatEntity: animación de ataque finalizada', {
+        displayName: this.combatant.displayName, animName: group.name,
+      });
+    });
+
+    logger.debug('CombatEntity: reproduciendo ataque', {
+      displayName: this.combatant.displayName, animName: group.name, animSet,
+    });
   }
 
   // -- API publica: cambio de stance en caliente --------------------------------

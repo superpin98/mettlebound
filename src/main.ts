@@ -28,6 +28,8 @@ import { CombatMovementSystem } from '@/game/combat/CombatMovementSystem';
 import { CombatTurnSystem }     from '@/game/combat/CombatTurnSystem';
 import { CombatActionBar }      from '@/ui/CombatActionBar';
 import { InitiativeSystem, hasTrait } from '@/game/combat/InitiativeSystem';
+import { CombatHpBar }           from '@/game/combat/CombatHpBar';
+import { CombatAttackSystem }    from '@/game/combat/CombatAttackSystem';
 import type { InitCombatantDef } from '@/game/combat/InitiativeSystem';
 import { InitiativeTracker }    from '@/ui/InitiativeTracker';
 import { getClassById }          from '@/config/classes.config';
@@ -131,6 +133,8 @@ playerController.setCamera(cameraController.camera);
   let turnSys:         CombatTurnSystem | null = null;
   // Referencia a la barra de acciones de combate. Hoisted para window.__mb.
   let combatActionBar: CombatActionBar  | null = null;
+  // Sistema de ataque táctico — hoisted para window.__mb (debug).
+  let combatAttackSys: CombatAttackSystem | null = null;
   // Ficha de combate de Rusty — hoisted para exponerla en window.__mb (debug).
   let rustyEntity: import('@/game/combat/CombatEntity').CombatEntity | null = null;
 
@@ -213,7 +217,7 @@ playerController.setCamera(cameraController.camera);
           playerEntity,
           'player',
         );
-        movSys.activate();
+        // activate() se llama más abajo, después de setResourceContainer (Tweak 5)
 
         // -- Sistema de iniciativa real (acumulación por DEX) --------
         // Sorpresa: jugador ataca primero SALVO que Rusty tenga DEX >= 1.5×
@@ -239,6 +243,35 @@ playerController.setCamera(cameraController.camera);
         // Se muestra antes de start() para que reciba el primer combat:turn-start.
         combatActionBar = new CombatActionBar(turnSys.budget);
         combatActionBar.show();
+
+        // Tweak 5: montar MovementBar dentro del panel de acciones antes de activar
+        movSys.setResourceContainer(combatActionBar.getResourceContainer());
+        movSys.activate();
+
+        // -- Sistema de ataque + HP bar de Rusty ----------------------------
+        if (rustyEntity !== null) {
+          combatAttackSys = new CombatAttackSystem(
+            scene,
+            playerEntity,
+            turnSys.budget,
+            combatActionBar,
+            movSys,   // para blockInputClicks + walkWithCallback (auto-approach)
+            grid,     // para isInBounds + occupantAt en _tryAutoApproach
+          );
+
+          // HP bar sobre la cabeza de Rusty (por encima de su label de nombre)
+          const rustyHpBar = new CombatHpBar(scene, rustyEntity.pivot, { yOffset: 2.75 });
+          rustyHpBar.update(rustyEntity.combatant.currentHp, rustyEntity.combatant.maxHp);
+
+          combatAttackSys.registerTarget('rusty', rustyEntity, rustyHpBar);
+          turnSys.setAttackSystem(combatAttackSys);
+
+          // Callback del botón Atacar → entrar en modo selección de objetivo
+          combatActionBar.setOnAction('attack', () => {
+            combatAttackSys?.enterSelectMode();
+          });
+        }
+
         endTurnBtn.classList.add('visible');
         turnSys.start();
       }
@@ -512,7 +545,8 @@ playerController.setCamera(cameraController.camera);
       budget:       () => turnSys?.budget.snapshot,
       // combatActionBar: la barra de acciones de combate.
       // Uso en DevTools: window.__mb.combatActionBar()
-      combatActionBar: () => combatActionBar,
+      combatActionBar:  () => combatActionBar,
+      combatAttackSys:  () => combatAttackSys,
     };
 
     // Suprimir advertencia de variable no usada

@@ -117,6 +117,14 @@ export class CombatGrid {
     return { x, z };
   }
 
+  /**
+   * Comprueba si una coordenada de celda está dentro del tablero (0 ≤ x,z < 20).
+   * Útil para filtrar casillas adyacentes en pathfinding y cálculos de rango.
+   */
+  isInBounds(cx: number, cz: number): boolean {
+    return cx >= 0 && cx < CELLS && cz >= 0 && cz < CELLS;
+  }
+
   /** Destruye todos los meshes del grid, libera la fisica y limpia la ocupacion. */
   dispose(): void {
     this._physics?.dispose();

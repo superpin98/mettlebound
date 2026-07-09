@@ -65,8 +65,37 @@ export class CombatMovementSystem {
 
   private _isActive         = false;
   private _playerTurnActive = true;   // false durante el turno del enemigo
+  /**
+   * Si true, los clicks del jugador son ignorados aunque sea su turno.
+   * Puesto a true por CombatAttackSystem mientras el jugador selecciona objetivo
+   * o durante la animación de ataque (swing).
+   */
+  private _inputBlocked = false;
+
   private _pointerObserver: Observer<PointerInfo> | null = null;
   private _statsHandler: ((snapshot: PlayerSnapshot) => void) | null = null;
+
+  /**
+   * Callbacks opcionales para un movimiento programático iniciado con walkWithCallback().
+   * _pendingArrivalCb:   se invoca cuando la caminata llega al destino sin interrupción.
+   * _pendingInterruptCb: se invoca si el jugador redirige la caminata a otro destino.
+   * Ambos se limpian tras dispararse.
+   */
+  private _pendingArrivalCb:   (() => void) | null = null;
+  private _pendingInterruptCb: (() => void) | null = null;
+
+  /**
+   * Tweak 4: última celda en la que se recalculó el highlight durante la caminata.
+   * null = forzar recálculo en el próximo frame.
+   */
+  private _lastHighlightCell: { x: number; z: number } | null = null;
+
+  /**
+   * Tweak 5: contenedor DOM (dentro de .cab-recursos) donde se monta MovementBar.
+   * null = comportamiento anterior (se monta en document.body).
+   * Debe establecerse antes de llamar a activate().
+   */
+  private _resourceContainer: HTMLElement | null = null;
 
   /**
    * @param scene        Escena Babylon activa.
@@ -90,6 +119,93 @@ export class CombatMovementSystem {
 
   // -- API publica --------------------------------------------------------------
 
+  /** PM que le quedan al jugador en este turno (lectura externa para CombatAttackSystem). */
+  get movPointsRemaining(): number { return this._movPointsRemaining; }
+
+  /**
+   * Bloquea o desbloquea el procesamiento de clicks de movimiento sin desactivar el sistema.
+   * Llamado por CombatAttackSystem:
+   *   - true  → mientras el jugador selecciona objetivo o durante el swing de ataque.
+   *   - false → al cancelar selección o cuando el swing termina.
+   */
+  blockInputClicks(v: boolean): void {
+    this._inputBlocked = v;
+  }
+
+  /**
+   * Tweak 5: establece el contenedor DOM donde se montará MovementBar.
+   * Debe llamarse antes de activate().
+   * Si no se llama, MovementBar se monta en document.body (comportamiento anterior).
+   */
+  setResourceContainer(el: HTMLElement): void {
+    this._resourceContainer = el;
+  }
+
+  /**
+   * Inicia un movimiento programático hacia (destX, destZ) con callbacks de llegada/interrupción.
+   *
+   * A diferencia del click normal, NO trunca el camino: si el coste total no cabe en los
+   * PM restantes, devuelve false sin moverse (el llamador decide qué hacer).
+   *
+   * @param onArrival     Llamado cuando el walker llega al destino sin interrupción.
+   * @param onInterrupted Llamado si el jugador redirige el walker antes de llegar (ataque cancelado).
+   * @returns true si la caminata fue iniciada; false si el destino no es alcanzable con PM actuales.
+   */
+  walkWithCallback(
+    destX:         number,
+    destZ:         number,
+    onArrival:     () => void,
+    onInterrupted: () => void,
+  ): boolean {
+    if (!this._isActive || !this._playerTurnActive) { return false; }
+    if (this._walker.isWalking)                     { return false; }
+    if (this._movPointsRemaining < 0.001)           { return false; }
+
+    const dest     = { x: destX, z: destZ };
+    const occupant = this._grid.occupantAt(dest.x, dest.z);
+    if (occupant !== null && occupant !== this._playerId) { return false; }
+
+    const start  = { x: this._playerEntity.cellX, z: this._playerEntity.cellZ };
+    const result = CombatPathfinder.findPath(start, dest, this._grid, this._playerId);
+    if (result === null) { return false; }
+
+    // No truncar: el camino completo debe caber en los PM restantes
+    if (result.cost > this._movPointsRemaining + 0.0001) { return false; }
+
+    const path = result.path;
+    if (path.length < 2) { return false; }
+
+    const actualDest = path[path.length - 1];
+    if (actualDest === undefined) { return false; }
+
+    // Registrar callbacks ANTES de iniciar (se leen en _onWalkComplete / _handleRedirect)
+    this._pendingArrivalCb   = onArrival;
+    this._pendingInterruptCb = onInterrupted;
+
+    this._currentWalkCost = result.cost;
+
+    // Actualizar ocupación al destino
+    this._grid.release(this._playerId);
+    this._grid.occupy(
+      this._playerId,
+      actualDest.x,
+      actualDest.z,
+      this._playerEntity.footprintW,
+      this._playerEntity.footprintH,
+    );
+    this._reservedDest = { x: actualDest.x, z: actualDest.z };
+
+    // Tweak 4: no ocultar; el highlight se actualiza en _updateBar()
+    this._lastHighlightCell = null;  // forzar recálculo inmediato
+
+    logger.info('CombatMovementSystem: walkWithCallback iniciado', {
+      from: start, to: actualDest, cost: result.cost,
+    });
+
+    this._walker.startWalk(path, this._playerEntity, this._grid, () => { this._onWalkComplete(); });
+    return true;
+  }
+
   /**
    * Activa el sistema: muestra highlight + barra, registra clicks, suscribe stats.
    * Equivale al inicio del primer turno del jugador.
@@ -104,8 +220,8 @@ export class CombatMovementSystem {
     this._movPointsRemaining = this._movPointsTotal;
     this._currentWalkCost    = 0;
 
-    // Crear y mostrar MovementBar
-    this._movBar = new MovementBar();
+    // Crear y mostrar MovementBar (Tweak 5: en el container si fue inyectado)
+    this._movBar = new MovementBar(this._resourceContainer ?? undefined);
     this._movBar.setMax(this._movPointsTotal);
     this._movBar.setCurrent(this._movPointsTotal);
     this._movBar.show();
@@ -236,6 +352,7 @@ export class CombatMovementSystem {
 
   private _handleClick(): void {
     if (!this._playerTurnActive) { return; } // turno del enemigo: ignorar clicks
+    if (this._inputBlocked)      { return; } // bloqueado durante selección/swing de ataque
     // Raycast al suelo del combate (isPickable=true en CombatGrid)
     const pick = this._scene.pick(
       this._scene.pointerX,
@@ -299,8 +416,8 @@ export class CombatMovementSystem {
     this._reservedDest    = { x: actualDest.x, z: actualDest.z };
     this._currentWalkCost = walkCost;
 
-    // Ocultar resaltado durante el movimiento
-    this._highlight.hide();
+    // Tweak 4: mantener resaltado visible; se actualiza celda a celda en _updateBar()
+    this._lastHighlightCell = null;  // forzar recálculo inmediato
 
     logger.info('CombatMovementSystem: iniciando caminata', {
       from: start, to: actualDest, walkCost,
@@ -366,6 +483,16 @@ export class CombatMovementSystem {
     );
     this._reservedDest = { x: newDest.x, z: newDest.z };
 
+    // Notificar interrupción de ataque programado (si existía)
+    // La caminata continúa pero el ataque se cancela: el jugador cambió de destino.
+    const interruptCb = this._pendingInterruptCb;
+    this._pendingArrivalCb   = null;
+    this._pendingInterruptCb = null;
+    interruptCb?.();
+
+    // Tweak 4: forzar recálculo de highlight en el próximo frame
+    this._lastHighlightCell = null;
+
     // Redirigir el walker (la caminata continua sin corte de animacion)
     this._walker.redirectTo(newPath);
 
@@ -383,6 +510,9 @@ export class CombatMovementSystem {
     this._movPointsRemaining -= this._currentWalkCost;
     this._movPointsRemaining  = Math.max(0, this._movPointsRemaining);
 
+    // Tweak 4: limpiar tracking de celda (ya no estamos caminando)
+    this._lastHighlightCell = null;
+
     // Mostrar highlight con el movimiento restante (0 PM = sin resaltado)
     this._highlight.show(this._playerEntity, this._movPointsRemaining);
 
@@ -393,6 +523,12 @@ export class CombatMovementSystem {
       dest:      this._reservedDest,
       remaining: this._movPointsRemaining,
     });
+
+    // Disparar callback de llegada si existía (auto-approach: lanzar el ataque)
+    const arrivalCb = this._pendingArrivalCb;
+    this._pendingArrivalCb   = null;
+    this._pendingInterruptCb = null;
+    arrivalCb?.();
   }
 
   // -- Barra de movimiento ------------------------------------------------------
@@ -402,6 +538,18 @@ export class CombatMovementSystem {
     const spent     = this._walker.isWalking ? this._walker.elapsedCost : 0;
     const remaining = Math.max(0, this._movPointsRemaining - spent);
     this._movBar.setCurrent(remaining);
+
+    // Tweak 4: actualizar highlight cuando la celda cambia durante la caminata.
+    // Sólo se recalcula al entrar en una celda nueva, no cada frame.
+    if (this._walker.isWalking && this._playerTurnActive) {
+      const cx   = this._playerEntity.cellX;
+      const cz   = this._playerEntity.cellZ;
+      const last = this._lastHighlightCell;
+      if (last === null || cx !== last.x || cz !== last.z) {
+        this._lastHighlightCell = { x: cx, z: cz };
+        this._highlight.show(this._playerEntity, remaining);
+      }
+    }
   }
 
   // -- Helpers estaticos --------------------------------------------------------

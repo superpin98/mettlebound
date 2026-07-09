@@ -12,7 +12,8 @@
  *     .mov-bar-text    "3.5 / 8"
  *
  * Uso:
- *   const bar = new MovementBar();
+ *   const bar = new MovementBar();                      // standalone (flota sobre el HUD)
+ *   const bar = new MovementBar(containerEl);           // embebido en .cab-recursos (Tweak 5)
  *   bar.setMax(8);
  *   bar.setCurrent(5.5);  // llamar cada frame durante la caminata
  *   bar.dispose();
@@ -30,7 +31,12 @@ export class MovementBar {
   private _max     = 1;
   private _current = 1;
 
-  constructor() {
+  /**
+   * @param container Tweak 5: si se proporciona, la barra se monta dentro de ese elemento
+   *                  (modo embebido en .cab-recursos). Si se omite, se monta en document.body
+   *                  con posicion fija (comportamiento original).
+   */
+  constructor(container?: HTMLElement) {
     // -- Contenedor principal ---------------------------------------------------
     this._container = document.createElement('div');
     this._container.id = 'movement-bar';
@@ -56,7 +62,15 @@ export class MovementBar {
     this._container.appendChild(label);
     this._container.appendChild(track);
     this._container.appendChild(this._text);
-    document.body.appendChild(this._container);
+
+    if (container !== undefined) {
+      // Tweak 5: embebido dentro del panel (sin posicion fija, sin fondo propio)
+      this._container.classList.add('mov-bar--embedded');
+      container.appendChild(this._container);
+    } else {
+      // Standalone: flota como elemento fijo sobre el HUD
+      document.body.appendChild(this._container);
+    }
 
     this._refresh();
   }

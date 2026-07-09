@@ -24,6 +24,7 @@ import { CombatActionBudget }        from '@/game/combat/CombatActionBudget';
 import type { TurnCombatant }        from '@/game/combat/InitiativeSystem';
 import { eventBus }                  from '@/core/EventBus';
 import { logger }                    from '@/core/Logger';
+import type { CombatAttackSystem }  from '@/game/combat/CombatAttackSystem';
 
 // Re-exportar TurnCombatant para que los importadores existentes no se rompan.
 export type { TurnCombatant } from '@/game/combat/InitiativeSystem';
@@ -52,6 +53,12 @@ export class CombatTurnSystem {
    * Guardado para poder desuscribir limpiamente en dispose().
    */
   private _statsHandler: ((snap: PlayerSnapshot) => void) | null = null;
+
+  /**
+   * Sistema de ataque. Opcional: se asigna con setAttackSystem() tras la construcción.
+   * CombatTurnSystem se encarga de activarlo/desactivarlo con el turno del jugador.
+   */
+  private _attackSys: CombatAttackSystem | null = null;
 
   /**
    * Presupuesto de acciones del turno (1 principal + 1 secundaria).
@@ -87,6 +94,15 @@ export class CombatTurnSystem {
   get budget(): CombatActionBudget { return this._budget; }
 
   /**
+   * Registra el sistema de ataque para que CombatTurnSystem lo active y desactive
+   * automáticamente con el turno del jugador.
+   * Llamar justo después de construir ambos sistemas, antes de start().
+   */
+  setAttackSystem(sys: CombatAttackSystem): void {
+    this._attackSys = sys;
+  }
+
+  /**
    * Arranca el ciclo de turnos.
    * Rellena el tracker con los próximos QUEUE_SIZE turnos y activa el primero.
    */
@@ -119,6 +135,7 @@ export class CombatTurnSystem {
 
     this._endTurnBtn.disabled = true;
     this._movSys.setPlayerTurnActive(false);
+    this._attackSys?.setPlayerTurnActive(false);
     this._advanceToNext();
   }
 
@@ -133,6 +150,8 @@ export class CombatTurnSystem {
       this._statsHandler = null;
     }
     this._budget.reset();
+    this._attackSys?.dispose();
+    this._attackSys = null;
     this._tracker.hide();
     this._endTurnBtn.disabled = true;
     this._isRunning = false;
@@ -172,12 +191,14 @@ export class CombatTurnSystem {
     // _budget.reload() ya fue llamado en _activateCombatant antes del emit.
     this._movSys.setPlayerTurnActive(true);
     this._movSys.reloadMovement();
+    this._attackSys?.setPlayerTurnActive(true);
     this._endTurnBtn.disabled = false;
   }
 
   private _doEnemyTurn(combatant: TurnCombatant): void {
     this._endTurnBtn.disabled = true;
     this._movSys.setPlayerTurnActive(false);
+    this._attackSys?.setPlayerTurnActive(false);
 
     logger.debug('CombatTurnSystem: turno de enemigo — auto-paso', { id: combatant.id });
 

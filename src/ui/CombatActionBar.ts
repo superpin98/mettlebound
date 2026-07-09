@@ -48,28 +48,31 @@ const ACTIONS: readonly ActionDef[] = [
 ] as const;
 
 const TABS: ReadonlyArray<{ id: TabId; label: string }> = [
+  { id: 'all',       label: 'Todas'      },
   { id: 'principal', label: 'Principal'  },
   { id: 'secondary', label: 'Secundaria' },
-  { id: 'all',       label: 'Todas'      },
 ] as const;
 
 // ── Clase ──────────────────────────────────────────────────────────────────────
 
 export class CombatActionBar {
 
-  private readonly _budget:   CombatActionBudget;
-  private readonly _root:     HTMLElement;
-  private readonly _body:     HTMLElement;
+  private readonly _budget:     CombatActionBudget;
+  private readonly _root:       HTMLElement;
+  private readonly _body:       HTMLElement;
+  private readonly _recursosEl: HTMLElement;
   private readonly _collapseBtn: HTMLButtonElement;
 
   private _isPlayerTurn = false;
   private _isCollapsed  = false;
-  private _activeTab: TabId = 'principal';
+  private _activeTab: TabId = 'all';
 
   /** panel DOM por tabId */
   private readonly _panels: Map<TabId, HTMLElement> = new Map();
   /** lista de botones de acción por actionId (pueden aparecer en varias tabs) */
   private readonly _actionBtns: Map<string, HTMLButtonElement[]> = new Map();
+  /** callbacks por actionId, registrados desde fuera (p. ej. CombatAttackSystem). */
+  private readonly _actionCallbacks: Map<string, () => void> = new Map();
 
   /** Guardado para poder desuscribir en dispose(). */
   private readonly _turnHandler: (p: {
@@ -84,6 +87,7 @@ export class CombatActionBar {
 
     // Referencias cacheadas después de buildDOM
     this._body        = this._root.querySelector('.cab-body')         as HTMLElement;
+    this._recursosEl  = this._root.querySelector('.cab-recursos')     as HTMLElement;
     this._collapseBtn = this._root.querySelector('.cab-collapse-btn') as HTMLButtonElement;
 
     // Toggle de colapso
@@ -97,13 +101,17 @@ export class CombatActionBar {
       }
     });
 
-    // Clicks en acciones — stub 4c
+    // Clicks en acciones — llaman al callback registrado por acción
     this._root.querySelectorAll<HTMLButtonElement>('.cab-action-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         if (btn.disabled) { return; }
         const actionId = btn.dataset['actionId'] ?? '?';
-        logger.info('CombatActionBar: acción seleccionada (flujo 4c pendiente)', { actionId });
-        // TODO 4c: iniciar flujo de selección de objetivo
+        const cb = this._actionCallbacks.get(actionId);
+        if (cb !== undefined) {
+          cb();
+        } else {
+          logger.warn('CombatActionBar: sin callback para acción', { actionId });
+        }
       });
     });
 
@@ -134,8 +142,51 @@ export class CombatActionBar {
   }
 
   /**
+   * Tweak 5: devuelve el contenedor DOM de la sección de recursos (.cab-recursos).
+   * CombatMovementSystem lo usa para montar MovementBar dentro del panel.
+   * El elemento es visible SIEMPRE (no se colapsa con las acciones).
+   */
+  getResourceContainer(): HTMLElement {
+    return this._recursosEl;
+  }
+
+  /**
+   * Registra el callback que se ejecuta cuando el jugador activa una acción.
+   *
+   * @param actionId Id de la acción (p. ej. 'attack').
+   * @param fn       Función a llamar. Llamar con fn=null para quitar el callback.
+   */
+  setOnAction(actionId: string, fn: (() => void) | null): void {
+    if (fn === null) {
+      this._actionCallbacks.delete(actionId);
+    } else {
+      this._actionCallbacks.set(actionId, fn);
+    }
+  }
+
+  /**
+   * Activa el modo visual "seleccionando objetivo".
+   * Añade la clase CSS cab--selecting al root; el CSS puede resaltar el botón activo,
+   * cambiar el color del tab, etc.
+   * Llamar desde CombatAttackSystem.enterSelectMode().
+   */
+  enterSelectMode(): void {
+    this._root.classList.add('cab--selecting');
+    logger.debug('CombatActionBar: modo selección activado');
+  }
+
+  /**
+   * Desactiva el modo visual "seleccionando objetivo".
+   * Llamar desde CombatAttackSystem._cancelSelectMode() o tras ejecutar el ataque.
+   */
+  exitSelectMode(): void {
+    this._root.classList.remove('cab--selecting');
+    logger.debug('CombatActionBar: modo selección desactivado');
+  }
+
+  /**
    * Refresca el estado habilitado/deshabilitado.
-   * Llamar desde 4c después de consumir una acción.
+   * Llamar después de consumir una acción para actualizar los botones.
    */
   refresh(): void {
     this._refreshButtons();
@@ -215,8 +266,15 @@ export class CombatActionBar {
     collapseIcon.textContent = '▼';
     collapseBtn.appendChild(collapseIcon);
 
-    // DOM order: body primero (arriba), collapse btn después (abajo, pegado al borde)
+    // ── Sección de recursos (Tweak 5): siempre visible, entre body y collapse ──
+    // Aquí monta MovementBar (y futuros recursos: maná, stamina, cargas…).
+    // No está dentro de cab-body, por lo que NO se colapsa con las acciones.
+    const recursos = document.createElement('div');
+    recursos.className = 'cab-recursos';
+
+    // DOM order: body (arriba, colapsa) → recursos (fijo, siempre visible) → collapse (abajo)
     root.appendChild(body);
+    root.appendChild(recursos);
     root.appendChild(collapseBtn);
 
     return root;
