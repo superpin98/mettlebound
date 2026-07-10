@@ -1,18 +1,17 @@
 /**
  * GameOverModal -- overlay de muerte del jugador.
  *
- * Se muestra cuando recibe 'player:death-anim-end', que se emite en
- * PlayerController justo cuando la animacion Death_A termina su ultimo frame.
- * El modelo queda congelado caido y el overlay aparece en ese instante exacto.
+ * Se muestra cuando recibe 'player:death-anim-end':
+ *   - En combate: emitido por main.ts al terminar playerEntityCombat.playDeathAnim()
+ *   - En exploración: emitido por PlayerController al terminar Death_A
  *
- * Patron identico a LevelUpModal:
+ * Escucha también 'player:death' para capturar la causa antes de mostrarse.
+ * En exploración el payload es null → no se muestra causa.
+ *
+ * Patrón idéntico a LevelUpModal:
  *   - overlay en #ui-center
- *   - .hidden toggle para mostrar/ocultar
+ *   - clases CSS .hidden / .visible para el fade
  *   - escucha EventBus, no sabe nada de game/
- *
- * Botones:
- *   Reiniciar          -> window.location.reload()
- *   Conocimiento adquirido -> placeholder para el Codex (proxima sprint)
  */
 
 import { eventBus } from '@/core/EventBus';
@@ -21,6 +20,8 @@ export class GameOverModal {
   private readonly overlay: HTMLElement;
   private readonly container: HTMLElement;
   private _isShowing = false;
+  /** Causa de muerte capturada desde player:death antes de que llegue player:death-anim-end. */
+  private _pendingCause: string | null = null;
 
   constructor() {
     this.overlay   = this._buildOverlay();
@@ -30,15 +31,17 @@ export class GameOverModal {
     const center = document.getElementById('ui-center') ?? document.body;
     center.appendChild(this.overlay);
 
-    // Botones se enlazan una sola vez (contenido estatico)
     this._bindButtons();
 
-    // Mostrar el overlay cuando la animacion de muerte haya terminado realmente.
-    // 'player:death-anim-end' lo emite PlayerController al final de Death_A
-    // (o de inmediato si el personaje no tiene animacion de muerte).
+    // Capturar la causa en cuanto el jugador muere (antes que la animación termine).
+    eventBus.on('player:death', (event) => {
+      this._pendingCause = event?.cause ?? null;
+    });
+
+    // Mostrar el overlay cuando la animación de muerte haya terminado realmente.
     eventBus.on('player:death-anim-end', () => {
       if (this._isShowing) { return; }
-      this.show();
+      this.show(this._pendingCause);
     });
   }
 
@@ -55,9 +58,10 @@ export class GameOverModal {
     const el = document.createElement('div');
     el.id = 'gameover-modal';
     el.innerHTML = `
-      <div class="gameover-ornament">&#10022;</div>
+      <div class="gameover-ornament">&#8224;</div>
       <h1 class="gameover-title">HAS PERECIDO</h1>
       <div class="gameover-divider"></div>
+      <p class="gameover-cause hidden" id="gameover-cause"></p>
       <p class="gameover-flavor">Tus huesos adornar&#225;n estas piedras por siempre.</p>
       <div class="gameover-buttons">
         <button id="gameover-restart-btn" class="gameover-btn gameover-btn--primary">
@@ -79,21 +83,38 @@ export class GameOverModal {
 
   // ─── Show ─────────────────────────────────────────────────────────────────
 
-  show(): void {
+  show(cause: string | null): void {
     this._isShowing = true;
+
+    // Actualizar causa si la hay
+    const causeEl = this.container.querySelector<HTMLElement>('#gameover-cause');
+    if (causeEl !== null) {
+      if (cause !== null && cause.length > 0) {
+        causeEl.textContent = cause;
+        causeEl.classList.remove('hidden');
+      } else {
+        causeEl.classList.add('hidden');
+      }
+    }
+
+    // Mostrar overlay con fade-in: quitar .hidden primero (display:flex),
+    // luego en el siguiente frame añadir .visible (opacity: 1 via CSS transition).
     this.overlay.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.overlay.classList.add('visible');
+      });
+    });
   }
 
   // ─── Listeners ───────────────────────────────────────────────────────────
 
   private _bindButtons(): void {
-    // Reiniciar: recarga la pagina completa (forma mas simple y robusta)
     const restartBtn = this.container.querySelector<HTMLButtonElement>('#gameover-restart-btn');
     restartBtn?.addEventListener('click', () => {
       window.location.reload();
     });
 
-    // Conocimiento adquirido: placeholder del Codex (toggle del panel inferior)
     const codexBtn   = this.container.querySelector<HTMLButtonElement>('#gameover-codex-btn');
     const codexPanel = this.container.querySelector<HTMLElement>('#gameover-codex-panel');
     codexBtn?.addEventListener('click', () => {

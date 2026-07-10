@@ -60,7 +60,7 @@ export class MeleeAttackAction implements EnemyAction {
           playerHpBefore: ctx.playerStats.getSnapshot().currentHp,
         });
 
-        ctx.playerStats.takeDamage(dmg);
+        ctx.playerStats.takeDamage(dmg, 'Has caído en combate');
 
         logger.info('MeleeAttackAction: estado del jugador tras dano', {
           playerHpAfter: ctx.playerStats.getSnapshot().currentHp,

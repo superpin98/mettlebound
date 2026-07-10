@@ -171,6 +171,31 @@ export class CombatCamera {
     logger.info('CombatCamera: desactivada');
   }
 
+  /**
+   * Bloquea todos los controles de la cámara sin cambiar la cámara activa.
+   * Usado en cinemáticas de muerte: el jugador no puede mover la cámara,
+   * pero la escena sigue renderizando con esta cámara.
+   */
+  lockForCinematic(): void {
+    this._camera.detachControl();
+
+    if (this._keyDownHandler !== null) {
+      window.removeEventListener('keydown', this._keyDownHandler);
+      this._keyDownHandler = null;
+    }
+    if (this._keyUpHandler !== null) {
+      window.removeEventListener('keyup', this._keyUpHandler);
+      this._keyUpHandler = null;
+    }
+    if (this._renderObserver !== null) {
+      this._camera.getScene().onBeforeRenderObservable.remove(this._renderObserver);
+      this._renderObserver = null;
+    }
+    this._pressedKeys.clear();
+
+    logger.info('CombatCamera: controles bloqueados para cinematica');
+  }
+
   dispose(): void {
     this.deactivate();
     this._camera.dispose();

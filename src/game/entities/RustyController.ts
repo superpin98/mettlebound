@@ -21,6 +21,7 @@ import {
   MeshBuilder,
   StandardMaterial,
   DynamicTexture,
+  Texture,
   Color3,
   AnimationGroup,
   PhysicsBody,
@@ -58,7 +59,7 @@ const WAIT_MIN       = 1.5;
 const WAIT_MAX       = 3.5;
 
 /** Altura del label sobre el suelo (KayKit mide ~2u). */
-const LABEL_Y        = 2.55;
+const LABEL_Y        = 2.3;
 
 /** Color dorado de NPC consciente neutral. Fuente: solicitud + coherencia lore. */
 const LABEL_COLOR    = '#c0a060';
@@ -182,38 +183,60 @@ export class RustyController extends Combatant {
   // ── Label flotante ─────────────────────────────────────────────────────────
 
   private _buildLabel(): void {
-    // Plano 3D (2.0 × 0.5 u) que siempre mira a la cámara.
+    // ── Pixel art equilibrado (112×24 px) + NEAREST_SAMPLINGMODE ─────────
+    // Doble resolución: texels ~1 px pantalla — retro legible, sin blur.
+    // Plano 1.4×0.44 u (mismo ancho que CombatHpBar para coherencia visual).
+    const TEX_W = 112;
+    const TEX_H = 24;
+
     const plane = MeshBuilder.CreatePlane(
       'rusty_label',
-      { width: 2.0, height: 0.5 },
+      { width: 1.4, height: 0.44 },
       this._scene,
     );
     plane.billboardMode = TransformNode.BILLBOARDMODE_ALL;
     plane.position.y    = LABEL_Y;
     plane.parent        = this._pivot;
+    plane.isPickable    = false;
 
-    // Textura dinámica: fondo oscuro semitransparente + texto dorado.
-    const tex = new DynamicTexture('rusty_label_tex', { width: 512, height: 128 }, this._scene, false);
+    // DynamicTexture baja resolución — 5º argumento = NEAREST (sin interpolación)
+    const tex = new DynamicTexture(
+      'rusty_label_tex',
+      { width: TEX_W, height: TEX_H },
+      this._scene,
+      false,
+      Texture.NEAREST_SAMPLINGMODE,
+    );
     tex.hasAlpha = true;
 
-    // ICanvasRenderingContext de Babylon es un subset. Cast para acceder a textAlign/textBaseline.
     const ctx = tex.getContext() as unknown as CanvasRenderingContext2D;
-    // Fondo oscuro traslúcido — tag de NPC consciente neutral
-    ctx.fillStyle = 'rgba(8, 6, 4, 0.72)';
-    ctx.fillRect(0, 0, 512, 128);
-    // Texto dorado centrado
-    ctx.font          = 'bold 60px serif';
-    ctx.textAlign     = 'center';
-    ctx.textBaseline  = 'middle';
-    ctx.fillStyle     = LABEL_COLOR;
-    ctx.fillText('Rusty', 256, 64);
+
+    // Fondo Grimspire oscuro
+    ctx.fillStyle = 'rgba(6, 3, 14, 0.82)';
+    ctx.fillRect(0, 0, TEX_W, TEX_H);
+
+    // Texto dorado VT323 centrado (NPC consciente neutral)
+    ctx.font         = '20px VT323';
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle    = LABEL_COLOR;
+    ctx.fillText('RUSTY', Math.floor(TEX_W / 2), Math.floor(TEX_H / 2));
+
+    // Borde 2px con fillRect (sin antialiasing — proporcional a resolución ×2)
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.95)';
+    ctx.fillRect(0, 0, TEX_W, 2);
+    ctx.fillRect(0, TEX_H - 2, TEX_W, 2);
+    ctx.fillRect(0, 0, 2, TEX_H);
+    ctx.fillRect(TEX_W - 2, 0, 2, TEX_H);
+
     tex.update();
 
     const mat = new StandardMaterial('rusty_label_mat', this._scene);
-    mat.diffuseTexture              = tex;
-    mat.useAlphaFromDiffuseTexture  = true;
-    mat.emissiveColor               = new Color3(1, 1, 1); // visible en oscuridad
-    mat.backFaceCulling             = false;
+    mat.diffuseTexture             = tex;
+    mat.useAlphaFromDiffuseTexture = true;
+    mat.emissiveColor              = new Color3(1, 1, 1);
+    mat.backFaceCulling            = false;
+    mat.disableLighting            = true;
     plane.material = mat;
   }
 

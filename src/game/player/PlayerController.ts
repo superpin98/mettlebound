@@ -201,6 +201,11 @@ export class PlayerController {
       this._attackAnim?.stop();
       this._isAttacking = false;
 
+      // En combate, main.ts reproduce la animación de muerte sobre el CombatEntity
+      // visible y emite player:death-anim-end desde su callback. Este mesh de
+      // exploración está invisible — no hay que tocarlo ni emitir nada desde aquí.
+      if (this._isInCombat) { return; }
+
       if (this._deathAnim !== null) {
         // Reproducir Death_A una sola vez (loop = false).
         // Babylon congela el modelo en el último frame automáticamente al acabar.

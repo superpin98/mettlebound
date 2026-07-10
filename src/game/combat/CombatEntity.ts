@@ -474,6 +474,38 @@ export class CombatEntity {
 
   // -- Ciclo de vida -----------------------------------------------------------
 
+  // -- Utilidades de layout -----------------------------------------------------
+
+  /**
+   * Calcula el límite Y superior del modelo en espacio local (relativo al pivot).
+   *
+   * Fuerza la actualización de matrices mundo antes de leer los bounding boxes,
+   * garantizando valores correctos incluso si la escena no ha renderizado aún.
+   *
+   * Uso típico: calcular el yOffset para CombatNameLabel / CombatHpBar de forma
+   * dinámica y genérica, sin importar la altura real del GLB cargado.
+   *
+   * @returns Altura máxima local del modelo sobre el pivot (nunca < 0.5).
+   */
+  computeModelTopY(): number {
+    if (this._instance === null) { return 2.0; }
+    const meshes = this._instance.rootNode.getChildMeshes(false);
+    if (meshes.length === 0) { return 2.0; }
+    const pivotY  = this._pivot.getAbsolutePosition().y;
+    let   maxLocalY = 0.5; // mínimo defensivo
+    for (const mesh of meshes) {
+      // Forzar actualización de la matriz mundo antes de leer la bounding box.
+      mesh.computeWorldMatrix(true);
+      const worldMaxY = mesh.getBoundingInfo().boundingBox.maximumWorld.y;
+      const localY    = worldMaxY - pivotY;
+      if (localY > maxLocalY) { maxLocalY = localY; }
+    }
+    logger.debug('CombatEntity.computeModelTopY', {
+      entity: this.combatant.displayName, maxLocalY,
+    });
+    return maxLocalY;
+  }
+
   /**
    * Libera todos los recursos 3D (meshes, animaciones, pivot).
    * Llamar al finalizar el combate o al destruir la escena.

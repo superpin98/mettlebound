@@ -30,7 +30,7 @@ export type GameEventMap = {
   'player:xp-gained': { amount: number; snapshot: PlayerSnapshot };
   'player:attack': null;        // swing iniciado
   'player:attack-hit': { body: PhysicsBody };  // impacto real: hitbox tocó un cuerpo
-  'player:death':      null;        // HP llegó a 0 — emitido una sola vez por PlayerStats
+  'player:death':      { cause: string } | null;  // HP llegó a 0; cause = razón (null en exploración)
   'player:death-anim-end': null;     // animación Death_A terminada — dispara el GameOverModal
   'combat:start':      null;         // transición exploración→combate iniciada (freeze todo)
   'combat:end':        null;         // vuelta a exploración (unfreeze)

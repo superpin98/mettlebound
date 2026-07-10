@@ -29,6 +29,7 @@ import { CombatTurnSystem }     from '@/game/combat/CombatTurnSystem';
 import { CombatActionBar }      from '@/ui/CombatActionBar';
 import { InitiativeSystem, hasTrait } from '@/game/combat/InitiativeSystem';
 import { CombatHpBar }           from '@/game/combat/CombatHpBar';
+import { CombatNameLabel }      from '@/game/combat/CombatNameLabel';
 import { CombatAttackSystem }    from '@/game/combat/CombatAttackSystem';
 import type { InitCombatantDef } from '@/game/combat/InitiativeSystem';
 import { InitiativeTracker }    from '@/ui/InitiativeTracker';
@@ -146,6 +147,8 @@ playerController.setCamera(cameraController.camera);
   let playerEntityCombat: import('@/game/combat/CombatEntity').CombatEntity | null = null;
   // HP bar de Rusty — hoisted para dispose en onRestoreExploration.
   let rustyHpBar: import('@/game/combat/CombatHpBar').CombatHpBar | null = null;
+  // Label pixel art de nombre de Rusty — hoisted para dispose.
+  let rustyNameLabel: CombatNameLabel | null = null;
   // Nivel de Rusty — controla escalado de stats (dev panel).
   let rustyLevel = 1;
   // Stats base de Rusty (nivel 1, sin escalar).
@@ -272,8 +275,29 @@ playerController.setCamera(cameraController.camera);
             grid,     // para isInBounds + occupantAt en _tryAutoApproach
           );
 
-          // HP bar sobre la cabeza de Rusty (por encima de su label de nombre)
-          rustyHpBar = new CombatHpBar(scene, rustyEntity.pivot, { yOffset: 2.75 });
+          // Posicionamiento dinámico sobre la cabeza del modelo:
+          //   - computeModelTopY() devuelve el max Y de la bounding box (local al pivot)
+          //   - Así funciona para Rusty, el caballero y cualquier enemigo futuro
+          //     sin hardcodear alturas fijas.
+          const rustyTopY   = rustyEntity.computeModelTopY();
+          const LABEL_H     = 0.44;   // planeHeight de CombatNameLabel
+          const HP_H        = 0.175;  // planeHeight de CombatHpBar
+          const LABEL_MARGIN = 0.06;  // espacio sobre la cabeza
+          const LABEL_GAP    = 0.04;  // separación entre nombre y barra
+
+          // Centro del nombre: MARGIN encima del top + la mitad del plano
+          const nameLabelY = rustyTopY + LABEL_MARGIN + LABEL_H / 2;
+          // Centro de la HP bar: justo encima del nombre
+          const hpBarY     = nameLabelY + LABEL_H / 2 + LABEL_GAP + HP_H / 2;
+
+          rustyNameLabel = new CombatNameLabel(
+            scene,
+            rustyEntity.pivot,
+            rustyEntity.combatant.displayName,
+            { yOffset: nameLabelY },
+          );
+
+          rustyHpBar = new CombatHpBar(scene, rustyEntity.pivot, { yOffset: hpBarY });
           rustyHpBar.update(rustyEntity.combatant.currentHp, rustyEntity.combatant.maxHp);
 
           combatAttackSys.registerTarget('rusty', rustyEntity, rustyHpBar, rustyLevel);
@@ -317,6 +341,8 @@ playerController.setCamera(cameraController.camera);
       // TODO (pieza futura): cadaver saqueable con tecla E.
       if (rusty.isDead) { rusty.showCorpse(); }
       // Limpiar entidades de combate
+      rustyNameLabel?.dispose();
+      rustyNameLabel = null;
       rustyHpBar?.dispose();
       rustyHpBar = null;
       rustyEntity?.dispose();
@@ -387,14 +413,51 @@ playerController.setCamera(cameraController.camera);
     }
   });
 
-  // -- Derrota: el jugador murio en combate → parar turnos (Game Over ya gestionado)
-  // La cadena player:death → PlayerController (Death_A) → player:death-anim-end → GameOverModal
-  // ya funciona. Solo necesitamos parar el CombatTurnSystem para que no siga avanzando.
+  // -- Derrota: jugador muerto en combate → secuencia cinemática AAA --
+  //
+  // Flujo:
+  //   1. Parar CombatTurnSystem (ningún enemigo actúa más)
+  //   2. Apuntar la cámara de combate al jugador y bloquear controles
+  //   3. Reproducir la animación de muerte en el CombatEntity visible
+  //   4. Al terminar la animación, emitir player:death-anim-end → GameOverModal con fade
+  //
+  // PlayerController también escucha player:death, pero detecta _isInCombat=true
+  // y devuelve sin reproducir Death_A ni emitir player:death-anim-end.
   eventBus.on('player:death', () => {
-    if (!_combatActive) { return; } // solo actuar si estamos en combate
-    logger.info('main: jugador muerto en combate — parando CombatTurnSystem');
+    if (!_combatActive) { return; }
+
+    logger.info('main: jugador muerto en combate — iniciando cinemática de muerte');
+
+    // 1. Limpiar UI de combate inmediatamente (antes de la animación)
+    movSys?.deactivate();         // oculta CombatReachableHighlight + MovementBar
+    combatActionBar?.hide();      // oculta barra de acciones
+    endTurnBtn.classList.remove('visible');
+    endTurnBtn.disabled = true;
+
+    // 2. Parar ciclo de turnos
     turnSys?.dispose();
     turnSys = null;
+
+    // 2. Apuntar cámara al jugador y bloquear controles
+    if (playerEntityCombat !== null) {
+      const cam = combatTransition.combatCamera.camera;
+      cam.target = playerEntityCombat.pivot.getAbsolutePosition();
+      cam.radius = 6;
+      cam.beta   = Math.PI / 2.5;  // ángulo bajo — perspectiva dramática frontal
+      combatTransition.combatCamera.lockForCinematic();
+    }
+
+    // 3. Reproducir animación de muerte en el entity visible del tablero
+    if (playerEntityCombat !== null) {
+      playerEntityCombat.playDeathAnim(() => {
+        // 4. Fin de animación → GameOverModal con fade
+        eventBus.emit('player:death-anim-end', null);
+        logger.info('main: Death_A (combat entity) terminada — emitiendo player:death-anim-end');
+      });
+    } else {
+      // Sin entidad visible: Game Over inmediato
+      eventBus.emit('player:death-anim-end', null);
+    }
   });
 
   // -- Sistemas de juego ------------------------------------------------------

@@ -1443,6 +1443,107 @@ body {
   line-height:  1.6;
 }
 
+/* ─── GameOver Overlay ──────────────────────────────────────────────────── */
+
+#gameover-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9900;
+  background: rgba(4, 2, 10, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  backdrop-filter: blur(6px);
+  /* Fade in controlado por .visible */
+  opacity: 0;
+  transition: opacity 800ms ease;
+}
+
+#gameover-overlay.visible {
+  opacity: 1;
+}
+
+#gameover-overlay.hidden {
+  display: none;
+}
+
+/* ─── GameOver Modal ────────────────────────────────────────────────────── */
+
+#gameover-modal {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-gold-dim);
+  border-radius: 4px;
+  padding: 40px 48px;
+  width: min(440px, 90vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  box-shadow:
+    0 0 60px rgba(180, 20, 20, 0.25),
+    inset 0 0 80px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  transform: translateY(10px);
+  transition: transform 800ms ease;
+}
+
+#gameover-overlay.visible #gameover-modal {
+  transform: translateY(0);
+}
+
+.gameover-ornament {
+  font-size: 30px;
+  color: var(--rarity-cursed-mid, #8b2020);
+  line-height: 1;
+  margin-bottom: 18px;
+  opacity: 0.85;
+}
+
+.gameover-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  color: var(--text-primary);
+  letter-spacing: 0.22em;
+  text-shadow: 0 0 28px rgba(200, 30, 30, 0.55);
+  margin: 0 0 18px;
+}
+
+.gameover-divider {
+  width: 160px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-gold-dim), transparent);
+  margin-bottom: 20px;
+}
+
+.gameover-cause {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--rarity-cursed-mid, #8b2020);
+  margin: 0 0 10px;
+}
+
+.gameover-cause.hidden { display: none; }
+
+.gameover-flavor {
+  font-family: var(--font-body, serif);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0 0 32px;
+  line-height: 1.6;
+}
+
+.gameover-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 0;
+}
+
 /* Base compartida de botones Game Over */
 .gameover-btn {
   font-family: var(--font-ui);
@@ -1844,3 +1945,12 @@ body {
 }
 
 #end-turn-btn:dis
+
+/* ── Cursor de selección de ataque ──────────────────────────────────────────── */
+/* Al entrar en modo selección (CombatAttackSystem.enterSelectMode), se añade    */
+/* la clase mb-selecting-target al body. El canvas y todo elemento encima pasan  */
+/* a mostrar la espada pixel art (32×32, hotspot en la punta: 3 3).              */
+body.mb-selecting-target #renderCanvas,
+body.mb-selecting-target #renderCanvas * {
+  cursor: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiI+CiAgPGcgc3Ryb2tlPSIjMGEwNjA0IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPGxpbmUgeDE9IjMiIHkxPSIzIiB4Mj0iMjAiIHkyPSIyMCIgc3Ryb2tlLXdpZHRoPSI0Ii8+CiAgICA8bGluZSB4MT0iOSIgeTE9IjE5IiB4Mj0iMTkiIHkyPSI5IiAgc3Ryb2tlLXdpZHRoPSI0Ii8+CiAgICA8bGluZSB4MT0iMjAiIHkxPSIyMCIgeDI9IjI1IiB5Mj0iMjUiIHN0cm9rZS13aWR0aD0iNCIvPgogICAgPGNpcmNsZSBjeD0iMjciIGN5PSIyNyIgcj0iMy41IiBmaWxsPSIjMGEwNjA0IiBzdHJva2U9Im5vbmUiLz4KICA8L2c+CiAgPGcgc3Ryb2tlPSIjZjJlOGMwIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogICAgPGxpbmUgeDE9IjMiIHkxPSIzIiB4Mj0iMjAiIHkyPSIyMCIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgICA8bGluZSB4MT0iOSIgeTE9IjE5IiB4Mj0iMTkiIHkyPSI5IiAgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KICAgIDxsaW5lIHgxPSIyMCIgeTE9IjIwIiB4Mj0iMjUiIHkyPSIyNSIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KICAgIDxjaXJjbGUgY3g9IjI3IiBjeT0iMjciIHI9IjIiIGZpbGw9IiNmMmU4YzAiIHN0cm9rZT0ibm9uZSIvPgogIDwvZz4KPC9zdmc+") 3 3, crosshair;
+}

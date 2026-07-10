@@ -76,6 +76,11 @@ export class CombatTransition {
     this._combatCamera          = new CombatCamera(scene);
   }
 
+  // -- Accesores ----------------------------------------------------------------
+
+  /** Referencia a la cámara de combate — usada por main.ts para cinemáticas. */
+  get combatCamera(): CombatCamera { return this._combatCamera; }
+
   // -- Entrada ------------------------------------------------------------------
 
   /** Arranca la secuencia cinematica de entrada al combate. */

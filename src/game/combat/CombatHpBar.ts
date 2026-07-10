@@ -1,17 +1,17 @@
 /**
- * CombatHpBar -- barra de HP 3D como billboard, reutilizable para cualquier entidad.
+ * CombatHpBar -- barra de HP 3D pixel art, reutilizable para cualquier entidad.
  *
- * Patrón idéntico al label de RustyController:
- *   CreatePlane + billboardMode ALL + parent al pivot de la entidad.
- *   DynamicTexture: fondo oscuro + rect rojo (HP perdido) + rect verde (HP actual).
- *
- * El color de relleno cambia a naranja cuando la entidad está por debajo
- * del LOW_HP_THRESHOLD (30% de HP).
+ * Técnica de pixel art marcado (misma que CombatNameLabel):
+ *   1. DynamicTexture a resolución moderada (96×12 px).
+ *      Mapeada a un plano 1.4u × 0.175u → cada texel ocupa ~2-3 px pantalla.
+ *   2. samplingMode = Texture.NEAREST_SAMPLINGMODE → bordes duros, sin blur.
+ *   3. Colores planos (sin gradientes): verde → naranja/rojo al bajar HP.
+ *   4. Borde dibujado con fillRect (no strokeRect) para evitar antialiasing.
  *
  * Uso típico:
  *   const hpBar = new CombatHpBar(scene, entity.pivot);
  *   hpBar.update(entity.combatant.currentHp, entity.combatant.maxHp);
- *   // …más tarde:
+ *   // más tarde:
  *   hpBar.dispose();
  */
 
@@ -19,27 +19,39 @@ import {
   MeshBuilder,
   DynamicTexture,
   StandardMaterial,
+  Texture,
   Color3,
   TransformNode,
 } from '@babylonjs/core';
 import type { Scene, Mesh } from '@babylonjs/core';
 import { logger } from '@/core/Logger';
 
-// ── Constantes de dibujo ───────────────────────────────────────────────────────
+// ── Textura (baja resolución → píxeles gordos) ────────────────────────────────
 
-/** Resolución interna de la textura (píxeles). */
-const TEX_W = 256;
-const TEX_H = 32;
+/**
+ * Ancho de la textura interna (×2 del original).
+ * Doblar la resolución mantiene NEAREST chunky pero mejora la legibilidad del borde.
+ */
+const TEX_W = 96;
 
-const COLOR_BG   = 'rgba(10, 5, 5, 0.80)';  // fondo oscuro semitransparente
-const COLOR_LOST = '#5a1a1a';                  // HP perdido — rojo oscuro
-const COLOR_FULL = '#2a7a2a';                  // HP lleno/normal — verde
-const COLOR_LOW  = '#a05000';                  // HP < 30% — naranja-rojo
+/** Alto de la textura interna. 12px: 2 borde + 8 contenido + 2 borde bottom. */
+const TEX_H = 12;
 
-/** Ratio de HP a partir del que la barra se muestra en COLOR_LOW. */
-const LOW_HP_THRESHOLD = 0.30;
+// ── Colores planos (sin gradientes) ───────────────────────────────────────────
 
-// ── Opciones ───────────────────────────────────────────────────────────────────
+const COLOR_BG     = 'rgba(6, 3, 14, 0.82)';  // fondo negro-púrpura Grimspire
+const COLOR_BORDER = 'rgba(0, 0, 0, 0.95)';    // borde duro 1px
+const COLOR_LOST   = '#4a1010';                 // HP perdido — rojo oscuro apagado
+const COLOR_FULL   = '#1a6b1a';                 // HP lleno/normal — verde oscuro
+const COLOR_MID    = '#6b4000';                 // HP medio (~50%) — naranja oscuro
+const COLOR_LOW    = '#8b1010';                 // HP crítico (<30%) — rojo
+
+/** Porcentaje a partir del que la barra se vuelve naranja. */
+const MID_THRESHOLD  = 0.50;
+/** Porcentaje a partir del que la barra se vuelve roja. */
+const LOW_THRESHOLD  = 0.25;
+
+// ── Opciones ──────────────────────────────────────────────────────────────────
 
 /**
  * Opciones de creación de CombatHpBar.
@@ -47,11 +59,11 @@ const LOW_HP_THRESHOLD = 0.30;
  * para entidades de ~2 unidades de altura (modelos KayKit).
  */
 export interface CombatHpBarOptions {
-  /** Altura sobre el pivot (eje Y), en unidades de mundo. Por defecto 2.3. */
+  /** Altura sobre el pivot (eje Y). Por defecto 1.50 (encima del nombre). */
   yOffset?: number;
   /** Anchura del plano 3D. Por defecto 1.4. */
   planeWidth?: number;
-  /** Altura del plano 3D. Por defecto 0.18. */
+  /** Altura del plano 3D. Por defecto 0.175. */
   planeHeight?: number;
 }
 
@@ -72,11 +84,11 @@ export class CombatHpBar {
     pivot:   TransformNode,
     options: CombatHpBarOptions = {},
   ) {
-    const yOffset    = options.yOffset    ?? 2.3;
+    const yOffset     = options.yOffset    ?? 1.50;
     const planeWidth  = options.planeWidth  ?? 1.4;
-    const planeHeight = options.planeHeight ?? 0.18;
+    const planeHeight = options.planeHeight ?? 0.175;
 
-    // ── Plano 3D que siempre mira a la cámara ──────────────────────────────────
+    // ── Plano 3D billboard ─────────────────────────────────────────────────────
     this._plane = MeshBuilder.CreatePlane(
       'combatHpBar',
       { width: planeWidth, height: planeHeight },
@@ -85,26 +97,26 @@ export class CombatHpBar {
     this._plane.billboardMode = TransformNode.BILLBOARDMODE_ALL;
     this._plane.position.y    = yOffset;
     this._plane.parent        = pivot;
-    this._plane.isPickable    = false; // no interferir con raycast de ataque
+    this._plane.isPickable    = false;
 
-    // ── Textura dinámica ────────────────────────────────────────────────────────
+    // ── Textura baja resolución + NEAREST_SAMPLINGMODE ─────────────────────────
     this._tex = new DynamicTexture(
       'combatHpBar_tex',
       { width: TEX_W, height: TEX_H },
       scene,
-      false,  // no regenerar mipmaps — innecesario para UI 2D
+      false,
+      Texture.NEAREST_SAMPLINGMODE,   // sin interpolación → píxeles duros
     );
     this._tex.hasAlpha = true;
 
     const mat = new StandardMaterial('combatHpBar_mat', scene);
     mat.diffuseTexture             = this._tex;
     mat.useAlphaFromDiffuseTexture = true;
-    mat.emissiveColor              = new Color3(1, 1, 1); // visible sin iluminación
+    mat.emissiveColor              = new Color3(1, 1, 1);
     mat.backFaceCulling            = false;
     mat.disableLighting            = true;
     this._plane.material           = mat;
 
-    // Dibujar barra al 100% en la creación
     this._draw(1.0);
 
     logger.debug('CombatHpBar: creada', { pivot: pivot.name, yOffset });
@@ -114,8 +126,6 @@ export class CombatHpBar {
 
   /**
    * Redibuja la barra con los nuevos valores de HP.
-   * Llamar después de cada takeDamage() o heal().
-   *
    * @param currentHp HP actual de la entidad.
    * @param maxHp     HP máximo de la entidad.
    */
@@ -140,26 +150,40 @@ export class CombatHpBar {
     const w   = TEX_W;
     const h   = TEX_H;
 
-    // Limpiar y dibujar fondo
+    // Limpiar
     ctx.clearRect(0, 0, w, h);
+
+    // Fondo Grimspire
     ctx.fillStyle = COLOR_BG;
     ctx.fillRect(0, 0, w, h);
 
-    // Franja de HP perdido (fondo rojo oscuro interior)
-    ctx.fillStyle = COLOR_LOST;
-    ctx.fillRect(2, 2, w - 4, h - 4);
+    // Interior: zona de HP (borde 2px, contenido y=2..y=9, 8 px de alto)
+    const innerX = 2;
+    const innerY = 2;
+    const innerW = w - 4;  // 92 px
+    const innerH = h - 4;  // 8 px
 
-    // Franja de HP actual
-    const fillW = Math.round((w - 4) * ratio);
+    ctx.fillStyle = COLOR_LOST;
+    ctx.fillRect(innerX, innerY, innerW, innerH);
+
+    // Interior: zona de HP actual
+    const fillW = Math.round(innerW * ratio);
     if (fillW > 0) {
-      ctx.fillStyle = ratio < LOW_HP_THRESHOLD ? COLOR_LOW : COLOR_FULL;
-      ctx.fillRect(2, 2, fillW, h - 4);
+      const color = ratio < LOW_THRESHOLD
+        ? COLOR_LOW
+        : ratio < MID_THRESHOLD
+          ? COLOR_MID
+          : COLOR_FULL;
+      ctx.fillStyle = color;
+      ctx.fillRect(innerX, innerY, fillW, innerH);
     }
 
-    // Borde sutil
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
-    ctx.lineWidth   = 1;
-    ctx.strokeRect(1, 1, w - 2, h - 2);
+    // Borde 2px (fillRect — sin antialiasing, proporcional a resolución ×2)
+    ctx.fillStyle = COLOR_BORDER;
+    ctx.fillRect(0, 0, w, 2);       // top
+    ctx.fillRect(0, h - 2, w, 2);   // bottom
+    ctx.fillRect(0, 0, 2, h);       // left
+    ctx.fillRect(w - 2, 0, 2, h);   // right
 
     this._tex.update();
   }

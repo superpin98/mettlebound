@@ -192,7 +192,7 @@ export class PlayerStats {
     this.emitStatsChanged();
   }
 
-  takeDamage(amount: number): void {
+  takeDamage(amount: number, cause?: string): void {
     this.currentHp = Math.max(0, this.currentHp - amount);
     this.emitStatsChanged();
     // Detección de muerte: se emite una sola vez (flag _isDead evita re-emisión).
@@ -200,7 +200,7 @@ export class PlayerStats {
     // tanto en exploración como en combate.
     if (this.currentHp === 0 && !this._isDead) {
       this._isDead = true;
-      eventBus.emit('player:death', null);
+      eventBus.emit('player:death', cause !== undefined ? { cause } : null);
     }
   }
 
