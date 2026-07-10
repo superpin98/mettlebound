@@ -23,7 +23,7 @@
  *   skills de dash/TP pueden no bloquearlo. Hoy: siempre bloquea.
  *
  * Fórmula de daño exportada:
- *   calcBasicAttackDamage(coreStats) → 5 + floor(STR / 10).
+ *   calcBasicAttackDamage(coreStats) → round(DAÑO_BASE + STR × FACTOR_STR).
  *   Importable desde cualquier skill futura sin depender de esta clase.
  */
 
@@ -40,19 +40,27 @@ import type { GridCell }             from '@/game/combat/CombatPathfinder';
 import type { CoreStats }            from '@/types/game.types';
 import { CombatPathfinder }          from '@/game/combat/CombatPathfinder';
 import { logger }                    from '@/core/Logger';
+import { eventBus }                  from '@/core/EventBus';
 
 // ── Fórmula de daño (exportada para reutilizar en futuros ataques) ──────────────
 
+/** Daño base independiente de stats. */
+const DAÑO_BASE  = 3;
+/** Fracción de STR que se suma al daño. */
+const FACTOR_STR = 0.5;
+
 /**
  * Calcula el daño de un ataque básico cuerpo a cuerpo.
- * Fórmula: 5 + floor(STR / 10).
- *   STR  0 → 5 de daño
- *   STR 10 → 6 de daño
- *   STR 20 → 7 de daño
+ * Fórmula: round(DAÑO_BASE + STR × FACTOR_STR).
+ *   STR  0  →  3 de daño
+ *   STR 10  →  8 de daño
+ *   STR 50  → 28 de daño
+ *   STR 100 → 53 de daño
  * Centralizada aquí para cambiarla sin buscar en múltiples archivos.
+ * Aplica igual a jugador y enemigos (ambos usan esta función).
  */
 export function calcBasicAttackDamage(attackerStats: CoreStats): number {
-  return 5 + Math.floor(attackerStats.STR / 10);
+  return Math.round(DAÑO_BASE + attackerStats.STR * FACTOR_STR);
 }
 
 // ── Tipos internos ──────────────────────────────────────────────────────────────
@@ -61,6 +69,8 @@ export function calcBasicAttackDamage(attackerStats: CoreStats): number {
 interface AttackTarget {
   readonly entity: CombatEntity;
   readonly hpBar:  CombatHpBar;
+  /** Nivel del enemigo — usado para calcular la XP al matarlo. */
+  readonly level:  number;
 }
 
 /** Offsets de las 8 casillas adyacentes (excluye [0,0]). */
@@ -125,9 +135,9 @@ export class CombatAttackSystem {
    * Registra una entidad como objetivo atacable.
    * Para N enemigos: llamar una vez por cada uno.
    */
-  registerTarget(id: string, entity: CombatEntity, hpBar: CombatHpBar): void {
-    this._targets.set(id, { entity, hpBar });
-    logger.debug('CombatAttackSystem: objetivo registrado', { id });
+  registerTarget(id: string, entity: CombatEntity, hpBar: CombatHpBar, level = 1): void {
+    this._targets.set(id, { entity, hpBar, level });
+    logger.debug('CombatAttackSystem: objetivo registrado', { id, level });
   }
 
   /**
@@ -347,6 +357,9 @@ export class CombatAttackSystem {
     // Tweak 1: bloquear movimiento durante el swing
     this._movSys.blockInputClicks(true);
 
+    // Girar al jugador hacia el objetivo antes del swing (snap instantaneo)
+    this._playerEntity.faceTowardCell(target.entity.cellX, target.entity.cellZ);
+
     this._playerEntity.playAttackAnim(() => {
       target.entity.combatant.takeDamage(dmg);
       target.hpBar.update(
@@ -363,6 +376,13 @@ export class CombatAttackSystem {
         maxHp:  target.entity.combatant.maxHp,
         isDead: target.entity.combatant.isDead,
       });
+
+      // Si el objetivo murio, emitir combat:enemy-killed para que main.ts
+      // coordine la animacion de muerte + XP + salida del combate.
+      if (target.entity.combatant.isDead) {
+        eventBus.emit('combat:enemy-killed', { level: target.level });
+        logger.info('CombatAttackSystem: objetivo eliminado', { targetId, level: target.level });
+      }
     });
 
     // Consumir acción principal inmediatamente (la UI refleja el gasto ya)

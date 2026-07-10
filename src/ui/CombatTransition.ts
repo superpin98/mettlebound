@@ -47,32 +47,42 @@ const OVERLAY_Z = 9000;
 
 export class CombatTransition {
 
-  private readonly _canvas:              HTMLCanvasElement;
-  private readonly _explorationCamera:   ArcRotateCamera;
-  private readonly _combatGrid:          CombatGrid;
-  private readonly _combatCamera:        CombatCamera;
-  private readonly _onBlackScreen:       () => void;
-  private readonly _onPlaceCombatants:   (grid: CombatGrid) => Promise<void>;
+  private readonly _scene:                 Scene;
+  private readonly _canvas:               HTMLCanvasElement;
+  private readonly _explorationCamera:    ArcRotateCamera;
+  private readonly _combatGrid:           CombatGrid;
+  private readonly _combatCamera:         CombatCamera;
+  private readonly _onBlackScreen:        () => void;
+  private readonly _onPlaceCombatants:    (grid: CombatGrid) => Promise<void>;
+  private readonly _onRestoreExploration: (() => void) | null;
+  /** Radio original de la camara de exploracion, guardado al inicio de enter(). */
+  private _originalCameraRadius: number | null = null;
 
   constructor(
-    scene:               Scene,
-    canvas:              HTMLCanvasElement,
-    explorationCamera:   ArcRotateCamera,
-    onBlackScreen:       () => void,
-    onPlaceCombatants:   (grid: CombatGrid) => Promise<void>,
+    scene:                  Scene,
+    canvas:                 HTMLCanvasElement,
+    explorationCamera:      ArcRotateCamera,
+    onBlackScreen:          () => void,
+    onPlaceCombatants:      (grid: CombatGrid) => Promise<void>,
+    onRestoreExploration?:  () => void,
   ) {
-    this._canvas              = canvas;
-    this._explorationCamera   = explorationCamera;
-    this._onBlackScreen       = onBlackScreen;
-    this._onPlaceCombatants   = onPlaceCombatants;
-    this._combatGrid          = new CombatGrid(scene);
-    this._combatCamera        = new CombatCamera(scene);
+    this._scene                 = scene;
+    this._canvas                = canvas;
+    this._explorationCamera     = explorationCamera;
+    this._onBlackScreen         = onBlackScreen;
+    this._onPlaceCombatants     = onPlaceCombatants;
+    this._onRestoreExploration  = onRestoreExploration ?? null;
+    this._combatGrid            = new CombatGrid(scene);
+    this._combatCamera          = new CombatCamera(scene);
   }
 
   // -- Entrada ------------------------------------------------------------------
 
   /** Arranca la secuencia cinematica de entrada al combate. */
   async enter(): Promise<void> {
+
+    // Guardar radio original de la camara de exploracion para restaurarlo en exit()
+    this._originalCameraRadius = this._explorationCamera.radius;
 
     // a. Zoom cinematic de la camara de exploracion (simultaneo con blur)
     this._animateRadius(ZOOM_RADIUS_TARGET, T_ZOOM_MS);
@@ -125,22 +135,53 @@ export class CombatTransition {
   // -- Salida -------------------------------------------------------------------
 
   /**
-   * Vuelta a exploracion.
-   * No implementado todavia -- el combate es irreversible hasta que se desarrolle
-   * el flujo completo de victoria/derrota en un sprint posterior.
+   * Vuelta a exploracion desde el combate.
+   *
+   * Flujo simetrico a enter():
+   *   a. Fade a negro (T_FADE_MS)
+   *   b. Mientras la pantalla esta negra:
+   *       - combatCamera.deactivate()
+   *       - Restaurar escena de exploracion: activeCamera + attachControl + radius
+   *       - Llamar onRestoreExploration() -> mostrar meshes + player + Rusty
+   *       - combatGrid.hide()
+   *   c. Fade back in (T_REVEAL_MS)
+   *   d. eventBus.emit('combat:end', null)
    */
   async exit(): Promise<void> {
-    // TODO Sprint futuro:
-    //   1. Fade a negro
-    //   2. combatCamera.deactivate()
-    //   3. Reactivar exploracion (meshes + player + Rusty)
-    //   4. Restaurar scene.activeCamera + explorationCamera.attachControl()
-    //   5. Ocultar combatGrid (+ dispose fichas de combate)
-    //   6. Restaurar radius de la camara de exploracion
-    //   7. Fade back in
-    //   8. eventBus.emit('combat:end', null)
-    logger.warn('CombatTransition.exit(): no implementado todavia');
+    // a. Fade a negro
+    const overlay = this._buildOverlay();
+    // Iniciar con fondo semitransparente y transicionar a negro total
+    document.body.appendChild(overlay);
+    overlay.getBoundingClientRect(); // forzar reflow
+    await this._sleep(16);
+    overlay.style.background = 'rgba(0, 0, 0, 1)';
+    await this._sleep(T_FADE_MS);
+
+    // b. Pantalla a negro: intercambiar escena
+    this._combatCamera.deactivate();
+
+    // Restaurar la camara de exploracion
+    this._scene.activeCamera = this._explorationCamera;
+    this._explorationCamera.attachControl(this._canvas, true);
+    if (this._originalCameraRadius !== null) {
+      this._explorationCamera.radius = this._originalCameraRadius;
+    }
+
+    // Restaurar meshes y entidades de exploracion; limpiar entidades de combate
+    this._onRestoreExploration?.();
+
+    // Ocultar el tablero tactico
+    this._combatGrid.hide();
+
+    // c. Fade back in
+    overlay.style.transition = `opacity ${T_REVEAL_MS}ms ease`;
+    overlay.style.opacity    = '0';
+    await this._sleep(T_REVEAL_MS + 50);
+    overlay.remove();
+
+    // d. Notificar fin de combate
     eventBus.emit('combat:end', null);
+    logger.info('CombatTransition.exit(): transicion de salida completada');
   }
 
   // -- Construccion DOM ---------------------------------------------------------

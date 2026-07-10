@@ -36,6 +36,7 @@ export type GameEventMap = {
   'combat:end':        null;         // vuelta a exploración (unfreeze)
   'combat:turn-start': { combatantId: string; isPlayer: boolean; turnNumber: number };
   'combat:turn-end':   { combatantId: string };
+  'combat:enemy-killed': { level: number };   // enemigo derrotado en combate — payload: nivel del enemigo
   'input:attack': null;         // click izquierdo detectado por InputManager
   'ui:show-level-up-modal': { snapshot: PlayerSnapshot };
   'ui:close-level-up-modal': null;

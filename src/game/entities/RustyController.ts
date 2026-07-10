@@ -73,11 +73,15 @@ export class RustyController extends Combatant {
   private _idleAnim:              AnimationGroup | null = null;
   private _walkAnim:              AnimationGroup | null = null;
   private _currentAnim:           AnimationGroup | null = null;
+  /** Todos los AnimationGroups del GLB — para buscar animaciones adicionales (ej: muerte). */
+  private _allAnimGroups:         AnimationGroup[]      = [];
   private _wanderTarget:          Vector3;
   private _isWaiting:             boolean = true;
   private _waitTimer:             number  = 0;
   private _observer:              Observer<Scene> | null = null;
   private _isInCombat:            boolean = false;
+  /** True cuando Rusty fue eliminado en combate. Impide que _update() lo mueva. */
+  private _isDead:                boolean = false;
   private _pivotBody:             PhysicsBody | null = null;
   private _pivotShape:            PhysicsShapeCapsule | null = null;
 
@@ -154,6 +158,7 @@ export class RustyController extends Combatant {
    * Los AnimationGroups instanciados llevan sufijo _instN — se elimina para comparar.
    */
   private _resolveAnims(groups: AnimationGroup[]): void {
+    this._allAnimGroups = [...groups]; // guardar todos para busquedas futuras (ej: muerte)
     const find = (target: string): AnimationGroup | null =>
       groups.find((g) => g.name.replace(/_inst\d+$/, '') === target) ?? null;
 
@@ -223,6 +228,7 @@ export class RustyController extends Combatant {
   }
 
   private _update(): void {
+    if (this._isDead)     { return; } // muerto — no mover ni animar nunca
     // Guard: en combate — congelar wander
     if (this._isInCombat) { return; }
 
@@ -299,6 +305,65 @@ export class RustyController extends Combatant {
   /**
    * Activa o desactiva a Rusty y todos sus meshes hijo.
    * Usado para ocultarlo al entrar en la escena de combate.
+   */
+  /**
+   * Marca a este NPC como muerto.
+   * Detiene inmediatamente cualquier movimiento de exploracion y evita que
+   * setEnabled(true) lo reactive. Generico: preparado para cualquier enemigo.
+   */
+  /**
+   * Marca al NPC como muerto.
+   * Solo establece el flag — NO oculta el mesh. El cuerpo permanece visible.
+   * El comportamiento (movimiento, IA) se detiene via el guard en _update().
+   * Para mostrar la pose de muerte en exploracion, llama showCorpse() aparte.
+   */
+  markDead(): void {
+    this._isDead = true;
+    // No ocultamos el pivot: el cadaver debe seguir visible en exploracion.
+  }
+
+  /**
+   * Congela al NPC en la pose de muerte para la escena de exploracion.
+   * Busca cualquier AnimationGroup cuyo nombre contenga 'death' (case-insensitive)
+   * y lo reproduce UNA vez (loop=false): Babylon.js deja el ultimo frame visible.
+   * Si no existe animacion de muerte, detiene la animacion actual (pose neutra).
+   *
+   * TODO (pieza futura): este cadaver sera saqueable con tecla E.
+   */
+  showCorpse(): void {
+    // Detener TODAS las animaciones activas (Idle, Walk, cualquier otra)
+    for (const g of this._allAnimGroups) { g.stop(); }
+    this._currentAnim = null;
+
+    // Buscar animacion de muerte por nombre (mismo criterio que CombatEntity)
+    const deathGroup = this._allAnimGroups.find((g) => {
+      const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
+      return clean !== 'mixamo.com' && clean.includes('death');
+    });
+
+    if (deathGroup === undefined) {
+      logger.debug('RustyController: sin animacion de muerte — cadaver en pose neutra');
+      return;
+    }
+
+    // Saltar DIRECTAMENTE al ultimo frame sin reproducir la animacion desde el principio.
+    // Truco: start con from == to == lastFrame → rango 0, el skeleton queda en ese frame
+    // y como loop=false no vuelve a frame 0 ni dispara onEnd.
+    const lastFrame = deathGroup.to;
+    deathGroup.start(false, 1.0, lastFrame, lastFrame, false);
+
+    logger.debug('RustyController: cadaver fijado en ultimo frame de muerte', {
+      anim: deathGroup.name, frame: lastFrame,
+    });
+  }
+
+  /** True si el NPC fue eliminado en combate. */
+  get isDead(): boolean { return this._isDead; }
+
+  /**
+   * Activa/desactiva el pivot de exploracion.
+   * Si el NPC esta muerto, setEnabled(true) ESTA permitido para mostrar el cadaver.
+   * El guard de _isDead en _update() garantiza que no se mueva.
    */
   setEnabled(enabled: boolean): void {
     this._pivot.setEnabled(enabled);

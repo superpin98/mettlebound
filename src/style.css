@@ -1750,8 +1750,8 @@ body {
 }
 
 /* Cada tarjeta de turno.
-   width + overflow: hidden necesarios para la animación de salida
-   (JS anima width → 0 + margin-right → 0 para el efecto slide). */
+   overflow: hidden necesario para que @keyframes initCardLeave
+   colapse width + padding sin desbordamiento visible. */
 .init-card {
   display: flex;
   flex-direction: column;
@@ -1771,6 +1771,31 @@ body {
 .init-card--current {
   border-color: var(--border-gold);
   box-shadow: 0 0 8px 1px rgba(212, 160, 74, 0.4);
+}
+
+/* Animación de salida del turno: width + padding → 0, fade out.
+   Controlada por InitiativeTracker._snapLeaving() — interrumpible en cualquier
+   momento con clearTimeout + .remove(), sin race conditions con JS. */
+@keyframes initCardLeave {
+  from {
+    width:        58px;
+    margin-right: 8px;
+    padding:      6px 4px 5px;
+    border-width: 2px;
+    opacity:      1;
+  }
+  to {
+    width:        0;
+    margin-right: 0;
+    padding:      0;
+    border-width: 0;
+    opacity:      0;
+  }
+}
+
+.init-card--leaving {
+  animation:      initCardLeave 280ms ease forwards;
+  pointer-events: none;
 }
 
 .init-card__icon {
@@ -1818,48 +1843,4 @@ body {
   border-color: var(--border-gold-bright);
 }
 
-#end-turn-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-/* ── CombatAttackSystem: modo selección de objetivo ─────────────────────────── */
-
-/* Cursor punto de mira en toda la página mientras se selecciona objetivo */
-body.mb-selecting-target,
-body.mb-selecting-target * {
-  cursor: crosshair !important;
-}
-
-/* Resaltar el botón de Atacar cuando se está en modo selección */
-#combat-action-bar.cab--selecting .cab-action-btn[data-action-id="attack"] {
-  box-shadow:  0 0 0 2px var(--border-gold), 0 0 8px 2px rgba(192, 160, 96, 0.5);
-  background:  rgba(192, 160, 96, 0.15);
-  border-color: var(--border-gold-bright, #d4b060);
-}
-
-/* ── Toast de feedback de combate ─────────────────────────────────────────────── */
-
-#mb-combat-toast {
-  position:   fixed;
-  bottom:     calc(72px + 24px * var(--ui-scale, 1));  /* por encima de la barra */
-  left:       50%;
-  transform:  translateX(-50%);
-  background: rgba(100, 20, 20, 0.92);
-  color:      #f0d0a0;
-  font-family: 'VT323', monospace;
-  font-size:  clamp(13px, 1.6vw, 17px);
-  letter-spacing: 0.04em;
-  padding:    5px 18px;
-  border:     1px solid rgba(200, 80, 80, 0.5);
-  border-radius: 4px;
-  pointer-events: none;
-  z-index:    3000;
-  opacity:    0;
-  transition: opacity 0.25s ease;
-  white-space: nowrap;
-}
-
-#mb-combat-toast.mb-toast--visible {
-  opacity: 1;
-}
+#end-turn-btn:dis

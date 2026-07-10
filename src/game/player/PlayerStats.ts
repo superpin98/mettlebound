@@ -151,7 +151,7 @@ export class PlayerStats {
   }
 
   gainXpFromKill(enemyLevel: number): void {
-    const xp = xpFromEnemy(enemyLevel, this.level);
+    const xp = xpFromEnemy(enemyLevel);
     this.addXp(xp);
   }
 

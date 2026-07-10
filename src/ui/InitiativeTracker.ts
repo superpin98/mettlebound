@@ -1,31 +1,42 @@
 /**
  * InitiativeTracker -- cola animada de turnos (estilo BG3).
  *
- * Muestra los próximos QUEUE_SIZE turnos como una fila horizontal.
- * El turno EN CURSO es siempre la tarjeta de la izquierda.
+ * Arquitectura: ESTADO separado de PRESENTACIÓN.
  *
- * Cuando el turno avanza (llamando a advance()):
- *   1. La tarjeta actual (izquierda) desaparece con fade + shrink.
- *   2. El resto se deslizan hacia la izquierda (CSS overflow + width → 0).
- *   3. Una nueva tarjeta aparece por la derecha (fade in).
+ * Estado lógico (_queue + _cardEls): se actualiza SÍNCRONAMENTE en cada
+ * llamada pública. Siempre refleja el turno real, a cualquier velocidad.
  *
- * El tracker NO conoce la lógica de turnos ni el orden de combate:
- * recibe una cola inicial y luego una entrada nueva en cada avance.
- * Esto lo hace reutilizable con cualquier InitiativeCalculator externo.
+ * Animación de salida (_leavingCard): puramente decorativa, interrumpible en
+ * cualquier momento mediante _snapLeaving(). Si advance() llega antes de que
+ * termine la animación anterior, hace snap instantáneo y arranca limpio.
+ *
+ * Invariantes garantizados tras cualquier método público:
+ *   - _queue[i] ↔ _cardEls[i]  (siempre sincronizados)
+ *   - _cardEls[0]               (siempre tiene init-card--current)
+ *   - _leavingCard              (nunca tiene init-card--current)
+ *   - máximo 1 elemento saliente en el DOM en todo momento
  */
 
 import type { TurnCombatant } from '@/game/combat/InitiativeSystem';
 
-/** Duración de la animación de salida en ms. */
-const LEAVE_MS  = 280;
-/** Duración de la animación de entrada en ms. */
-const ENTER_MS  = 200;
+/** Duración de la animación de salida en ms (debe coincidir con @keyframes initCardLeave en CSS). */
+const LEAVE_MS = 280;
 
 export class InitiativeTracker {
 
-  private readonly _el:    HTMLElement;
-  /** Tarjetas visibles en orden (index 0 = turno actual). */
-  private readonly _cards: HTMLElement[] = [];
+  private readonly _el: HTMLElement;
+
+  // ── Estado lógico ────────────────────────────────────────────────────────────
+  /** Combatientes en cola, en orden. Index 0 = turno activo. */
+  private _queue:   TurnCombatant[] = [];
+  /** Elementos DOM paralelos a _queue. _cardEls[i] ↔ _queue[i] siempre. */
+  private _cardEls: HTMLElement[]   = [];
+
+  // ── Animación de salida ──────────────────────────────────────────────────────
+  /** Elemento DOM animando su salida (fuera de _queue/_cardEls). Null si no hay animación. */
+  private _leavingCard: HTMLElement | null                    = null;
+  /** Timer para limpiar _leavingCard del DOM tras la animación. */
+  private _leaveTimer:  ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this._el = document.createElement('div');
@@ -41,80 +52,71 @@ export class InitiativeTracker {
    * Llamar UNA VEZ antes de show(), desde CombatTurnSystem.start().
    */
   initQueue(queue: TurnCombatant[]): void {
+    this._snapLeaving();      // cancela animación en curso si la hay
+    this._queue   = [...queue];
+    this._cardEls = [];
     this._el.innerHTML = '';
-    this._cards.length = 0;
 
     for (const entry of queue) {
       const card = this._buildCard(entry);
       this._el.appendChild(card);
-      this._cards.push(card);
+      this._cardEls.push(card);
     }
     this._markFirst();
   }
 
   /**
-   * Avanza la cola: anima la salida del turno actual y añade newEntry al final.
-   * No bloqueante: la animación ocurre en segundo plano.
+   * Avanza la cola: el turno actual sale (animado) y newEntry se añade al final.
+   * No bloqueante: la animación de salida es puramente decorativa y snapeable.
+   *
+   * Si advance() se llama antes de que termine la animación anterior, el elemento
+   * saliente previo hace snap instantáneo (desaparece del DOM en el mismo frame)
+   * y la nueva animación arranca desde un estado limpio.
    *
    * @param newEntry  Entrada que se añade por la derecha para mantener la cola llena.
    */
   advance(newEntry: TurnCombatant): void {
-    const leaving = this._cards[0];
-    if (leaving === undefined) { return; }
+    if (this._queue.length === 0) { return; }
 
-    // Preparar nueva tarjeta (invisible, ya en el DOM para que el layout la incluya)
+    // 1. SNAP: cancela animación de salida anterior si la hay.
+    //    Garantiza máximo 1 elemento saliente en el DOM en todo momento.
+    this._snapLeaving();
+
+    // 2. Extraer el primer elemento de _queue Y _cardEls (síncrono).
+    const leavingEl = this._cardEls.shift();
+    this._queue.shift();
+    if (leavingEl === undefined) { return; }
+
+    // 3. Quitar el resaltado ANTES de empezar la animación de salida.
+    //    _markFirst() solo itera _cardEls (que ya no contiene leavingEl),
+    //    por lo que sin esta línea el saliente conservaría --current durante la animación.
+    leavingEl.classList.remove('init-card--current');
+
+    // 4. Actualizar estado lógico con el nuevo tail (síncrono).
+    this._queue.push(newEntry);
     const newCard = this._buildCard(newEntry);
-    newCard.style.opacity   = '0';
-    newCard.style.transform = 'scale(0.7)';
-    newCard.style.transition = 'none';
     this._el.appendChild(newCard);
-    this._cards.push(newCard);
+    this._cardEls.push(newCard);
 
-    // Animar salida: width → 0 + margin-right → 0 + opacity → 0
-    // (width: 58px está definido en CSS, por lo que la transición funciona)
-    requestAnimationFrame(() => {
-      leaving.style.transition = [
-        `width ${LEAVE_MS}ms ease`,
-        `margin-right ${LEAVE_MS}ms ease`,
-        `padding-left ${LEAVE_MS}ms ease`,
-        `padding-right ${LEAVE_MS}ms ease`,
-        `opacity ${Math.round(LEAVE_MS * 0.78)}ms ease`,
-        `border-width ${LEAVE_MS}ms ease`,
-      ].join(', ');
-      leaving.style.width        = '0';
-      leaving.style.marginRight  = '0';
-      leaving.style.paddingLeft  = '0';
-      leaving.style.paddingRight = '0';
-      leaving.style.borderWidth  = '0';
-      leaving.style.opacity      = '0';
+    // 5. Resaltar el nuevo primer turno — estado correcto, sin timers.
+    this._markFirst();
 
-      setTimeout(() => {
-        leaving.remove();
-        this._cards.shift();
-        this._markFirst();
-
-        // Animar entrada de la nueva tarjeta (ya está en el DOM a la derecha)
-        requestAnimationFrame(() => {
-          newCard.style.transition = [
-            `opacity ${ENTER_MS}ms ease`,
-            `transform ${ENTER_MS}ms ease`,
-          ].join(', ');
-          newCard.style.opacity   = '1';
-          newCard.style.transform = '';
-        });
-      }, LEAVE_MS + 10);
-    });
+    // 6. Animación de salida: CSS puro vía @keyframes initCardLeave.
+    //    Interrumpible en cualquier momento con _snapLeaving().
+    leavingEl.classList.add('init-card--leaving');
+    this._leavingCard = leavingEl;
+    this._leaveTimer  = setTimeout(() => {
+      this._snapLeaving();
+    }, LEAVE_MS + 10);
   }
 
   /**
    * Recalcula y reemplaza la cola completa con una cross-fade suave.
    * Llamar cuando cambia el orden de iniciativa en pleno combate
    * (ej. después de updateCombatantDex).
-   *
-   * La animación: fade out (110ms) → initQueue → fade in (200ms).
-   * No bloquea: la actualización ocurre en segundo plano.
    */
   refreshQueue(newQueue: TurnCombatant[]): void {
+    this._snapLeaving();   // limpia saliente antes del rebuild
     const FADE_OUT_MS = 110;
     const FADE_IN_MS  = 200;
     this._el.style.transition = `opacity ${FADE_OUT_MS}ms ease`;
@@ -136,12 +138,29 @@ export class InitiativeTracker {
 
   /** Oculta y elimina el elemento del DOM. */
   dispose(): void {
+    this._snapLeaving();
     this.hide();
     if (this._el.parentNode !== null) { this._el.remove(); }
-    this._cards.length = 0;
+    this._queue.length   = 0;
+    this._cardEls.length = 0;
   }
 
   // -- Internals -----------------------------------------------------------------
+
+  /**
+   * Cancela y limpia instantáneamente cualquier animación de salida en curso.
+   * Siempre seguro llamar aunque no haya animación activa (no-op si _leavingCard === null).
+   */
+  private _snapLeaving(): void {
+    if (this._leaveTimer !== null) {
+      clearTimeout(this._leaveTimer);
+      this._leaveTimer = null;
+    }
+    if (this._leavingCard !== null) {
+      this._leavingCard.remove();
+      this._leavingCard = null;
+    }
+  }
 
   /** Construye una tarjeta DOM para un combatiente. */
   private _buildCard(entry: TurnCombatant): HTMLElement {
@@ -162,12 +181,16 @@ export class InitiativeTracker {
     return card;
   }
 
-  /** Marca la primera tarjeta de la cola como turno actual. */
+  /**
+   * Marca _cardEls[0] como turno actual y elimina --current del resto.
+   * Opera SOLO sobre _cardEls — nunca toca _leavingCard.
+   * Resultado siempre correcto independientemente del estado de la animación de salida.
+   */
   private _markFirst(): void {
-    for (const card of this._cards) {
+    for (const card of this._cardEls) {
       card.classList.remove('init-card--current');
     }
-    const first = this._cards[0];
+    const first = this._cardEls[0];
     if (first !== undefined) {
       first.classList.add('init-card--current');
     }

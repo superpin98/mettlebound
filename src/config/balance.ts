@@ -46,10 +46,13 @@ export const BALANCE = {
   XP: {
     BASE: 100,                      // XP base para llegar al nivel 2
     EXPONENT: 1.4,                  // exponente de la curva de XP
-    BASE_KILL_XP: 25,               // XP base por matar un enemigo del mismo nivel
-    XP_PER_ENEMY_LEVEL: 12,         // XP extra por cada nivel del enemigo
-    OVER_LEVEL_PENALTY_START: 5,    // diferencia de niveles donde empieza la penalizacion
-    OVER_LEVEL_PENALTY_STEP: 0.1,   // reduccion de XP por cada nivel de diferencia extra
+    BASE_KILL_XP: 25,               // XP base por matar un enemigo del mismo nivel (formula antigua — mantenida para tests)
+    XP_PER_ENEMY_LEVEL: 12,         // XP extra por cada nivel del enemigo (formula antigua — mantenida para tests)
+    OVER_LEVEL_PENALTY_START: 5,    // diferencia de niveles donde empieza la penalizacion (formula antigua)
+    OVER_LEVEL_PENALTY_STEP: 0.1,   // reduccion de XP por cada nivel de diferencia extra (formula antigua)
+    // --- Nueva formula cuadratica (Pieza 6) ---
+    XP_KILL_BASE: 10,               // multiplicador base por kill: XP = XP_KILL_BASE * nivel * (1 + XP_KILL_FACTOR * nivel)
+    XP_KILL_FACTOR: 0.15,           // factor cuadratico: crece con el cuadrado del nivel enemigo
   },
 
   ESCAPE: {

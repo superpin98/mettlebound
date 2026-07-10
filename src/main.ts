@@ -34,6 +34,11 @@ import type { InitCombatantDef } from '@/game/combat/InitiativeSystem';
 import { InitiativeTracker }    from '@/ui/InitiativeTracker';
 import { getClassById }          from '@/config/classes.config';
 import { RunState }             from '@/game/RunState';
+import { EnemyAI }             from '@/game/combat/EnemyAction';
+import { MeleeAttackAction }   from '@/game/combat/actions/MeleeAttackAction';
+import { ApproachAction }      from '@/game/combat/actions/ApproachAction';
+import { scaleEnemyStatsByLevel } from '@/game/combat/EnemyScaling';
+import { gameRng }             from '@/utils/random';
 
 import { eventBus }            from '@/core/EventBus';
 import { logger }              from '@/core/Logger';
@@ -137,6 +142,14 @@ playerController.setCamera(cameraController.camera);
   let combatAttackSys: CombatAttackSystem | null = null;
   // Ficha de combate de Rusty — hoisted para exponerla en window.__mb (debug).
   let rustyEntity: import('@/game/combat/CombatEntity').CombatEntity | null = null;
+  // Ficha de combate del jugador — hoisted para onRestoreExploration.
+  let playerEntityCombat: import('@/game/combat/CombatEntity').CombatEntity | null = null;
+  // HP bar de Rusty — hoisted para dispose en onRestoreExploration.
+  let rustyHpBar: import('@/game/combat/CombatHpBar').CombatHpBar | null = null;
+  // Nivel de Rusty — controla escalado de stats (dev panel).
+  let rustyLevel = 1;
+  // Stats base de Rusty (nivel 1, sin escalar).
+  const RUSTY_BASE_STATS = { STR: 8, DEX: 6, INT: 3, LCK: 3 } as const;
 
   // Botón «Terminar turno» — en DOM desde el inicio, visible solo en combate.
   const endTurnBtn = document.createElement('button');
@@ -164,10 +177,10 @@ playerController.setCamera(cameraController.camera);
       // -- Ficha del jugador (modelo de la clase activa) ----------------------
       const classDef  = getClassById(chosenClass);
       const modelFile = classDef.modelAssetId;
-      // playerEntity fuera del if para que sea accesible al crear CombatMovementSystem.
-      let playerEntity: import('@/game/combat/CombatEntity').CombatEntity | null = null;
+      // Usar la variable hoisted para que onRestoreExploration pueda limpiarla.
+      playerEntityCombat = null;
       if (modelFile !== undefined) {
-        playerEntity = await CombatEntity.create(scene, assetManager, {
+        playerEntityCombat = await CombatEntity.create(scene, assetManager, {
           baseUrl:     '/assets/models/characters/',
           filename:    modelFile,
           isMixamo:    classDef.isMixamo    ?? false,
@@ -183,7 +196,7 @@ playerController.setCamera(cameraController.camera);
         });
         // Celda (9, 5): X = -0.5, Z = -4.5 (sur del centro, 10 celdas al sur de Rusty).
         // facingRad = 0 -> mira hacia +Z (hacia Rusty en Z = +5.5).
-        playerEntity.placeAt(9, 5, grid, 0);
+        playerEntityCombat.placeAt(9, 5, grid, 0);
         grid.occupy('player', 9, 5, 1, 1);
       } else {
         logger.warn('main: clase sin modelAssetId, saltando ficha de jugador', { chosenClass });
@@ -195,13 +208,13 @@ playerController.setCamera(cameraController.camera);
         filename:    'Skeleton_Minion.glb',
         isMixamo:    false,
         modelScale:  1,
-        maxHp:       45,          // HP canonico de Rusty (docs/02_ENEMIES.md)
+        maxHp:       45 + (rustyLevel - 1) * 10,  // 45 base + 10 HP por nivel extra
         displayName: 'Rusty',
         footprintW:  1,
         footprintH:  1,
-        // Stats canonicos de Rusty: esqueleto agil pero debil.
-        // DEX 6 => 4 + round(8 * 6/80) = 4+1 = 5 puntos de movimiento.
-        coreStats:   { STR: 8, DEX: 6, INT: 3, LCK: 3 },
+        // Stats escalados segun rustyLevel via scaleEnemyStatsByLevel.
+        // Nivel 1 = stats base; cada nivel extra reparte 3 puntos aleatorios entre STR/DEX/INT/LCK.
+        coreStats:   scaleEnemyStatsByLevel({ ...RUSTY_BASE_STATS }, rustyLevel, () => gameRng.float(0, 1)),
       });
       // Celda (9, 11): X = -0.5, Z = +1.5 (ligeramente al norte del centro).
       // facingRad = Math.PI -> mira hacia -Z (hacia el jugador en Z = -1.5).
@@ -209,12 +222,12 @@ playerController.setCamera(cameraController.camera);
       grid.occupy('rusty', 9, 15, 1, 1);
 
       // Sistema de movimiento por casillas.
-      // Solo se activa si la clase tiene modelo (playerEntity != null).
-      if (playerEntity !== null) {
+      // Solo se activa si la clase tiene modelo (playerEntityCombat != null).
+      if (playerEntityCombat !== null) {
         movSys = new CombatMovementSystem(
           scene,
           grid,
-          playerEntity,
+          playerEntityCombat,
           'player',
         );
         // activate() se llama más abajo, después de setResourceContainer (Tweak 5)
@@ -223,7 +236,7 @@ playerController.setCamera(cameraController.camera);
         // Sorpresa: jugador ataca primero SALVO que Rusty tenga DEX >= 1.5×
         // la del jugador O tenga el trait 'alert' (stub: siempre false).
         // TODO: sustituir rustyIsAlert por hasTrait real cuando existan los traits.
-        const playerDex    = playerEntity.coreStats.DEX;
+        const playerDex    = playerEntityCombat.coreStats.DEX;
         const rustyDex     = rustyEntity?.coreStats.DEX ?? 6;
         const rustyIsAlert = hasTrait(rustyEntity, 'alert');  // stub — false
         const hasSurprise  = rustyDex < playerDex * 1.5 && !rustyIsAlert;
@@ -252,7 +265,7 @@ playerController.setCamera(cameraController.camera);
         if (rustyEntity !== null) {
           combatAttackSys = new CombatAttackSystem(
             scene,
-            playerEntity,
+            playerEntityCombat,
             turnSys.budget,
             combatActionBar,
             movSys,   // para blockInputClicks + walkWithCallback (auto-approach)
@@ -260,11 +273,27 @@ playerController.setCamera(cameraController.camera);
           );
 
           // HP bar sobre la cabeza de Rusty (por encima de su label de nombre)
-          const rustyHpBar = new CombatHpBar(scene, rustyEntity.pivot, { yOffset: 2.75 });
+          rustyHpBar = new CombatHpBar(scene, rustyEntity.pivot, { yOffset: 2.75 });
           rustyHpBar.update(rustyEntity.combatant.currentHp, rustyEntity.combatant.maxHp);
 
-          combatAttackSys.registerTarget('rusty', rustyEntity, rustyHpBar);
+          combatAttackSys.registerTarget('rusty', rustyEntity, rustyHpBar, rustyLevel);
           turnSys.setAttackSystem(combatAttackSys);
+
+          // -- IA de Rusty: evaluador extensible de acciones --------------------
+          // Hoy: MeleeAttackAction (score 100) + ApproachAction (score 50).
+          // Para añadir capacidades futuras: implementar EnemyAction y pasarla al array.
+          const rustyAI = new EnemyAI([
+            new MeleeAttackAction(),
+            new ApproachAction(),
+          ]);
+          turnSys.setEnemyAI(rustyAI, () => ({
+            self:        rustyEntity!,
+            selfId:      'rusty',
+            targets:     [playerEntityCombat!],
+            playerStats,
+            grid,
+            scene,
+          }));
 
           // Callback del botón Atacar → entrar en modo selección de objetivo
           combatActionBar.setOnAction('attack', () => {
@@ -275,6 +304,37 @@ playerController.setCamera(cameraController.camera);
         endTurnBtn.classList.add('visible');
         turnSys.start();
       }
+    },
+    // onRestoreExploration: restaurar escena de exploracion al salir del combate
+    () => {
+      // Mostrar meshes y entidades de exploracion
+      for (const m of explorationMeshes) { m.isVisible = true; }
+      playerController.mesh.setEnabled(true);
+      // Siempre re-activar el mesh de Rusty (vivo o muerto):
+      // el cadaver debe ser visible en exploracion.
+      rusty.setEnabled(true);
+      // Si murio en combate, congelar en pose de muerte (sin movimiento, sin Idle).
+      // TODO (pieza futura): cadaver saqueable con tecla E.
+      if (rusty.isDead) { rusty.showCorpse(); }
+      // Limpiar entidades de combate
+      rustyHpBar?.dispose();
+      rustyHpBar = null;
+      rustyEntity?.dispose();
+      rustyEntity = null;
+      playerEntityCombat?.dispose();
+      playerEntityCombat = null;
+      // Limpiar sistemas de combate (attackSys ya fue dispuesto en turnSys.dispose())
+      // IMPORTANTE: dispose() antes de nullear para que hide/deactivate se ejecuten.
+      movSys?.dispose();           // oculta CombatReachableHighlight + MovementBar
+      combatActionBar?.dispose();  // elimina el elemento del DOM
+      endTurnBtn.classList.remove('visible');
+      endTurnBtn.disabled = true;
+      movSys            = null;
+      turnSys           = null;
+      combatActionBar   = null;
+      combatAttackSys   = null;
+      _combatActive     = false;
+      logger.info('main: exploracion restaurada tras combate');
     },
   );
 
@@ -295,6 +355,46 @@ playerController.setCamera(cameraController.camera);
     _combatActive = true;
     eventBus.emit('combat:start', null);
     void combatTransition.enter();
+  });
+
+  // -- Victoria: Rusty eliminado → animacion de muerte + XP + salida ----------
+  eventBus.on('combat:enemy-killed', (event) => {
+    if (!_combatActive) { return; }
+    logger.info('main: Rusty eliminado', { level: event.level });
+
+    // Parar el ciclo de turnos para que no avance al turno de Rusty muerto
+    turnSys?.dispose();
+    turnSys = null;
+
+    // Marcar al NPC de exploracion como muerto ANTES de la animacion:
+    // cuando onRestoreExploration se ejecute, rusty.isDead ya sera true.
+    rusty.markDead();
+
+    // Reproducir animacion de muerte de Rusty y luego iniciar salida del combate
+    if (rustyEntity !== null) {
+      rustyEntity.playDeathAnim(() => {
+        // Dar XP al jugador (formula cuadratica, nivel del enemigo)
+        playerStats.gainXpFromKill(event.level);
+        logger.info('main: XP ganada por matar a Rusty', { enemyLevel: event.level });
+
+        // Iniciar transicion de vuelta a exploracion (fade negro → restaurar → fade back)
+        void combatTransition.exit();
+      });
+    } else {
+      // Sin entidad visible, igual dar XP y salir
+      playerStats.gainXpFromKill(event.level);
+      void combatTransition.exit();
+    }
+  });
+
+  // -- Derrota: el jugador murio en combate → parar turnos (Game Over ya gestionado)
+  // La cadena player:death → PlayerController (Death_A) → player:death-anim-end → GameOverModal
+  // ya funciona. Solo necesitamos parar el CombatTurnSystem para que no siga avanzando.
+  eventBus.on('player:death', () => {
+    if (!_combatActive) { return; } // solo actuar si estamos en combate
+    logger.info('main: jugador muerto en combate — parando CombatTurnSystem');
+    turnSys?.dispose();
+    turnSys = null;
   });
 
   // -- Sistemas de juego ------------------------------------------------------
@@ -509,6 +609,60 @@ playerController.setCamera(cameraController.camera);
     }
 
     devPanel.appendChild(statsGrid);
+
+    // -- Control de nivel de Rusty (DEV) ----------------------------------------
+    // Permite cambiar el nivel de Rusty en caliente para probar el escalado de stats
+    // y la curva de XP. Si Rusty ya existe en combate, actualiza sus stats al vuelo.
+
+    const rustyLabel = document.createElement('div');
+    rustyLabel.classList.add('dev-label');
+    rustyLabel.textContent = 'RUSTY';
+    devPanel.appendChild(rustyLabel);
+
+    const rustyRow = document.createElement('div');
+    rustyRow.classList.add('dev-stats-row');
+
+    const rustyLbl = document.createElement('span');
+    rustyLbl.classList.add('dev-stats-lbl');
+    rustyLbl.textContent = 'Nivel';
+
+    const rustyCur = document.createElement('span');
+    rustyCur.classList.add('dev-stats-cur');
+    rustyCur.textContent = String(rustyLevel);
+
+    const rustyInp = document.createElement('input');
+    rustyInp.type    = 'number';
+    rustyInp.min     = '1';
+    rustyInp.max     = '999';
+    rustyInp.value   = String(rustyLevel);
+    rustyInp.classList.add('dev-stats-input');
+
+    const rustyBtn = document.createElement('button');
+    rustyBtn.classList.add('dev-btn');
+    rustyBtn.textContent = 'Set';
+    rustyBtn.addEventListener('click', () => {
+      const val = parseInt(rustyInp.value, 10);
+      if (isNaN(val) || val < 1) { return; }
+      rustyLevel = val;
+      rustyCur.textContent = String(rustyLevel);
+      logger.info('DEV: rustyLevel cambiado', { rustyLevel });
+      // Si Rusty ya existe en combate, actualizar stats en caliente
+      if (rustyEntity !== null) {
+        const scaledStats = scaleEnemyStatsByLevel({ ...RUSTY_BASE_STATS }, rustyLevel, () => gameRng.float(0, 1));
+        rustyEntity.updateCoreStats(scaledStats);
+        logger.info('DEV: rustyEntity stats actualizados en caliente', { scaledStats });
+      }
+    });
+    rustyInp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { rustyBtn.click(); }
+    });
+
+    rustyRow.appendChild(rustyLbl);
+    rustyRow.appendChild(rustyCur);
+    rustyRow.appendChild(rustyInp);
+    rustyRow.appendChild(rustyBtn);
+    devPanel.appendChild(rustyRow);
+
     document.body.appendChild(devPanel);
 
     // Sincronizar spans e inputs cuando cambian los stats (nivel, item, set-coreStat, etc.)

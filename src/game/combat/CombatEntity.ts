@@ -282,6 +282,19 @@ export class CombatEntity {
     this._pivot.rotationQuaternion = Quaternion.RotationAxis(Vector3.Up(), rad);
   }
 
+  /**
+   * Gira instantaneamente la entidad para que mire hacia la celda indicada.
+   * Usa la misma formula de angulo que CombatWalker._updateFacing():
+   *   atan2(dx, dz) con diferencias de celda (mismo eje que el mundo 3D).
+   * Sin efecto si la celda objetivo es la misma que la propia.
+   */
+  faceTowardCell(targetCellX: number, targetCellZ: number): void {
+    const dx = targetCellX - this._cellX;
+    const dz = targetCellZ - this._cellZ;
+    if (dx === 0 && dz === 0) { return; } // misma celda — no girar
+    this.setFacingRad(Math.atan2(dx, dz));
+  }
+
   // -- API para CombatWalker: animaciones de caminata --------------------------
 
   /**
@@ -362,6 +375,55 @@ export class CombatEntity {
 
     logger.debug('CombatEntity: reproduciendo ataque', {
       displayName: this.combatant.displayName, animName: group.name, animSet,
+    });
+  }
+
+  // -- API publica: animacion de muerte ----------------------------------------
+
+  /**
+   * Reproduce la animacion de muerte UNA sola vez.
+   * Busca un AnimationGroup cuyo nombre contenga 'death' (case-insensitive),
+   * aplicando el filtro SNS/base del stance actual.
+   * Si no existe la animacion, llama onEnd() inmediatamente (degradacion elegante).
+   *
+   * @param onEnd Callback ejecutado al terminar la animacion (o inmediatamente si no existe).
+   */
+  playDeathAnim(onEnd?: () => void): void {
+    const animSet = STANCE_ANIM_SET[this._weaponStance];
+
+    const candidates = this._animGroups.filter((g) => {
+      const clean = g.name.replace(/_inst\d+$/, '').toLowerCase();
+      return clean !== 'mixamo.com' && clean.includes('death');
+    });
+
+    const group = CombatEntity._pickByAnimSet(candidates, animSet);
+
+    if (group === undefined) {
+      logger.warn('CombatEntity: animacion de muerte no encontrada — skip', {
+        displayName: this.combatant.displayName,
+        available: this._animGroups.map((g) => g.name),
+      });
+      onEnd?.();
+      return;
+    }
+
+    // Detener Idle y Walk para que no compitan con la muerte
+    this._idleAnim?.stop();
+    this._walkAnim?.stop();
+
+    // Reproducir muerte UNA vez (loop=false)
+    group.start(false, 1.0, group.from, group.to, false);
+
+    // Al terminar: notificar y dejar la entidad en el ultimo frame (no vuelve al Idle)
+    group.onAnimationGroupEndObservable.addOnce(() => {
+      onEnd?.();
+      logger.debug('CombatEntity: animacion de muerte finalizada', {
+        displayName: this.combatant.displayName, animName: group.name,
+      });
+    });
+
+    logger.debug('CombatEntity: reproduciendo muerte', {
+      displayName: this.combatant.displayName, animName: group.name,
     });
   }
 

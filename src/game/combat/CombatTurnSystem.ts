@@ -25,6 +25,7 @@ import type { TurnCombatant }        from '@/game/combat/InitiativeSystem';
 import { eventBus }                  from '@/core/EventBus';
 import { logger }                    from '@/core/Logger';
 import type { CombatAttackSystem }  from '@/game/combat/CombatAttackSystem';
+import type { EnemyAI, AIContext }   from '@/game/combat/EnemyAction';
 
 // Re-exportar TurnCombatant para que los importadores existentes no se rompan.
 export type { TurnCombatant } from '@/game/combat/InitiativeSystem';
@@ -49,6 +50,14 @@ export class CombatTurnSystem {
   private _enemyTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
+   * DEX del jugador vista la última vez por _statsHandler.
+   * null = aún no inicializada (primera llamada siempre se descarta).
+   * Solo actualizamos la iniciativa cuando la DEX cambia realmente:
+   * HP, MP y otros stats no afectan el orden de turnos.
+   */
+  private _lastPlayerDex: number | null = null;
+
+  /**
    * Handler suscrito a 'player:stats-changed' durante el combate.
    * Guardado para poder desuscribir limpiamente en dispose().
    */
@@ -65,6 +74,11 @@ export class CombatTurnSystem {
    * Se recarga al inicio de cada turno del jugador y se vacía en dispose().
    */
   private readonly _budget: CombatActionBudget;
+
+  /** IA del enemigo. null = auto-paso (fallback). */
+  private _enemyAI:       EnemyAI | null = null;
+  /** Factoria de contexto de IA. Se llama justo antes de cada turno enemigo. */
+  private _aiCtxFactory:  (() => AIContext) | null = null;
 
   /**
    * @param initSys     Sistema de iniciativa que calcula el orden real.
@@ -103,6 +117,20 @@ export class CombatTurnSystem {
   }
 
   /**
+   * Registra la IA del enemigo y la factoria de contexto.
+   * Debe llamarse despues de que las entidades de combate esten creadas.
+   * Si no se registra, el turno enemigo auto-pasa con un delay (fallback).
+   *
+   * @param ai         Evaluador extensible de acciones del enemigo.
+   * @param ctxFactory Funcion que devuelve el AIContext actual en el momento del turno.
+   *                   Lazy para que siempre recoja los valores mas recientes.
+   */
+  setEnemyAI(ai: EnemyAI, ctxFactory: () => AIContext): void {
+    this._enemyAI      = ai;
+    this._aiCtxFactory = ctxFactory;
+  }
+
+  /**
    * Arranca el ciclo de turnos.
    * Rellena el tracker con los próximos QUEUE_SIZE turnos y activa el primero.
    */
@@ -116,10 +144,20 @@ export class CombatTurnSystem {
     this._activateCombatant(this._initSys.currentTurn);
 
     // Escuchar cambios de stats del jugador para recalcular la cola EN VIVO.
+    // GUARD: solo actuamos si la DEX cambia realmente. player:stats-changed se
+    // emite en cada takeDamage/heal/spendMp — llamar refreshQueue() con HP cambiado
+    // pero DEX igual capturaba una cola obsoleta y la reinyectaba 120ms después
+    // con initQueue(), sobreescribiendo el avance correcto del tracker.
     this._statsHandler = (snap: PlayerSnapshot): void => {
       if (!this._isRunning) { return; }
-      this._initSys.updateCombatantDex('player', snap.coreStats.DEX);
-      // Recalcular los turnos futuros — el turno en curso NO se interrumpe.
+      const newDex = snap.coreStats.DEX;
+      // Primera llamada (null) o DEX sin cambio → ignorar.
+      // Así HP, MP, etc. no tocan la iniciativa ni el tracker.
+      const dexChanged = this._lastPlayerDex !== null && newDex !== this._lastPlayerDex;
+      this._lastPlayerDex = newDex;
+      if (!dexChanged) { return; }
+      // DEX cambió realmente (ej. item +DEX, dev panel) → recalcular orden EN VIVO.
+      this._initSys.updateCombatantDex('player', newDex);
       this._tracker.refreshQueue(this._initSys.getInitialQueue(QUEUE_SIZE));
     };
     eventBus.on('player:stats-changed', this._statsHandler);
@@ -149,6 +187,7 @@ export class CombatTurnSystem {
       eventBus.off('player:stats-changed', this._statsHandler);
       this._statsHandler = null;
     }
+    this._lastPlayerDex = null;
     this._budget.reset();
     this._attackSys?.dispose();
     this._attackSys = null;
@@ -200,13 +239,22 @@ export class CombatTurnSystem {
     this._movSys.setPlayerTurnActive(false);
     this._attackSys?.setPlayerTurnActive(false);
 
-    logger.debug('CombatTurnSystem: turno de enemigo — auto-paso', { id: combatant.id });
-
-    this._enemyTimer = setTimeout(() => {
-      this._enemyTimer = null;
-      if (!this._isRunning) { return; }
-      this._advanceToNext();
-    }, ENEMY_AUTO_PASS_MS);
+    if (this._enemyAI !== null && this._aiCtxFactory !== null) {
+      // IA real: ejecutar y avanzar al siguiente turno al terminar
+      const ctx = this._aiCtxFactory();
+      void this._enemyAI.execute(ctx).then(() => {
+        if (!this._isRunning) { return; } // combate terminado durante la IA (muerte del jugador o del enemigo)
+        this._advanceToNext();
+      });
+    } else {
+      // Fallback: auto-paso con delay (sin IA configurada)
+      logger.debug('CombatTurnSystem: turno de enemigo — auto-paso', { id: combatant.id });
+      this._enemyTimer = setTimeout(() => {
+        this._enemyTimer = null;
+        if (!this._isRunning) { return; }
+        this._advanceToNext();
+      }, ENEMY_AUTO_PASS_MS);
+    }
   }
 
   private _advanceToNext(): void {

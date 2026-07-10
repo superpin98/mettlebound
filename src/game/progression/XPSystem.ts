@@ -36,37 +36,46 @@ export function xpToNextLevel(currentLevel: number): number {
 
 /**
  * XP ganada al derrotar un enemigo del nivel indicado.
- * Aplica penalizacion si el jugador supera al enemigo en mas de 5 niveles.
  *
- * Formula:
- *   base = BASE_KILL_XP + enemyLevel x XP_PER_ENEMY_LEVEL
- *   si diff > OVER_LEVEL_PENALTY_START:
- *     multiplicador = max(0.1, 1 - (diff - START) x STEP)
- *   resultado = max(1, floor(base x multiplicador))
+ * Formula cuadratica (Pieza 6):
+ *   XP = floor(XP_KILL_BASE * enemyLevel * (1 + XP_KILL_FACTOR * enemyLevel))
+ *
+ * Ejemplos con XP_KILL_BASE=10, XP_KILL_FACTOR=0.15:
+ *   Nivel  1  ->   11 XP   (10 * 1 * 1.15)
+ *   Nivel  5  ->   87 XP   (10 * 5 * 1.75)
+ *   Nivel 10  ->  250 XP   (10 * 10 * 2.5)
+ *   Nivel 20  ->  800 XP   (10 * 20 * 4.0)
+ *   Nivel 40  -> 2800 XP   (10 * 40 * 7.0)
+ *
+ * Sin penalizacion por nivel del jugador: el desafio esta en el nivel del enemigo.
  */
-export function xpFromEnemy(enemyLevel: number, playerLevel: number): number {
-  const base = BALANCE.XP.BASE_KILL_XP + enemyLevel * BALANCE.XP.XP_PER_ENEMY_LEVEL;
-  const diff = playerLevel - enemyLevel;
-
-  if (diff <= BALANCE.XP.OVER_LEVEL_PENALTY_START) {
-    return Math.max(1, Math.floor(base));
-  }
-
-  const excessLevels = diff - BALANCE.XP.OVER_LEVEL_PENALTY_START;
-  const multiplier = Math.max(0.1, 1 - excessLevels * BALANCE.XP.OVER_LEVEL_PENALTY_STEP);
-  return Math.max(1, Math.floor(base * multiplier));
+export function xpFromEnemy(enemyLevel: number): number {
+  const xp = BALANCE.XP.XP_KILL_BASE * enemyLevel * (1 + BALANCE.XP.XP_KILL_FACTOR * enemyLevel);
+  return Math.max(1, Math.floor(xp));
 }
 
 /**
  * Calcula el nivel que corresponde a la XP total acumulada.
  * Devuelve el nivel mas alto tal que xpForLevel(level) <= totalXp.
- * Nivel minimo: 1. Nivel maximo practico: 100.
+ * Nivel minimo: 1. Sin tope de nivel.
+ *
+ * Implementacion: estimacion matematica directa + correccion de +-1.
+ * La formula inversa de xpForLevel(N) = floor(BASE * (N-1)^EXP) es:
+ *   N ≈ floor((totalXp / BASE)^(1/EXP)) + 1
+ * La correccion por floor() puede generar un off-by-one maximo de 1-2 pasos,
+ * resuelto con un bucle de ajuste acotado (< 5 iteraciones siempre).
  */
 export function levelFromTotalXp(totalXp: number): number {
-  let level = 1;
-  while (totalXp >= xpForLevel(level + 1) && level < 100) {
-    level++;
-  }
+  if (totalXp <= 0) { return 1; }
+  // Estimacion inversa: N ≈ (totalXp / BASE)^(1/EXPONENT) + 1
+  const estimate = Math.floor(
+    Math.pow(totalXp / BALANCE.XP.BASE, 1 / BALANCE.XP.EXPONENT),
+  ) + 1;
+  let level = Math.max(1, estimate);
+  // Ajuste hacia atras si la estimacion se paso (off-by-one por floor)
+  while (level > 1 && xpForLevel(level) > totalXp) { level--; }
+  // Ajuste hacia adelante si la estimacion se quedo corta
+  while (xpForLevel(level + 1) <= totalXp) { level++; }
   return level;
 }
 
